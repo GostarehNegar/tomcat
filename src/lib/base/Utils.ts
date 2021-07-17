@@ -1,4 +1,4 @@
-import { TimeSpan } from "./TimeEx";
+import { TimeSpan } from './TimeEx';
 
 export class Utils {
   public test(): string {
@@ -10,6 +10,8 @@ export class Utils {
   SubtractDates(first: Date, second: Date): TimeSpan {
     return TimeSpan.FromDates(first, second, true);
   }
-  public static get instance() { return new Utils() }
+  public static get instance() {
+    return new Utils();
+  }
 }
 export const utils = Utils.instance;

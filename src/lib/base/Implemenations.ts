@@ -1,3 +1,3 @@
-export * from './TimeEx'
-export * from './Utils'
-export * from './ServiceLocator'
+export * from './TimeEx';
+export * from './Utils';
+export * from './ServiceLocator';

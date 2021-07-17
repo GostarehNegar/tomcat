@@ -1,9 +1,9 @@
+import * as _flat from './lib/all';
+import { Utils } from './lib/all';
 import _locator, { IServiceLocator } from './lib/base/ServiceLocator';
 import { Constants as _constants } from './lib/constants';
-import * as _flat from './lib/all';
 import * as _Implementaions from './lib/implementations';
 import * as _Interfaces from './lib/interfaces';
-import { Utils } from './lib/all';
 
 export * as Interfaces from './lib/interfaces';
 export * as Implementaions from './lib/implementations';
