@@ -5,7 +5,7 @@ import { WebSocketTransport } from '../src/lib/MessageBus/WebSocketTranstport'
 const transport = new WebSocketTransport();
 const bus = new MessageBus();
 
-describe('websockt transport', () => {
+describe('websocket transport', () => {
     //const ws = await transport.open();
 
     test('send', async () => {

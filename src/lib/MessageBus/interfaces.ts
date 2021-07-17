@@ -48,6 +48,7 @@ export interface IMessageContext {
   reply(body: unknown): Promise<void>;
   isLocal(): boolean;
   get headers(): { [id: string]: string };
+  setScope(scope: "local" | "remote" | "both"): void;
 }
 
 export interface IMessageBusSubscription {
