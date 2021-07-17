@@ -1,4 +1,4 @@
-import { IMessage } from './interfaces';
+import { IMessage } from '../interfaces';
 import { MessageTopic } from './Topics';
 
 export const uniqueId = (): string => {

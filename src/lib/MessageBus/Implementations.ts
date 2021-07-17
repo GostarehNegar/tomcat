@@ -1,1 +1,1 @@
-export * from './MessageBus';
+export * from './Internals/MessageBus';

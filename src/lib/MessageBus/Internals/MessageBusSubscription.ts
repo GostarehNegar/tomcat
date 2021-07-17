@@ -2,7 +2,7 @@ import {
   IHandler,
   IMessageBusSubscription,
   IMessageContext,
-} from './interfaces';
+} from '../interfaces';
 import { MessageTopic } from './Topics';
 
 export class MessageBusSubscription implements IMessageBusSubscription {

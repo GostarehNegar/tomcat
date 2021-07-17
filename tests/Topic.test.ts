@@ -1,4 +1,4 @@
-import { MessageTopic } from "../src/lib/MessageBus/Topics";
+import { MessageTopic } from "../src/lib/MessageBus/Internals/Topics";
 
 describe('message bus topics', () => {
 

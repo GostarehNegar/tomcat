@@ -1,4 +1,4 @@
-import { IParsedTopic } from "./interfaces";
+import { IParsedTopic } from "../interfaces";
 
 const delim = '://';
 export class MessageTopic implements IParsedTopic {

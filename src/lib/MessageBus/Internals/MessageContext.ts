@@ -1,7 +1,7 @@
 import { Message } from './Message';
 import { MessageBus } from './MessageBus';
 import { MessageTopic } from './Topics';
-import { IMessageBus, IMessageContext } from './interfaces';
+import { IMessageBus, IMessageContext } from '../interfaces';
 
 export class MessageContext implements IMessageContext {
   private _bus: MessageBus = null;

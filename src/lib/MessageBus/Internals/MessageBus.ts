@@ -2,18 +2,18 @@ import { Message } from './Message';
 import { MessageBusSubscription } from './MessageBusSubscription';
 import { MessageBusSubscriptions } from './MessageBusSubscriptions';
 import { MessageContext } from './MessageContext';
-import { SignalRTransport } from './SignalRTransport';
+import { SignalRTransport } from '../SignalRTransport';
 import { MessageTopic } from './Topics';
 import {
-  ICreateMessageConfig,
+
   IHandler,
   IMessageBus,
   IMessageBusSubscription,
   IMessageContext,
   IMessageTransport,
-} from './interfaces';
+} from '../interfaces';
 
-import { WebSocketTransport } from './WebSocketTranstport';
+import { WebSocketTransport } from '../WebSocketTranstport';
 
 type promise_def = {
   resolve: (e: unknown) => void;

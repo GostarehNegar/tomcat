@@ -1,5 +1,5 @@
 
-import { MessageBus } from "../src/lib/MessageBus/MessageBus";
+import { MessageBus } from "../src/lib/MessageBus/Internals/MessageBus";
 
 const bus = new MessageBus();
 

@@ -1,5 +1,5 @@
 import { MessageBusSubscription } from './MessageBusSubscription';
-import { IMessageContext } from './interfaces';
+import { IMessageContext } from '../interfaces';
 
 export class MessageBusSubscriptions {
   private _items: MessageBusSubscription[] = [];

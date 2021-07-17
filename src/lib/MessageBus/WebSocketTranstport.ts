@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 
 import { IMessageContext, ITransportConnectInfo, IMessageTransport } from './interfaces';
-//import { IMessage } from './interfaces';
+
 
 export class WebSocketTransport implements IMessageTransport {
   private _ws: WebSocket | null = null;
@@ -18,16 +18,7 @@ export class WebSocketTransport implements IMessageTransport {
     return this;
 
   }
-  // private _getSocket(): WebSocket {
-  //     if (!this._ws) {
-  //         this._ws = new WebSocket("http://localhost:8080");
-  //         this._ws.on('open', (ev) => {
-  //             console.log('open :', ev)
 
-  //         });
-  //     }
-  //     return this._ws;
-  // }
   public async _open(): Promise<WebSocket> {
     if (this._ws) return Promise.resolve(this._ws);
     return new Promise<WebSocket>((resolve, reject) => {
