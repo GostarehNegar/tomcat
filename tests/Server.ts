@@ -1,7 +1,11 @@
 
 import { MessageBus } from "../src/lib/MessageBus/Internals/MessageBus";
 import { ServerBuilder } from "../src/lib/server/ServerBuilder";
-var builder = new ServerBuilder();
+import tomcat from "../src/";
+
+
+
+
 
 
 

@@ -14,40 +14,38 @@ import {
 } from '../interfaces';
 
 import { WebSocketTransport } from '../WebSocketTranstport';
+import config from '../../config';
+import { CanellationToken, IServerTask } from '../../server/ServerBuilder';
 
 type promise_def = {
   resolve: (e: unknown) => void;
   error: (err: any) => void;
 };
 
-export class MessageBus implements IMessageBus {
+export class MessageBus extends IServerTask implements IMessageBus {
+  public name: string = "MessageBus";
+  protected run(token: CanellationToken): Promise<void> {
+    (token);
+    return Promise.resolve();
+  }
   private _subscriptions: MessageBusSubscriptions =
     new MessageBusSubscriptions();
   private promises: { [id: string]: promise_def } = {};
 
   private _channelName: string = Math.random().toString();
   private _transports: IMessageTransport[] = [];
+  private _config = config.messaging;
   constructor() {
+    super();
     this._subscriptions;
     (SignalRTransport);
-    this._channelName = "test_channel@" + Math.random().toString();
+    this._channelName = this._config.channel;// "test_channel@" + Math.random().toString();
     this._transports.push(new WebSocketTransport());
     this._transports[0].on(msg => {
       const _msg = JSON.parse(msg.toString()) as { method: string, payload: any };
-      const __msg = _msg.payload as Message;
-      //console.log(_msg.method, _msg.payload);
-      //console.log("r1", __msg)
-      var ctx = new MessageContext(__msg, this);
-      //console.log("r2", ctx.message)
-      //console.log(this.channelName)
-      //console.log("==================")
-      //ctx.message.channel = this.channelName;
-      ctx.message.headers['local'] = "True";
-      ctx.message.headers['remote'] = "False";
-
+      var ctx = new MessageContext(_msg.payload, this);
+      ctx.setScope('local');
       this.publish(ctx);
-
-
     });
 
   }
@@ -121,7 +119,7 @@ export class MessageBus implements IMessageBus {
     });
   }
   public publishToTransports(ctx: IMessageContext): Promise<void> {
-    if (ctx.isLocal() || ctx.message.headers['local']) {
+    if (ctx.isLocal()) {
       return Promise.resolve();
     }
     return this._transports[0].pubish(ctx);

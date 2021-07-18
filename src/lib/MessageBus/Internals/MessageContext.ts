@@ -18,7 +18,7 @@ export class MessageContext implements IMessageContext {
   }
 
   isLocal(): boolean {
-    return this.message == null || this.message.to == this._bus.channelName;
+    return this.message == null || this.message.to == this._bus.channelName || this.scope == 'local'
   }
   execute<T>(): Promise<T> {
     const result = this._bus.createReplyPromise(this) as Promise<T>;

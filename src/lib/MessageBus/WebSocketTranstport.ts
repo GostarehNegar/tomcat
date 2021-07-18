@@ -1,4 +1,5 @@
 import WebSocket from 'ws';
+import config from '../config';
 
 import { IMessageContext, ITransportConnectInfo, IMessageTransport } from './interfaces';
 
@@ -6,11 +7,14 @@ import { IMessageContext, ITransportConnectInfo, IMessageTransport } from './int
 export class WebSocketTransport implements IMessageTransport {
   private _ws: WebSocket | null = null;
   private _on: (message: any) => void;
+  public _config = config.messaging.transports.websocket;
   constructor() {
     this._ws;
+
   }
   on(handler: (message: any) => void) {
     this._on = handler;
+
   }
   async open(info: ITransportConnectInfo): Promise<IMessageTransport> {
     await this._open();
@@ -22,7 +26,7 @@ export class WebSocketTransport implements IMessageTransport {
   public async _open(): Promise<WebSocket> {
     if (this._ws) return Promise.resolve(this._ws);
     return new Promise<WebSocket>((resolve, reject) => {
-      const ws = new WebSocket('http://localhost:8080');
+      const ws = new WebSocket(this._config.url);
       ws.on('open', () => {
         this._ws = ws;
         ws.on('message', msg => {
