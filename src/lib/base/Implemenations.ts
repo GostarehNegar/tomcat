@@ -1,3 +1,4 @@
 export * from './TimeEx';
 export * from './Utils';
-export * from './ServiceLocator';
+export * from './ServiceContainer';
+export * from './logger'

@@ -1,3 +1,5 @@
+import { ILogger } from './interfaces';
+import { Logger } from './logger';
 import { TimeSpan } from './TimeEx';
 
 export class Utils {
@@ -12,6 +14,10 @@ export class Utils {
   }
   public static get instance() {
     return new Utils();
+  }
+  public getLogger(name?: string): ILogger {
+    return Logger.getLogger(name);
+
   }
 }
 export const utils = Utils.instance;

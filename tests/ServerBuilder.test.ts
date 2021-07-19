@@ -1,6 +1,8 @@
-import { CanellationToken, ServerBuilder, IServerTask } from "../src/lib/server/ServerBuilder";
+import { CanellationToken } from "../src/lib/hosting/interfaces";
+import { HostBuilder, BackgroundService, } from "../src/lib/hosting/internals/ServerBuilder";
 
-class dummyTask extends IServerTask {
+
+class dummyTask extends BackgroundService {
     public started = false;
     public stopped = false;
     public name: string = "dummy-task";
@@ -22,18 +24,18 @@ class dummyTask extends IServerTask {
 describe('ServerBuilder', () => {
 
     test('how server builder works', async () => {
-        const builder = new ServerBuilder();
+        const builder = new HostBuilder();
         var server = builder
             .addService("my-service", "my-service-value")
             .build();
         expect("my-service-value").toBe(server.services.getService("my-service"));
     });
     test('server tasks are started', async () => {
-        const builder = new ServerBuilder();
+        const builder = new HostBuilder();
         const task = new dummyTask();
         var server = builder
             .addService("my-service", "my-service-value")
-            .addTask(task)
+            .addHostedService(task)
             .build();
         await server.start();
         const tasks = server.services.getServices("_SERVER_TASK_");

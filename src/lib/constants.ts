@@ -3,6 +3,10 @@ export const Constants = {
     IDataProvider: 'IDataProvider',
     IDataSource: 'IDataSource',
     IDataStore: 'IDataStore',
+    IHostedService: 'IHostedService',
+    HttpServer: 'http-server',
+    IWebHost: '#IWebHost',
+    Router: '#rooter'
   },
   DataSources: {
     bainance: 'binance',

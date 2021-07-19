@@ -15,14 +15,17 @@ import {
 
 import { WebSocketTransport } from '../WebSocketTranstport';
 import config from '../../config';
-import { CanellationToken, IServerTask } from '../../server/ServerBuilder';
-
+import { BackgroundService } from "../../hosting/internals/BackgroundService";
+import { ILogger } from '../../base/interfaces';
+import { Logger, services } from '../../base';
+import { CanellationToken } from '../../hosting/interfaces';
+(services)
 type promise_def = {
   resolve: (e: unknown) => void;
   error: (err: any) => void;
 };
 
-export class MessageBus extends IServerTask implements IMessageBus {
+export class MessageBus extends BackgroundService implements IMessageBus {
   public name: string = "MessageBus";
   protected run(token: CanellationToken): Promise<void> {
     (token);
@@ -35,8 +38,10 @@ export class MessageBus extends IServerTask implements IMessageBus {
   private _channelName: string = Math.random().toString();
   private _transports: IMessageTransport[] = [];
   private _config = config.messaging;
+  private _logger: ILogger;
   constructor() {
     super();
+    this._logger = Logger.getLogger("tomcat.MessageBus");
     this._subscriptions;
     (SignalRTransport);
     this._channelName = this._config.channel;// "test_channel@" + Math.random().toString();
@@ -54,6 +59,7 @@ export class MessageBus extends IServerTask implements IMessageBus {
   }
   async start(): Promise<void> {
     await this._transports[0].open({ channel: this.channelName });
+    this._logger.log("started");
   }
   async stop(): Promise<void> {
     this._transports[0].close();
