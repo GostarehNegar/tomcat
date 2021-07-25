@@ -1,5 +1,5 @@
 import { CanellationToken } from "../src/lib/hosting/interfaces";
-import { HostBuilder, BackgroundService, } from "../src/lib/hosting/internals/ServerBuilder";
+import { HostBuilder, BackgroundService } from "../src/lib/hosting";
 
 
 class dummyTask extends BackgroundService {

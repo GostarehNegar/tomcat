@@ -19,5 +19,18 @@ export class Utils {
     return Logger.getLogger(name);
 
   }
+  /**
+   * Asynchronously waits ms miliseconds.
+   * e.g await delay(3000);
+   * @param ms 
+   * @returns 
+   */
+  public delay(ms: number): Promise<void> {
+    return new Promise(resolve => {
+      setTimeout(resolve, ms);
+    });
+  }
+
 }
+
 export const utils = Utils.instance;

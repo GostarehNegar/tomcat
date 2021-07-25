@@ -17,9 +17,9 @@ import { WebSocketTransport } from '../WebSocketTranstport';
 import config from '../../config';
 import { BackgroundService } from "../../hosting/internals/BackgroundService";
 import { ILogger } from '../../base/interfaces';
-import { Logger, services } from '../../base';
+import { Logger } from '../../base';
 import { CanellationToken } from '../../hosting/interfaces';
-(services)
+
 type promise_def = {
   resolve: (e: unknown) => void;
   error: (err: any) => void;
@@ -39,12 +39,13 @@ export class MessageBus extends BackgroundService implements IMessageBus {
   private _transports: IMessageTransport[] = [];
   private _config = config.messaging;
   private _logger: ILogger;
-  constructor() {
+  constructor(channel?: string) {
     super();
     this._logger = Logger.getLogger("tomcat.MessageBus");
     this._subscriptions;
     (SignalRTransport);
     this._channelName = this._config.channel;// "test_channel@" + Math.random().toString();
+    this._channelName = channel || this.channelName;
     this._transports.push(new WebSocketTransport());
     this._transports[0].on(msg => {
       const _msg = JSON.parse(msg.toString()) as { method: string, payload: any };
@@ -62,7 +63,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     this._logger.log("started");
   }
   async stop(): Promise<void> {
-    this._transports[0].close();
+    return this._transports[0].close();
     //return this._transport.stop();
   }
 

@@ -97,6 +97,6 @@ export class ServiceContainer implements IServiceContainer {
 
   }
 }
-const services: IServiceContainer = new ServiceContainer();
+//const services: IServiceContainer = new ServiceContainer();
 //export const ServiceLocator: IServiceLocator = new _ServiceLocator();
-export default services;
+//export default services;

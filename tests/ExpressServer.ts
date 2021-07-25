@@ -4,6 +4,11 @@ import tomcat from '../src/index'
 //import services from '../src/lib/base/ServiceContainer';
 //import app from '../src/lib/hosting/ExpressWebHost'
 //import http from 'http';
+import child from 'child_process'
+const f = child.fork('./tests/ChildProcessMain.js',);
+(f)
+
+
 
 
 class IndexRoute {
@@ -30,7 +35,16 @@ class IndexRoute {
 // routes.push(new IndexRoute().router)
 // var _app = new app(services, routes);
 // _app.listen();
-const host = new tomcat.Internals.Implementaions.Hosting.HostBuilder()
-    .addService(tomcat.constants.ServiceNames.Router, () => new IndexRoute().router)
-    .buildWebHost();
-host.listen(3000);
+(async () => {
+    const host = tomcat
+        .builder
+        .addRouter(() => new IndexRoute().router)
+        .buildWebHost();
+    await host.listen(3000)
+    console.log("here");
+    console.log(host.port)
+    host.expressApp.get('/test', ({ }, res) => {
+        res.send("test page")
+    });
+
+})()

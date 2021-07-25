@@ -28,7 +28,7 @@ export interface IMessageBus {
   //   callBack: (subs: IMessageBusSubscription) => void
   // ): Promise<IMessageBusSubscription>;
   subscribe(topic: string, handler: IHandler): Promise<IMessageBusSubscription>;
-  start(): Promise<void>;
+  start(): Promise<unknown>;
   get channelName(): string;
 }
 export interface ITransportConnectInfo {
@@ -43,9 +43,9 @@ export interface IMessageTransport {
 
 export interface IMessageContext {
   get message(): IMessage;
-  publish(): Promise<void>;
+  publish(): Promise<unknown>;
   execute<T>(): Promise<T>;
-  reply(body: unknown): Promise<void>;
+  reply(body: unknown): Promise<unknown>;
   isLocal(): boolean;
   get headers(): { [id: string]: string };
   setScope(scope: "local" | "remote" | "both"): void;

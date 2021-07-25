@@ -25,10 +25,10 @@ export class MessageContext implements IMessageContext {
     this.publish();
     return result;
   }
-  publish(): Promise<void> {
+  publish(): Promise<unknown> {
     return this._bus.publish(this);
   }
-  reply(body: unknown): Promise<void> {
+  reply(body: unknown): Promise<unknown> {
     const message = this._bus.createMessage(MessageTopic.reply, this.message.from, body);
     message.message.reply_to = this.message.id;
     return message.publish();

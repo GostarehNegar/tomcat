@@ -4,8 +4,10 @@ export const Constants = {
     IDataSource: 'IDataSource',
     IDataStore: 'IDataStore',
     IHostedService: 'IHostedService',
+    IMessageBus: '#IMessageBus',
     HttpServer: 'http-server',
     IWebHost: '#IWebHost',
+    WebSocketHub: '#WebSocketHub',
     Router: '#rooter'
   },
   DataSources: {
@@ -15,5 +17,13 @@ export const Constants = {
     BTC: 'BTC',
     DOGE: 'DOGE',
   },
+  messages: {
+    hub: {
+      "publish": "publish",
+      "connect": "connect",
+      "send": "send"
+
+    }
+  }
 };
 export default Constants;

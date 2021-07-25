@@ -1,14 +1,27 @@
 import { IServiceContainer } from "../../base/ServiceContainer";
 import { IWebHost } from "../interfaces";
 import { Host } from "./Host";
+import express from 'express';
+import { Server } from "http";
+import Constants from "../../constants";
 
 export class WebHost extends Host implements IWebHost {
-    constructor(services: IServiceContainer) {
-        super(services);
+    public port: number | string | null;
+    public expressApp: express.Application = null;
+    constructor(name: string, services: IServiceContainer) {
+        super(name, services);
+
     }
-    listen(port?: number) {
-        this.start();
+    async listen(port?: number): Promise<unknown> {
         (port);
+        await this.start();
+        return this;
+    }
+    async close(): Promise<unknown> {
+        await this.stop();
+        this.services.getService<Server>(Constants.ServiceNames.HttpServer).close();
+        return this;
+
     }
 
 

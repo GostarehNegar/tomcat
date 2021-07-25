@@ -4,7 +4,7 @@ export let config = {
         "channel": `smaple-${Math.random()}`,
         "transports": {
             "websocket": {
-                "url": 'http://localhost:8080'
+                "url": 'http://localhost:8080/hub'
 
             }
 

@@ -1,7 +1,8 @@
-import locator from "../src/lib/base/ServiceContainer";
+import { ServiceContainer } from "../src/lib/base/ServiceContainer";
 import { Logger } from "../src/lib/base/logger"
 import '../src/lib/base';
 
+const locator = new ServiceContainer();
 
 
 describe('ServiceLocator', () => {

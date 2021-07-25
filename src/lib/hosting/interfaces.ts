@@ -1,4 +1,5 @@
 import { IServiceContainer } from "../base";
+import express from 'express';
 
 
 export interface CanellationToken {
@@ -6,12 +7,23 @@ export interface CanellationToken {
 }
 export interface IHost {
     get services(): IServiceContainer;
-    start(): Promise<void>;
-    stop(): Promise<void>
+    get name(): string;
+    start(): Promise<unknown>;
+    stop(): Promise<unknown>;
 
 }
 export interface IWebHost extends IHost {
-    listen(port?: number);
+    listen(port?: number): Promise<unknown>;
+    get port(): number | string | null;
+    expressApp: express.Application;
+    close(): Promise<unknown>;
+
+}
+export interface IHostCollection {
+    add(name: string, item: IHost): IHost;
+    getByName(name: string): IHost;
+    getDefualtBuilder(name?: string): IHostBuilder;
+    get current(): IHost;
 
 }
 export interface IHostBuilder {
@@ -19,12 +31,15 @@ export interface IHostBuilder {
     buildWebHost(): IWebHost;
     addHostedService(task: IHostedService | ((IServiceLocator) => IHostedService)): IHostBuilder;
     addService(name: string, ctor: any | ((locator: IServiceContainer) => any), key?: string): IHostBuilder;
-    addHttp();
+    addRouter(router: unknown): IHostBuilder;
+    addWebSocketHub(path?: string): IHostBuilder;
+    addHttp(): IHostBuilder;
     addExpress();
+    addMessageBus(channel?: string): IHostBuilder;
 
 }
 export interface IHostedService {
-    start(): Promise<any>;
-    stop(): Promise<any>;
+    start(): Promise<unknown>;
+    stop(): Promise<unknown>;
 
 }
