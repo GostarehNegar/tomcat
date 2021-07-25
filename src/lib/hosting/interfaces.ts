@@ -1,5 +1,8 @@
 import { IServiceContainer } from "../base";
 import express from 'express';
+import { config } from "../interfaces";
+import { IMessageBus } from "../MessageBus/interfaces";
+
 
 
 export interface CanellationToken {
@@ -10,6 +13,9 @@ export interface IHost {
     get name(): string;
     start(): Promise<unknown>;
     stop(): Promise<unknown>;
+    get config(): typeof config;
+    get bus(): IMessageBus;
+
 
 }
 export interface IWebHost extends IHost {
@@ -35,7 +41,7 @@ export interface IHostBuilder {
     addWebSocketHub(path?: string): IHostBuilder;
     addHttp(): IHostBuilder;
     addExpress();
-    addMessageBus(channel?: string): IHostBuilder;
+    addMessageBus(cf?: (c: typeof config.messaging) => void): IHostBuilder;
 
 }
 export interface IHostedService {

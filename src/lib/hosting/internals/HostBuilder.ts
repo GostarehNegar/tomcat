@@ -7,20 +7,30 @@ import { BackgroundService } from "./BackgroundService";
 import { Host } from "./Host";
 import { WebSocketHub } from "./WebSocketHub";
 import { MessageBus } from "../../MessageBus/Implementations";
+import config from "../../config";
+//import { IConfig } from "../../interfaces";
 
 
 export class HostBuilder implements IHostBuilder {
 
     private addWebSocket: boolean;
     private websocketPath?: string;
+    private _config: typeof config;
 
     public services: IServiceContainer;
     constructor(private _name?: string, private _collection?: IHostCollection) {
         this._name = _name || `host-${Math.random()}`;
         this.services = new ServiceContainer();
+        /// Add a dummy host that will be eventually
+        /// replaced with the actual one, so that there is
+        /// a current host
+        ///
+        this._collection?.add(this._name, new Host(this._name, this.services));
+        this._config = JSON.parse(JSON.stringify(config));
+        this.services.register(serviceNames.Config, this._config);
     }
-    addMessageBus(channel?: string): IHostBuilder {
-        const bus = new MessageBus(channel);
+    addMessageBus(cf?: (c: typeof config.messaging) => void): IHostBuilder {
+        const bus = new MessageBus(cf, this._config.messaging);
         this.services.register(serviceNames.IHostedService, bus);
         this.services.register(serviceNames.IMessageBus, bus);
         return this;

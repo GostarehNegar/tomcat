@@ -8,7 +8,10 @@ export class WebSocketTransport implements IMessageTransport {
   private _ws: WebSocket | null = null;
   private _on: (message: any) => void;
   public _config = config.messaging.transports.websocket;
-  constructor() {
+  constructor(cf?: (c: typeof config.messaging.transports.websocket) => void, cfg?: typeof config.messaging.transports.websocket) {
+    this._config = cfg || config.messaging.transports.websocket;
+    if (cf)
+      cf(this._config)
     this._ws;
 
   }
@@ -68,7 +71,9 @@ export class WebSocketTransport implements IMessageTransport {
     //const _message = JSON.stringify(this.messagePayload('publish', message));
     return new Promise<void>((resolve, reject) => {
       this._open().then((ws) => {
+        //console.warn(message)
         ws.send(message, (err) => {
+
           if (err) reject(err);
           else resolve();
         });

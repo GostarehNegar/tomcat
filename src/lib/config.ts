@@ -1,11 +1,12 @@
 
+
 export let config = {
     "messaging": {
-        "channel": `smaple-${Math.random()}`,
+        "channel": (`smaple-${Math.random()}` as string | undefined),
         "transports": {
             "websocket": {
-                "url": 'http://localhost:8080/hub'
-
+                "url": 'http://localhost:8080/hub',
+                'diabled': false
             }
 
         }

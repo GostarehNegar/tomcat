@@ -39,14 +39,18 @@ export class MessageBus extends BackgroundService implements IMessageBus {
   private _transports: IMessageTransport[] = [];
   private _config = config.messaging;
   private _logger: ILogger;
-  constructor(channel?: string) {
+  constructor(cf?: (c: typeof config.messaging) => void, cfg?: typeof config.messaging) {
     super();
+    this._config = cfg || config.messaging;
+    if (cf)
+      cf(this._config);
+    //this._config = cfg ?? config.messaging;
     this._logger = Logger.getLogger("tomcat.MessageBus");
     this._subscriptions;
     (SignalRTransport);
     this._channelName = this._config.channel;// "test_channel@" + Math.random().toString();
-    this._channelName = channel || this.channelName;
-    this._transports.push(new WebSocketTransport());
+    //this._channelName = channel || this.channelName;
+    this._transports.push(new WebSocketTransport(null, this._config.transports.websocket));
     this._transports[0].on(msg => {
       const _msg = JSON.parse(msg.toString()) as { method: string, payload: any };
       var ctx = new MessageContext(_msg.payload, this);
@@ -108,7 +112,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
 
   createMessage(topic: string, to?: string | null, body?: unknown | null): IMessageContext {
     const _topic = MessageTopic.parse(topic);
-    to = to || _topic.channel || this.channelName;
+    to = to || _topic.channel;//|| this.channelName;
     topic = _topic.topic
     //topic = _topic.topic;
     body = body || {};
@@ -145,6 +149,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
       this._subscriptions
         .publish(context)
         .then(() => {
+          //console.warn(context.message)
           this.publishToTransports(context)
             .then(resolve)
             .catch(err => reject(err));

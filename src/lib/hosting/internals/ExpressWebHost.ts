@@ -30,6 +30,7 @@ class ExpressWebHost extends WebHost {
         this.port = process.env.PORT || 3000;
         this.env = process.env.NODE_ENV || 'development';
         this.http = http.createServer(this.expressApp);
+
         services.register(Constants.ServiceNames.HttpServer, this.http);
         this.initializeMiddlewares();
         routes = routes || [];

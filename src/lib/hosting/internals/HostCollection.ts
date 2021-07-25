@@ -11,9 +11,7 @@ export class HostCollection implements IHostCollection {
         return vals[vals.length - 1];
 
     }
-
     private items: Map<string, IHost> = new Map<string, IHost>();
-
     public getByName(name: string): IHost {
         return this.items.get(name);
     }

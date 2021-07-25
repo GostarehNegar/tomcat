@@ -17,9 +17,29 @@ export class WebHost extends Host implements IWebHost {
         await this.start();
         return this;
     }
+    async stop(): Promise<unknown> {
+        await super.stop();
+        await this.close();
+        return this;
+    }
     async close(): Promise<unknown> {
-        await this.stop();
-        this.services.getService<Server>(Constants.ServiceNames.HttpServer).close();
+        //await this.stop();
+        await new Promise<void>((resolve, reject) => {
+
+            var http = this.services.getService<Server>(Constants.ServiceNames.HttpServer);
+            if (http) {
+                http.close(err => {
+                    if (err)
+                        reject(err)
+                    else resolve();
+                });
+            } else {
+                resolve();
+            }
+
+
+        })
+        //this.services.getService<Server>(Constants.ServiceNames.HttpServer).close();
         return this;
 
     }

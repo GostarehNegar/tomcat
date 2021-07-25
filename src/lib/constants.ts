@@ -8,7 +8,8 @@ export const Constants = {
     HttpServer: 'http-server',
     IWebHost: '#IWebHost',
     WebSocketHub: '#WebSocketHub',
-    Router: '#rooter'
+    Router: '#rooter',
+    Config: '#config'
   },
   DataSources: {
     bainance: 'binance',

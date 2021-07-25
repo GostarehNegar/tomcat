@@ -6,6 +6,7 @@ import _config from './config'
 import * as _locator from './base/ServiceContainer'
 export const config = _config
 export const constants = _constants
+export type IConfig = typeof _config;
 //export const services = _locator.default;
 
 

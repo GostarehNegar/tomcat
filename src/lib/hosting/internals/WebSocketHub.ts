@@ -45,6 +45,8 @@ export class WebSocketHub implements IHostedService {
         return result;
     }
     private _doSend(to: WebSocket, message: any): Promise<unknown> {
+        if (typeof message === 'object')
+            message = JSON.stringify(message)
         return new Promise<unknown>((resolve, reject) => {
             to.send(message, err => {
                 err ? reject(err) : resolve(to);
@@ -54,12 +56,14 @@ export class WebSocketHub implements IHostedService {
     }
     public publish(from: WebSocket, message: any) {
         let promises: Promise<unknown>[] = [];
+        //console.warn("publish");
+
         this._ws.clients.forEach(x => {
             var sender = getConectionInfo(from).channel;
             var receiver = getConectionInfo(x).channel;
             if (sender && sender != receiver) {
                 console.log("sender:", sender, "receiver:", receiver, "from:", message.payload.from)
-                promises.push(this._doSend(x, message))
+                promises.push(this._doSend(x, JSON.stringify(message)))
             }
         });
         return Promise.all(promises);
@@ -79,7 +83,7 @@ export class WebSocketHub implements IHostedService {
                 console.log('received: %s', _message);
                 switch (_message.method) {
                     case messages.publish:
-                        console.log('publish');
+                        //console.log('publish');
                         this.publish(ws, _message)
                         // this._ws.clients.forEach(x => {
                         //     var sender = getConectionInfo(ws).channel;
