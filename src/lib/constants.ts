@@ -4,12 +4,12 @@ export const Constants = {
     IDataSource: 'IDataSource',
     IDataStore: 'IDataStore',
     IHostedService: 'IHostedService',
-    IMessageBus: '#IMessageBus',
-    HttpServer: 'http-server',
-    IWebHost: '#IWebHost',
-    WebSocketHub: '#WebSocketHub',
-    Router: '#rooter',
-    Config: '#config'
+    IMessageBus: 'IMessageBus',
+    HttpServer: 'HttpServer',
+    IWebHost: 'IWebHost',
+    WebSocketHub: 'WebSocketHub',
+    Router: 'Router',
+    Config: 'Config'
   },
   DataSources: {
     bainance: 'binance',

@@ -50,13 +50,16 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     (SignalRTransport);
     this._channelName = this._config.channel;// "test_channel@" + Math.random().toString();
     //this._channelName = channel || this.channelName;
-    this._transports.push(new WebSocketTransport(null, this._config.transports.websocket));
-    this._transports[0].on(msg => {
-      const _msg = JSON.parse(msg.toString()) as { method: string, payload: any };
-      var ctx = new MessageContext(_msg.payload, this);
-      ctx.setScope('local');
-      this.publish(ctx);
-    });
+
+    if (this._config.transports.websocket.diabled !== true) {
+      this._transports.push(new WebSocketTransport(null, this._config.transports.websocket));
+      this._transports[0].on(msg => {
+        const _msg = JSON.parse(msg.toString()) as { method: string, payload: any };
+        var ctx = new MessageContext(_msg.payload, this);
+        ctx.setScope('local');
+        this.publish(ctx);
+      });
+    }
 
   }
   get channelName(): string {
@@ -67,6 +70,8 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     this._logger.log("started");
   }
   async stop(): Promise<void> {
+    if (this._transports.length < 1)
+      return Promise.resolve();
     return this._transports[0].close();
     //return this._transport.stop();
   }
@@ -110,7 +115,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
 
   }
 
-  createMessage(topic: string, to?: string | null, body?: unknown | null): IMessageContext {
+  createMessage(topic: string, body?: unknown | null, to?: string | null): IMessageContext {
     const _topic = MessageTopic.parse(topic);
     to = to || _topic.channel;//|| this.channelName;
     topic = _topic.topic
@@ -130,7 +135,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     });
   }
   public publishToTransports(ctx: IMessageContext): Promise<void> {
-    if (ctx.isLocal()) {
+    if (ctx.isLocal() || this._transports.length < 1) {
       return Promise.resolve();
     }
     return this._transports[0].pubish(ctx);

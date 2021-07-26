@@ -4,7 +4,7 @@ import compression from 'compression';
 import cors from 'cors';
 import express, { Router } from 'express';
 import http, { Server } from 'http'
-import { IServiceContainer } from '../../base';
+import { IServiceProvider } from '../../base';
 import Constants from '../../constants';
 import { WebHost } from "./WebHost";
 
@@ -24,7 +24,7 @@ class ExpressWebHost extends WebHost {
     public env: string;
     public http: Server;
 
-    constructor(name: string, services: IServiceContainer, routes?: Router[]) {
+    constructor(name: string, services: IServiceProvider, routes?: Router[]) {
         super(name, services);
         this.expressApp = express();
         this.port = process.env.PORT || 3000;

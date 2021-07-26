@@ -1,4 +1,4 @@
-import { IServiceContainer } from "../../base/ServiceContainer";
+import { IServiceProvider } from "../../base/ServiceProvider";
 import { IWebHost } from "../interfaces";
 import { Host } from "./Host";
 import express from 'express';
@@ -8,7 +8,7 @@ import Constants from "../../constants";
 export class WebHost extends Host implements IWebHost {
     public port: number | string | null;
     public expressApp: express.Application = null;
-    constructor(name: string, services: IServiceContainer) {
+    constructor(name: string, services: IServiceProvider) {
         super(name, services);
 
     }

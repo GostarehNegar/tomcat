@@ -70,16 +70,16 @@ describe('WebSocketHub', () => {
         // lets spin up two servers on different ports
         // const builder = new HostBuilder();
         const port = 8081;
-        const hub = hosts.getDefualtBuilder('hub')
+        const hub = hosts.getHostBuilder('hub')
             .addWebSocketHub()
             .buildWebHost();
         //config.messaging.transports.websocket.url = "http://localhost:8080/hub";
-        const client1 = hosts.getDefualtBuilder('client1')
+        const client1 = hosts.getHostBuilder('client1')
             .addMessageBus(cfg => {
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
             .build();
-        const client2 = hosts.getDefualtBuilder('client2')
+        const client2 = hosts.getHostBuilder('client2')
             .addMessageBus(cfg => {
                 cfg.channel = `sample-${Math.random()}}`
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
@@ -102,7 +102,7 @@ describe('WebSocketHub', () => {
         await client1.start();
         await client2.start();
         await wait(500);
-        await client2.bus.createMessage(messageName, null, "hi there")
+        await client2.bus.createMessage(messageName, "hi there")
             .publish();
         await wait(500);
         console.log(received);

@@ -1,4 +1,4 @@
-import { IServiceContainer } from "../../base/ServiceContainer";
+import { IServiceProvider } from "../../base/ServiceProvider";
 import { config } from "../../interfaces";
 import { IMessageBus } from "../../MessageBus/interfaces";
 import { CanellationToken, IHost, IHostedService } from "../interfaces";
@@ -9,7 +9,7 @@ export class Host implements IHost {
     private _tasks: IHostedService[] = [];
     public started: boolean;
     public config: typeof config;
-    constructor(public name: string, public services: IServiceContainer) {
+    constructor(public name: string, public services: IServiceProvider) {
         this._tasks = this.services
             .getServices<IHostedService>(serviceNames.IHostedService);
         this.config = this.services.getService(serviceNames.Config);

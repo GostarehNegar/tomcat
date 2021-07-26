@@ -29,7 +29,7 @@ export class MessageContext implements IMessageContext {
     return this._bus.publish(this);
   }
   reply(body: unknown): Promise<unknown> {
-    const message = this._bus.createMessage(MessageTopic.reply, this.message.from, body);
+    const message = this._bus.createMessage(MessageTopic.reply, body, this.message.from);
     message.message.reply_to = this.message.id;
     return message.publish();
   }

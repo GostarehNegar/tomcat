@@ -9,7 +9,7 @@ describe('HostCollection', () => {
 
         const name = 'some-host';
         const host = hosts
-            .getDefualtBuilder(name)
+            .getHostBuilder(name)
             .build();
         expect(hosts.getByName(name)).not.toBeNull();
         expect(hosts.getByName(name).name).toEqual(name);

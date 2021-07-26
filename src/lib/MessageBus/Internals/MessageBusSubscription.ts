@@ -18,8 +18,10 @@ export class MessageBusSubscription implements IMessageBusSubscription {
     return message
       &&
       (
-        message.message.to === "*" ||
-        this._matchRuleShort(message.message.to, this._topic.channel)
+        message.message.to === "*"
+        || typeof message.message.to === 'undefined'
+        || message.message.to == null
+        || this._matchRuleShort(message.message.to, this._topic.channel)
       )
       && this._matchRuleShort(message.message.topic, this._topic.topic);
   }

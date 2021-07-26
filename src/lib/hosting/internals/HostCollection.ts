@@ -4,7 +4,7 @@ import { HostBuilder } from "./HostBuilder";
 export class HostCollection implements IHostCollection {
     get current(): IHost {
         if (this.items.size == 0) {
-            this.getDefualtBuilder(null)
+            this.getHostBuilder(null)
                 .build();
         }
         var vals = Array.from(this.items.values());
@@ -19,7 +19,7 @@ export class HostCollection implements IHostCollection {
         this.items.set(name, item);
         return item;
     }
-    public getDefualtBuilder(name: string): IHostBuilder {
+    public getHostBuilder(name: string): IHostBuilder {
         (name);
         return new HostBuilder(name, this);
     }

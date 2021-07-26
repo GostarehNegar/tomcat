@@ -1,5 +1,5 @@
-import * as container from './ServiceContainer'
+import * as container from './ServiceProvider'
 export interface ILogger {
     log(message?: any, ...params: any[])
 }
-export import IServiceContainer = container.IServiceContainer
+export import IServiceProvider = container.IServiceProvider

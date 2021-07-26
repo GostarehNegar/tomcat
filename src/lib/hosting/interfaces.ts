@@ -1,4 +1,4 @@
-import { IServiceContainer } from "../base";
+import { IServiceProvider } from "../base";
 import express from 'express';
 import { config } from "../interfaces";
 import { IMessageBus } from "../MessageBus/interfaces";
@@ -9,7 +9,7 @@ export interface CanellationToken {
     get isCancelled(): boolean;
 }
 export interface IHost {
-    get services(): IServiceContainer;
+    get services(): IServiceProvider;
     get name(): string;
     start(): Promise<unknown>;
     stop(): Promise<unknown>;
@@ -28,15 +28,27 @@ export interface IWebHost extends IHost {
 export interface IHostCollection {
     add(name: string, item: IHost): IHost;
     getByName(name: string): IHost;
-    getDefualtBuilder(name?: string): IHostBuilder;
+    getHostBuilder(name?: string): IHostBuilder;
     get current(): IHost;
 
 }
+/**
+ * Represents a host builder that can be
+ * used to build a web or console host that
+ * will provide features to the end user.
+ * 
+ */
 export interface IHostBuilder {
+    /**
+     * Builds a simple console host.
+     */
     build(): IHost;
+    /**
+     * Builds an 'express' web host.
+     */
     buildWebHost(): IWebHost;
     addHostedService(task: IHostedService | ((IServiceLocator) => IHostedService)): IHostBuilder;
-    addService(name: string, ctor: any | ((locator: IServiceContainer) => any), key?: string): IHostBuilder;
+    addService(name: string, ctor: any | ((locator: IServiceProvider) => any), key?: string): IHostBuilder;
     addRouter(router: unknown): IHostBuilder;
     addWebSocketHub(path?: string): IHostBuilder;
     addHttp(): IHostBuilder;

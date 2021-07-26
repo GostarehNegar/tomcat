@@ -1,14 +1,17 @@
 import { MessageBus } from '../src/lib/MessageBus/Implementations'
+import { IMessageBus } from '../src/lib/MessageBus/interfaces';
 
-const bus = new MessageBus();
+const bus = new MessageBus(cf => {
+    cf.transports.websocket.diabled = true;
+}) as IMessageBus;
 afterAll(async () => {
     await bus.stop();
 
 });
 describe('bus', () => {
-    test('test', () => {
+    test('can create message', () => {
         var body = { name: "babak" }
-        const message = bus.createMessage("test", null, body);
+        const message = bus.createMessage("test", body);
         message.message.headers["on"] = Date.now().toString();
         expect(message.message.topic).toBe("test");
         expect(message.message.payload).toBe(body);
@@ -95,7 +98,7 @@ describe('bus', () => {
         });
 
         const response = await bus
-            .createMessage("request", null, "ping")
+            .createMessage("request", "ping")
             .execute()
 
         expect(response).not.toBeNull();

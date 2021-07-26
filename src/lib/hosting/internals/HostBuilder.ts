@@ -1,4 +1,4 @@
-import { IServiceContainer, ServiceContainer } from "../../base/ServiceContainer";
+import { IServiceProvider, ServiceProvider } from "../../base/ServiceProvider";
 import { IHost, IHostBuilder, IHostCollection, IWebHost } from "../interfaces";
 import http from 'http';
 import ExpressWebHost from "./ExpressWebHost";
@@ -17,10 +17,10 @@ export class HostBuilder implements IHostBuilder {
     private websocketPath?: string;
     private _config: typeof config;
 
-    public services: IServiceContainer;
+    public services: IServiceProvider;
     constructor(private _name?: string, private _collection?: IHostCollection) {
         this._name = _name || `host-${Math.random()}`;
-        this.services = new ServiceContainer();
+        this.services = new ServiceProvider();
         /// Add a dummy host that will be eventually
         /// replaced with the actual one, so that there is
         /// a current host
@@ -85,7 +85,7 @@ export class HostBuilder implements IHostBuilder {
         this.addService(serviceNames.IHostedService, task);
         return this;
     }
-    public addService(name: string, ctor: any | ((loc: IServiceContainer) => any), key?: string): IHostBuilder {
+    public addService(name: string, ctor: any | ((loc: IServiceProvider) => any), key?: string): IHostBuilder {
         this.services.register(name, ctor, false, key);
         return this;
     }

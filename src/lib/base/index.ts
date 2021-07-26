@@ -1,6 +1,6 @@
 export * from "./Implemenations";
 export * from './interfaces'
-export * from './ServiceContainer'
+export * from './ServiceProvider'
 
 //import _services from "./ServiceContainer"
 

@@ -4,7 +4,7 @@ import { Server } from 'http'
 import { constants } from '../../interfaces';
 import { IHostedService, ITransportConnectInfo } from '../../index';
 import { hosts } from '../Implementations';
-import { IServiceContainer } from '../../base';
+import { IServiceProvider } from '../../base';
 
 
 const messages = constants.messages.hub;
@@ -22,7 +22,7 @@ export interface WebSocktHubOptions {
 export class WebSocketHub implements IHostedService {
     private _ws: WebSocket.Server | null = null;
     public options: WebSocktHubOptions = null;
-    constructor(private _services?: IServiceContainer, options?: WebSocktHubOptions) {
+    constructor(private _services?: IServiceProvider, options?: WebSocktHubOptions) {
         (this._ws)
         this.options = options;
         this.options = this.options || {};

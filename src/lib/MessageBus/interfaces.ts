@@ -22,14 +22,29 @@ export interface ICreateMessageConfig {
   to: string,
   body: any,
 }
+/**
+ * Represents messaging features.
+ */
 export interface IMessageBus {
-  createMessage(topic: string, to?: string | null, body?: unknown | null): IMessageContext;
-  // subscribeEx(
-  //   callBack: (subs: IMessageBusSubscription) => void
-  // ): Promise<IMessageBusSubscription>;
+  /**
+   * Creates a message (context) with a specific body to be later
+   * published.
+   * @param topic Message topic e.g 'some-topic'. It can be perfixed
+   * with the destination such as "some-destination://some-topic"
+   * @param body Body/payload of the message, can be any json serializable object.
+   * @param to Optionaly name of the destination endpoint. 
+   */
+  createMessage(topic: string, body?: unknown | null, to?: string | null): IMessageContext;
+
+  /**
+   * 
+   * @param topic 
+   * @param handler 
+   */
   subscribe(topic: string, handler: IHandler): Promise<IMessageBusSubscription>;
   start(): Promise<unknown>;
   get channelName(): string;
+  stop(): Promise<unknown>;
 }
 export interface ITransportConnectInfo {
   channel: string;
