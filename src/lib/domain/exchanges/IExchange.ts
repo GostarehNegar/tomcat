@@ -1,4 +1,4 @@
-import { TimeEx } from '../base/TimeEx';
+import { TimeEx } from '../../base/TimeEx';
 
 export interface IExchange {
   getServerTime(): Promise<TimeEx>;

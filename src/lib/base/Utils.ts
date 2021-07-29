@@ -1,10 +1,14 @@
 import { ILogger } from './interfaces';
 import { Logger } from './logger';
-import { TimeSpan } from './TimeEx';
+import { TimeEx, TimeSpan } from './TimeEx';
 
 export class Utils {
   public test(): string {
     return 'test from 1';
+  }
+  public toTimeEx(ticks?: number | Date): TimeEx {
+    return new TimeEx(ticks);
+
   }
   public toDate() {
     return new Date();
@@ -29,6 +33,14 @@ export class Utils {
     return new Promise(resolve => {
       setTimeout(resolve, ms);
     });
+  }
+  public wildCardMatch(str, rule) {
+    const escapeRegex = (str) =>
+      //eslint-disable-next-line no-useless-escape
+      str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+    return new RegExp(
+      '^' + rule.split('*').map(escapeRegex).join('.*') + '$'
+    ).test(str);
   }
 
 }

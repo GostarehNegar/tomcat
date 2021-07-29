@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-import { TimeEx } from '../base/TimeEx';
+import { TimeEx } from '../../base/TimeEx';
 
 import { IExchange } from './IExchange';
 const api = (_api: string) => 'https://api.binance.com/api/v3/' + _api;

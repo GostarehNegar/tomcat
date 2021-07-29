@@ -11,14 +11,31 @@ const msecPerSecond = 1000,
   msecPerHour = 3600000,
   msecPerDay = 86400000;
 export class TimeEx {
-  constructor(public ticks: number) {}
+  public ticks: number
+  constructor(_ticks?: number | Date | TimeEx) {
+    _ticks = _ticks || Date.now();
+    this.ticks = typeof _ticks == 'number' ? _ticks
+      : _ticks instanceof TimeEx
+        ? (_ticks as TimeEx).ticks
+        : (_ticks as Date).getTime();
 
+  }
+  public roundToMinutes(n: number): TimeEx {
+    const coeff = 1000 * 60 * n;
+    return new TimeEx(Math.round(this.ticks / coeff) * coeff)
+  }
+  public toString() {
+    return this.asDate.toUTCString();
+  }
   public get asDate() {
     return new Date(this.ticks);
   }
   static now = () => new TimeEx(Date.now());
   equals(other: TimeEx): boolean {
     return this.ticks === other.ticks;
+  }
+  subtract(other: number | Date | TimeEx) {
+    return new TimeSpan(this.ticks - new TimeEx(other).ticks)
   }
 }
 export class TimeSpan {
@@ -44,11 +61,20 @@ export class TimeSpan {
   get milliseconds() {
     return this.msecs % 1000;
   }
+  get absSeconds() {
+    return Math.abs(this.seconds);
+  }
   get seconds() {
     return Math.floor(this.msecs / msecPerSecond) % 60;
   }
+  get absMinutes() {
+    return Math.abs(this.minutes)
+  }
   get minutes() {
     return Math.floor(this.msecs / msecPerMinute) % 60;
+  }
+  get absHours() {
+    return Math.abs(this.hours)
   }
   get hours() {
     return Math.floor(this.msecs / msecPerHour) % 24;
@@ -56,14 +82,28 @@ export class TimeSpan {
   get days() {
     return Math.floor(this.msecs / msecPerDay);
   }
+  get absTotalMilliseconds() {
+    return Math.abs(this.totalMilliseconds)
+  }
+
   get totalMilliseconds() {
     return this.msecs;
+  }
+
+  get absTotalSeconds() {
+    return Math.abs(this.totalSeconds)
   }
   get totalSeconds() {
     return this.msecs / msecPerSecond;
   }
+  get absTotalMinutes() {
+    return Math.abs(this.totalMinutes);
+  }
   get totalMinutes() {
     return this.msecs / msecPerMinute;
+  }
+  get absTotalHours() {
+    return Math.abs(this.totalHours)
   }
   get totalHours() {
     return this.msecs / msecPerHour;

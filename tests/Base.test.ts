@@ -2,6 +2,7 @@ import { IServiceProvider, ServiceProvider } from "../src/lib/base/ServiceProvid
 import { Logger } from "../src/lib/base/logger"
 import '../src/lib/base';
 import '../src/lib/extensions'
+import { TimeEx, utils } from "../src/lib/base";
 const provider = new ServiceProvider() as IServiceProvider;
 
 
@@ -23,7 +24,7 @@ describe('ServiceLocator', () => {
     });
 
 });
-describe('logger works', () => {
+describe('Logger', () => {
     test('should create logger', () => {
         const logger = Logger.getLogger("test");
         const logger2 = Logger.getLogger("test");
@@ -34,4 +35,30 @@ describe('logger works', () => {
 
 
     });
+});
+describe('TimeEx', () => {
+
+    test('should construct TimeEx with date or ticks', async () => {
+
+        const time = new TimeEx(new Date());
+        const time2 = new TimeEx(Date.now());
+        const time3 = new TimeEx(time2);
+        expect(time.ticks).toBeGreaterThan(0);
+        expect(time2.ticks).toBeGreaterThanOrEqual(time.ticks);
+        expect(time3.ticks).toBe(time2.ticks)
+
+
+    });
+
+});
+
+describe('utils', () => {
+
+    test('wild card match works', async () => {
+        expect(utils.wildCardMatch('babak', 'b*'))
+        expect(utils.wildCardMatch('babak', 'b?bak'))
+        expect(utils.wildCardMatch('babak', 'a*')).toBeFalsy();
+
+    });
+
 });

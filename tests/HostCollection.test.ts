@@ -5,7 +5,7 @@ const utils = impl.Base.utils;
 
 describe('HostCollection', () => {
 
-    test('builds hosts', async () => {
+    test('should build a host with correct name.', async () => {
 
         const name = 'some-host';
         const host = hosts
@@ -15,6 +15,12 @@ describe('HostCollection', () => {
         expect(hosts.getByName(name).name).toEqual(name);
         expect(hosts.getByName(name).name).toEqual(host.name);
         await utils.delay(1000);
+    });
+    test('when a host is created it should be accessible as current.', async () => {
+        const name = 'some-host' + Math.random();
+        hosts.getHostBuilder(name)
+            .build();
+        expect(hosts.current.name).toBe(name);
 
     });
 

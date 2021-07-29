@@ -8,15 +8,15 @@ afterAll(async () => {
     await bus.stop();
 
 });
-describe('bus', () => {
-    test('can create message', () => {
+describe('MessageBus', () => {
+    test('should create message', () => {
         var body = { name: "babak" }
         const message = bus.createMessage("test", body);
         message.message.headers["on"] = Date.now().toString();
         expect(message.message.topic).toBe("test");
         expect(message.message.payload).toBe(body);
     });
-    test('subscribe', async () => {
+    test('should publish messages to subscribers.', async () => {
 
         let called = null;
         let called_count = 0;
@@ -36,7 +36,7 @@ describe('bus', () => {
         expect(called_count).toBe(1);
         expect(called).not.toBeNull()
     });
-    test('subcribe to specific channel', async () => {
+    test('should correctly publish messages according to channels', async () => {
 
         let count1 = 0;
         let count2 = 0;
@@ -84,23 +84,15 @@ describe('bus', () => {
         expect(count3).toBe(3);
         expect(count4).toBe(1);
 
-
-
-
-
-
-
     })
-    test('reply', async () => {
+    test('should properly deliver replies.', async () => {
         bus.subscribe("request", ctx => {
             ctx.reply("reply");
             return Promise.resolve();
         });
-
         const response = await bus
             .createMessage("request", "ping")
             .execute()
-
         expect(response).not.toBeNull();
     });
     // test('transport', async () => {
