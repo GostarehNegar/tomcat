@@ -1,40 +1,15 @@
-import { IPipeline, IPipelineBuilder, IPipelineContext, IPipelineRequest, IPipelineResponse } from "./interfaces";
+import { IRequestHeaders, IResponseHeaders } from "./interfaces";
 import http from 'http'
-
-export class Pipeline implements IPipeline {
-
-    private http: http.Server;
-    listen(port: number) {
-        this.http = http.createServer(async (req, res) => {
-            (req);
-            res.write('hello there!')
-            res.end();
-
-        });
-        this.http.listen(port);
-    }
-    close() {
-        this.http?.close();
-    }
-
-    handle(request: IPipelineRequest): Promise<IPipelineResponse> {
-        (request)
-        throw new Error("Method not implemented.");
-    }
+export * from './Implementaions/Pipeline'
+export * from './Implementaions/PipelineBuilder'
+export * from './Implementaions/PipelineContext'
+export * from './Implementaions/PipelineRequest'
+export * from './Implementaions/PipelineResponse'
+export class RequestHeaders implements IRequestHeaders {
+    [key: string]: string | string[];
 
 }
-export class PipelineBuilder implements IPipelineBuilder {
-    build(): IPipeline {
-        return new Pipeline();
-    }
-
-}
-export class PipelineContext implements IPipelineContext {
-
-}
-export class PipelineRequest implements IPipelineRequest {
-
-}
-export class PipelineResponse implements IPipelineResponse {
+export class ResponseHeaders implements IResponseHeaders {
+    [key: string]: http.OutgoingHttpHeader;
 
 }

@@ -8,6 +8,8 @@ import { Host } from "./Host";
 import { WebSocketHub } from "./WebSocketHub";
 import { MessageBus } from "../../MessageBus/Implementations";
 import config from "../../config";
+import { LightWebHost } from "./SimpleWebHost";
+//import { WebHost } from "./WebHost";
 //import { IConfig } from "../../interfaces";
 
 
@@ -39,13 +41,18 @@ export class HostBuilder implements IHostBuilder {
         this.services.register(serviceNames.Router, router);
         return this;
     }
-    buildWebHost(): IWebHost {
+    buildWebHost(type?: "light" | 'express'): IWebHost {
         //this.addHttp();
-        const result = new ExpressWebHost(this._name, this.services);
+        type = type || 'light';
+        //        const result: WebHost = null;
+        const result = type === 'light'
+            ? new LightWebHost(this._name, this.services)
+            : new ExpressWebHost(this._name, this.services);
         this.services.register(serviceNames.IWebHost, result);
+        result.createServer(result.listener);
         if (this.addWebSocket) {
             const hub = new WebSocketHub(this.services, {
-                server: result.http,
+                server: result.httpServer,
                 path: this.websocketPath
             })
             this.services.register(serviceNames.WebSocketHub, hub);

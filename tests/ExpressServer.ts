@@ -18,6 +18,7 @@ class IndexRoute {
         this.router.get('/', this.index)
         this.router.get('/wiki', ({ }, res) => {
             res.send('Wiki home page');
+
         })
     }
     public index = (req: Request, res: Response): void => {
@@ -37,12 +38,13 @@ class IndexRoute {
 // _app.listen();
 (async () => {
     const host = tomcat
-        .builder
+        .hosts.getHostBuilder('lklk')
         .addRouter(() => new IndexRoute().router)
         .buildWebHost();
     await host.listen(3000)
     console.log("here");
     console.log(host.port)
+
     host.expressApp.get('/test', ({ }, res) => {
         res.send("test page")
     });

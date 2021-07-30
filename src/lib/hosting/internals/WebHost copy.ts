@@ -5,8 +5,8 @@ import express from 'express';
 
 import Constants from "../../constants";
 import http from 'http'
-import { HttpContext, HttpRequest, HttpResponse } from "./HttpContext";
-import { Peer, PeerCollection } from "./Peers";
+import { HttpRequest, HttpResponse } from "./HttpContext";
+import { PeerCollection } from "./Peers";
 
 export class WebHost extends Host implements IWebHost {
     public port: number | string | null;
@@ -19,7 +19,6 @@ export class WebHost extends Host implements IWebHost {
         super(name, services);
     }
     addPeer(url: string) {
-        (url)
         this.peers.add(url);
     }
     jjj(): void {
@@ -29,15 +28,9 @@ export class WebHost extends Host implements IWebHost {
         return Promise.resolve();
 
     }
-    protected createContext(req: any, res: any): IHttpContext {
-        return new HttpContext(req, res);
-
-
-    }
     async listen(port?: number): Promise<unknown> {
         (port);
         this.port = port;
-        this.peers.setSelf(this.getHostUrl());
         await this.start();
         return this;
     }
@@ -68,9 +61,6 @@ export class WebHost extends Host implements IWebHost {
 
 
     public createServer(listener?: http.RequestListener) {
-        if (this.httpServer != null) {
-            return this.httpServer;
-        }
         this.listener = (listener || this.listener).bind(this);
         this.httpServer = http.createServer(
             {
@@ -85,65 +75,37 @@ export class WebHost extends Host implements IWebHost {
         this.handlers.push(handler);
 
     }
-    getHostUrl(): string {
-        return `http://localhost:${this.port}`;
-    }
-    private forwardToPeer(context: IHttpContext, peer: Peer): Promise<unknown> {
-        const req = context.request;
-        const res = context.response;
-        const x = req.headers;
-        //x["xxx-forwared-by"] = x["xxx-forwared-by"] ?? [];
-        //req.se
-        var chain = new PeerCollection(req.headers["x-forward-chain"])
-            .add(this.getHostUrl())
-            .toString();
-        var peers = new PeerCollection(req.headers["x-forward-peers"])
-            .add(this.peers)
-            .add(this.getHostUrl())
-            .toString();
-        req.headers["x-forward-chain"] = chain;
-        req.headers["x-forward-peers"] = peers;
-        var connector = http.request({
-            host: peer.uri.hostname,
-            path: req.url,
-            method: req.method,
-            headers: x,
-            port: peer.uri.port,
-        }, (resp) => {
-            resp.pipe(res);
-            res.statusCode = resp.statusCode;
-        });
-        req.pipe(connector);
+    // private forwardToPeer(context: IHttpContext, peer: Peer): Promise<unknown> {
+    //     const req = context.request;
+    //     const res = context.response;
+    //     const x = req.headers;
+    //     //x["xxx-forwared-by"] = x["xxx-forwared-by"] ?? [];
+    //     //req.se
+    //     const _url = `http://localhost:${this.port}`;
+    //     x["xxx-forwared-by"] = (x["xxx-forwared-by"] || "").concat(_url)
+    //     //x.host = "kkk";
+    //     var connector = http.request({
+    //         host: 'localhost',
+    //         path: req.url,
+    //         method: req.method,
+    //         headers: x,
+    //         port: peer.uri.port,
+    //     }, (resp) => {
+    //         resp.pipe(res);
+    //     });
+    //     req.pipe(connector);
 
-        return Promise.resolve({});
+    //     return Promise.resolve({});
 
-    }
-    protected async forward(context: IHttpContext): Promise<boolean> {
-        //console.warn("forwarding...");
+    // }
+    protected async forward(context: IHttpContext): Promise<void> {
+        console.warn("forwarding...");
         (context)
-        const peer = this.peers.getPeer(context);
+        const peer = null;//this.peers.getPeer(context);
         if (peer != null) {
-
-            await this.forwardToPeer(context, peer)
-            return true;
+            //await this.forwardToPeer(context, peer)
         }
         else {
-            context.response.statusCode = 404;
-            context.response.end();
-            //context.response.statusMessage = "not found";
-            // context.response.setHeader('x-err', "404");
-            // (context.response as any).babak = 404;
-            // //context.response.flushHeaders();
-            // //context.response.write({ error: 'not found' })
-            // context.response.end();
-            return false;
-            //            console.warn(context.response.statusCode);
-            //context.response.flushHeaders();
-            // context.response.flushHeaders();
-            // console.warn(context.response.statusCode);
-
-
-
 
         }
 

@@ -7,17 +7,8 @@ import http, { Server } from 'http'
 import { IServiceProvider } from '../../base';
 import Constants from '../../constants';
 import { WebHost } from "./WebHost";
+(http)
 
-// import cookieParser from 'cookie-parser';
-// import config from 'config';
-// import helmet from 'helmet';
-// import hpp from 'hpp';
-// import morgan from 'morgan';
-// import swaggerJSDoc from 'swagger-jsdoc';
-// import swaggerUi from 'swagger-ui-express';
-// import { Routes } from '@interfaces/routes.interface';
-// import errorMiddleware from '@middlewares/error.middleware';
-// import { logger, stream } from '@utils/logger';
 class ExpressWebHost extends WebHost {
     //public expressApp: express.Application;
     //public port: string | number;
@@ -29,16 +20,12 @@ class ExpressWebHost extends WebHost {
         this.expressApp = express();
         this.port = process.env.PORT || 3000;
         this.env = process.env.NODE_ENV || 'development';
-        this.http = http.createServer(this.expressApp);
-
-        services.register(Constants.ServiceNames.HttpServer, this.http);
         this.initializeMiddlewares();
         routes = routes || [];
         services.getServices<Router>(Constants.ServiceNames.Router)
             .forEach(x => routes.push(x));
         this.initializeRoutes(routes);
-
-
+        this.listener = this.expressApp.bind(this);
         //this.initializeSwagger();
         //this.initializeErrorHandling();
     }
@@ -46,8 +33,9 @@ class ExpressWebHost extends WebHost {
     public listen(port?: number): Promise<unknown> {
         //this.port = process.env.PORT || 3000;
         this.port = port || process.env.PORT || 3000;
+        const server = this.createServer(this.expressApp);
         //super.start()
-        this.http.listen(this.port, () => {
+        server.listen(this.port, () => {
             console.info(`=================================`);
             console.info(`======= ENV: ${this.env} =======`);
             console.info(`🚀 App listening on the port ${this.port}`);
@@ -70,6 +58,12 @@ class ExpressWebHost extends WebHost {
         this.expressApp.use(compression());
         this.expressApp.use(express.json());
         this.expressApp.use(express.urlencoded({ extended: true }));
+        // const controler = new PeerControler();
+
+        // this.expressApp.use(async (req, res, n) => {
+        //     Promise.resolve(controler.handle(req, res, n))
+        //         .catch(n)
+        // });
         //this.app.use(cookieParser());
     }
 
