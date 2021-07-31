@@ -60,6 +60,7 @@ export interface IHostBuilder {
     addHttp(): IHostBuilder;
     addExpress();
     addMessageBus(cf?: (c: typeof config.messaging) => void): IHostBuilder;
+    addBinance(): IHostBuilder;
 
 }
 export interface IHostedService {
@@ -74,6 +75,9 @@ export interface IHttpContext {
 }
 export interface IHttpRequest extends IncomingMessage {
     get headers(): IRequestHeaders;
+    get uri();
+    params(key: string);
+    getParams<T>(): T;
 
 }
 export interface IHttpResponse extends ServerResponse {

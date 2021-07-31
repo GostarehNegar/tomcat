@@ -37,6 +37,9 @@ export class TimeEx {
   subtract(other: number | Date | TimeEx) {
     return new TimeSpan(this.ticks - new TimeEx(other).ticks)
   }
+  addMinutes(n: number) {
+    return new TimeEx(this.ticks + (n * 1000 * 60))
+  }
 }
 export class TimeSpan {
   private msecs: number;

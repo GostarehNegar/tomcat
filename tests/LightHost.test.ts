@@ -24,6 +24,27 @@ describe('LightHost', () => {
         expect(res.data).toBe(expected_reply);
     });
 
+    test('binance', async () => {
+        const expected_reply = 'hi there';
+        const port = 3000;
+        const host = tomcat
+            .hosts
+            .getHostBuilder("light")
+            .buildWebHost('light');
+        host.use(ctx => {
+            if (ctx.request.url == '/data') {
+                ctx.response.write(expected_reply);
+                ctx.response.end();
+            }
+            return Promise.resolve();
+        });
+        await host.listen(port);
+        const res = await axios.get(`http://localhost:${port}/data`);
+        (res)
+        await host.stop();
+        expect(res.data).toBe(expected_reply);
+    });
+
     test('should forward to peer', async () => {
         const port1 = 3100;
         const port2 = 3101;

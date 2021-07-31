@@ -1,5 +1,5 @@
 import { IServiceProvider, ServiceProvider } from "../../base/ServiceProvider";
-import { IHost, IHostBuilder, IHostCollection, IWebHost } from "../interfaces";
+import { IHost, IHostBuilder, IHostCollection, IHttpHandler, IWebHost } from "../interfaces";
 import http from 'http';
 import ExpressWebHost from "./ExpressWebHost";
 import { serviceNames } from "./ServerBuilder";
@@ -9,6 +9,7 @@ import { WebSocketHub } from "./WebSocketHub";
 import { MessageBus } from "../../MessageBus/Implementations";
 import config from "../../config";
 import { LightWebHost } from "./SimpleWebHost";
+import { api2 } from '../../domain/exchanges/Binance.Exchange'
 //import { WebHost } from "./WebHost";
 //import { IConfig } from "../../interfaces";
 
@@ -18,6 +19,7 @@ export class HostBuilder implements IHostBuilder {
     private addWebSocket: boolean;
     private websocketPath?: string;
     private _config: typeof config;
+    private handlers: IHttpHandler[] = []
 
     public services: IServiceProvider;
     constructor(private _name?: string, private _collection?: IHostCollection) {
@@ -60,9 +62,17 @@ export class HostBuilder implements IHostBuilder {
         }
         this._collection?.add(this._name, result);
 
+
+        this.handlers.map(h => result.use(h))
         return result;
 
     }
+    addBinance() {
+        this.handlers.push(api2)
+        return this
+    }
+
+
     addExpress() {
         throw new Error("Method not implemented.");
     }
