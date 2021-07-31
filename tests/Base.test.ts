@@ -1,5 +1,5 @@
 import { IServiceProvider, ServiceProvider } from "../src/lib/base/ServiceProvider";
-import { Logger } from "../src/lib/base/logger"
+import { Logger } from "../src/lib/base/"
 import '../src/lib/base';
 import '../src/lib/extensions'
 import { TimeEx, utils } from "../src/lib/base";

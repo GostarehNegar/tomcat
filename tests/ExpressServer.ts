@@ -9,6 +9,9 @@ const f = child.fork('./tests/ChildProcessMain.js',);
 (f)
 
 
+tomcat.hosts.getHostBuilder('')
+    .addServices(tomcat.Internals.Implementaions.Domain.Exchanges.addBinanceServices({ name: ';;;' }))
+
 
 
 class IndexRoute {

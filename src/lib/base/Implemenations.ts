@@ -1,4 +1,4 @@
-export * from './TimeEx';
-export * from './Utils';
+export * from './internals/TimeEx';
+export * from './internals/Utils';
 export * from './ServiceProvider';
-export * from './logger'
+export * from './internals/logger'

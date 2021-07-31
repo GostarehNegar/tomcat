@@ -29,7 +29,7 @@ export class WebHost extends Host implements IWebHost {
         return Promise.resolve();
 
     }
-    protected createContext(req: any, res: any): IHttpContext {
+    protected createContext(req: any, res: any): HttpContext {
         return new HttpContext(req, res);
 
 
@@ -81,10 +81,29 @@ export class WebHost extends Host implements IWebHost {
         return this.httpServer;
     }
 
-    use(handler: IHttpHandler) {
-        this.handlers.push(handler);
+    use(handler: IHttpHandler, config?: { name: string } | string): IWebHost {
 
+        const _config = config
+            ? typeof config === 'string'
+                ? { name: config }
+                : config
+            : { name: handler.name || 'noname' };
+        let _handler = handler;
+        if (handler.length == 1) {
+            _handler = async (ctx, n) => {
+                const result = await handler(ctx, n);
+                if (ctx.response.writableEnded) {
+                    return result;
+                }
+                return await n(ctx);
+            }
+        }
+        (_handler as any).config = _config;
+        this.handlers.push(_handler);
+        return this;
     }
+
+
     getHostUrl(): string {
         return `http://localhost:${this.port}`;
     }
@@ -119,8 +138,6 @@ export class WebHost extends Host implements IWebHost {
 
     }
     protected async forward(context: IHttpContext): Promise<boolean> {
-        //console.warn("forwarding...");
-        (context)
         const peer = this.peers.getPeer(context);
         if (peer != null) {
 
@@ -130,39 +147,10 @@ export class WebHost extends Host implements IWebHost {
         else {
             context.response.statusCode = 404;
             context.response.end();
-            //context.response.statusMessage = "not found";
-            // context.response.setHeader('x-err', "404");
-            // (context.response as any).babak = 404;
-            // //context.response.flushHeaders();
-            // //context.response.write({ error: 'not found' })
-            // context.response.end();
             return false;
-            //            console.warn(context.response.statusCode);
-            //context.response.flushHeaders();
-            // context.response.flushHeaders();
-            // console.warn(context.response.statusCode);
-
-
-
 
         }
 
-        // const req = context.request;
-        // const res = context.response;
-        // const x = req.headers;
-        // const _url = `http://localhost:${this.port}`;
-        // x["xxx-forwared-by"] = (x["xxx-forwared-by"] || "").concat(_url)
-        // //x.host = "kkk";
-        // var connector = http.request({
-        //     host: 'localhost',
-        //     path: req.url,
-        //     method: req.method,
-        //     headers: x,
-        //     port: peer.uri.port,
-        // }, (resp) => {
-        //     resp.pipe(res);
-        // });
-        // req.pipe(connector);
     }
 
 

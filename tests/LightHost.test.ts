@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 import tomcat from '../src/index'
 (axios);
 (tomcat);
@@ -11,35 +12,14 @@ describe('LightHost', () => {
             .hosts
             .getHostBuilder("light")
             .buildWebHost('light');
-        host.use(ctx => {
-            (ctx)
+        host.use((ctx) => {
             ctx.response.write(expected_reply);
             ctx.response.end();
+            ctx.getLogger().log()
             return Promise.resolve();
-        });
+        }, { 'name': 'll', params: { kk: 'll', kkk: 12 } });
         await host.listen(port);
-        const res = await axios.get(`http://localhost:${port}`);
-        (res)
-        await host.stop();
-        expect(res.data).toBe(expected_reply);
-    });
-
-    test('binance', async () => {
-        const expected_reply = 'hi there';
-        const port = 3000;
-        const host = tomcat
-            .hosts
-            .getHostBuilder("light")
-            .buildWebHost('light');
-        host.use(ctx => {
-            if (ctx.request.url == '/data') {
-                ctx.response.write(expected_reply);
-                ctx.response.end();
-            }
-            return Promise.resolve();
-        });
-        await host.listen(port);
-        const res = await axios.get(`http://localhost:${port}/data`);
+        const res = await axios.get(`http://localhost:${port}?ll=1`);
         (res)
         await host.stop();
         expect(res.data).toBe(expected_reply);

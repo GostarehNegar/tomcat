@@ -1,3 +1,5 @@
+//import { constants as hosting_constants } from './hosting'
+//(hosting_constants)
 export const Constants = {
   ServiceNames: {
     IDataProvider: 'IDataProvider',
@@ -9,7 +11,8 @@ export const Constants = {
     IWebHost: 'IWebHost',
     WebSocketHub: 'WebSocketHub',
     Router: 'Router',
-    Config: 'Config'
+    Config: 'Config',
+
   },
   DataSources: {
     bainance: 'binance',
@@ -18,6 +21,7 @@ export const Constants = {
     BTC: 'BTC',
     DOGE: 'DOGE',
   },
+  //hosting: hosting_constants,
   messages: {
     hub: {
       "publish": "publish",

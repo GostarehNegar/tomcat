@@ -1,7 +1,9 @@
 import { IServiceProvider } from "../../base/ServiceProvider";
-import { IHttpContext, IHttpRequest, IHttpResponse } from "../interfaces";
+import { IHttpRequest, IHttpResponse } from "../interfaces";
+import { HttpContext } from "./HttpContext";
 import { PeerCollection } from "./Peers";
 import { WebHost } from "./WebHost";
+
 
 
 
@@ -41,10 +43,11 @@ export class LightWebHost extends WebHost {
         return super.listen(port);
 
     }
-    async handle(ctx: IHttpContext): Promise<unknown> {
+    private async handle(ctx: HttpContext): Promise<unknown> {
         const _invoke = async (i) => {
             if (i == this.handlers.length)
                 return Promise.resolve();
+            ctx.setCurrentHandler(this.handlers[i]);
             return this.handlers[i](ctx, _ctx => _invoke(i + 1));
         };
         await _invoke(0);

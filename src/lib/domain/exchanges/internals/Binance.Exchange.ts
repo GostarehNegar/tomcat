@@ -1,10 +1,8 @@
 import fetch from 'node-fetch';
-import { TimeEx } from '../../base/TimeEx';
-import { IHttpContext } from '../../hosting';
-import { CandleStickCollection, ICandelStickData, Intervals, Markets, Symbols } from '../base';
-
-
-import { IExchange } from './IExchange';
+import { TimeEx } from '../../../base/internals/TimeEx';
+import { IHttpContext } from '../../../hosting';
+import { CandleStickCollection, ICandelStickData, Intervals, Markets, Symbols } from '../../base';
+import { IExchange } from '../interfaces';
 const api = (_api: string) => 'https://api.binance.com/api/v3/' + _api;
 
 export class BinanceExchange implements IExchange {

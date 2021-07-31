@@ -1,6 +1,6 @@
 import test from 'ava';
 
-import { TimeEx, TimeSpan } from './TimeEx';
+import { TimeEx, TimeSpan } from '../src/lib/base/';
 
 test('timeEx', (t) => {
   const now = TimeEx.now();

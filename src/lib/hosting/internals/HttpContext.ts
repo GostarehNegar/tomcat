@@ -1,4 +1,5 @@
-import { IHttpContext, IHttpRequest, IHttpResponse } from "../interfaces";
+import { IHttpContext, IHttpHandler, IHttpRequest, IHttpResponse } from "../interfaces";
+import { ILogger, Logger } from '../../base'
 import { IncomingMessage, ServerResponse } from 'http';
 //import { Socket } from "node:net";
 import { Socket } from 'net';
@@ -6,10 +7,20 @@ import { Socket } from 'net';
 
 
 export class HttpContext implements IHttpContext {
-
+    private _handler: IHttpHandler;
     constructor(public request: IHttpRequest, public response: IHttpResponse) {
 
     }
+    getLogger(name?: string): ILogger {
+        return Logger.getLogger(name);
+    }
+    get handler(): IHttpHandler {
+        return this._handler;
+    }
+    setCurrentHandler(handler: IHttpHandler) {
+        this._handler = handler;
+    }
+
 
 
 

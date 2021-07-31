@@ -1,4 +1,4 @@
-import { IServiceProvider } from "../base";
+import { ILogger, IServiceProvider } from "../base";
 import express from 'express';
 import { config } from "../interfaces";
 import { IMessageBus } from "../MessageBus/interfaces";
@@ -27,7 +27,7 @@ export interface IWebHost extends IHost {
     get port(): number | string | null;
     expressApp: express.Application;
     close(): Promise<unknown>;
-    use(handle: IHttpHandler);
+    use(handle: IHttpHandler, config?: { name: string, params: { [key: string]: string | number } | string): IWebHost;
     addPeer(url: string);
 
 }
@@ -55,6 +55,7 @@ export interface IHostBuilder {
     buildWebHost(type?: "light" | 'express'): IWebHost;
     addHostedService(task: IHostedService | ((IServiceLocator) => IHostedService)): IHostBuilder;
     addService(name: string, ctor: any | ((locator: IServiceProvider) => any), key?: string): IHostBuilder;
+    addServices(cb: (s: IServiceProvider) => void): IHostBuilder;
     addRouter(router: unknown): IHostBuilder;
     addWebSocketHub(path?: string): IHostBuilder;
     addHttp(): IHostBuilder;
@@ -71,6 +72,8 @@ export interface IHostedService {
 export interface IHttpContext {
     readonly request: IHttpRequest;
     readonly response: IHttpResponse;
+    getLogger(name?: string): ILogger;
+
 
 }
 export interface IHttpRequest extends IncomingMessage {
@@ -86,6 +89,7 @@ export interface IHttpResponse extends ServerResponse {
 export interface IHttpHandler {
     (ctx: IHttpContext, next: (ctx: IHttpContext) => Promise<unknown>): Promise<any>;
 }
+
 export interface IRequestHeaders extends IncomingHttpHeaders {
     'x-forward-peers'?: string | string[] | undefined;
     'x-forward-chain'?: string | string[] | undefined;
@@ -101,3 +105,10 @@ export interface IPeer {
 export interface IPeerCollection {
 
 }
+export const constants = {
+    kkk: 'jj',
+    ServiceNames: {
+        'll': 'll'
+    }
+
+};

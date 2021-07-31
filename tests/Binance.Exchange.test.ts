@@ -1,5 +1,5 @@
-import { TimeEx } from '../src/lib/base/TimeEx';
-import { BinanceExchange } from '../src/lib/domain/exchanges/Binance.Exchange'
+import { TimeEx } from '../src/lib/base';
+import { BinanceExchange } from '../src/lib/domain/exchanges/internals/Binance.Exchange'
 
 describe('BinanceExchange', () => {
 

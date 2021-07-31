@@ -9,7 +9,7 @@ import { WebSocketHub } from "./WebSocketHub";
 import { MessageBus } from "../../MessageBus/Implementations";
 import config from "../../config";
 import { LightWebHost } from "./SimpleWebHost";
-import { api2 } from '../../domain/exchanges/Binance.Exchange'
+import { api2 } from '../../domain/exchanges/internals/Binance.Exchange'
 //import { WebHost } from "./WebHost";
 //import { IConfig } from "../../interfaces";
 
@@ -71,7 +71,10 @@ export class HostBuilder implements IHostBuilder {
         this.handlers.push(api2)
         return this
     }
-
+    addServices(cb: (s: IServiceProvider) => void): IHostBuilder {
+        cb(this.services);
+        return this;
+    }
 
     addExpress() {
         throw new Error("Method not implemented.");

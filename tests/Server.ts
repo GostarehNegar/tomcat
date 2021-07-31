@@ -1,7 +1,15 @@
 
 import { MessageBus } from "../src/lib/MessageBus/Internals/MessageBus";
 
-import tomcat from "../src/";
+
+function ggg(a, b, c) {
+    return a + b + c;
+
+}
+ggg._NAME = "ll";
+
+ggg(1, 2, 3);
+
 
 
 

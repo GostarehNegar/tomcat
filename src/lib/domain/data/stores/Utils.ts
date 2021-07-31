@@ -1,4 +1,4 @@
-import { Utils } from '../../../base/Utils'
+import { Utils } from '../../../base/'
 class UtilsEx extends Utils {
 
     roundTime(time: number, minutes: number): number {

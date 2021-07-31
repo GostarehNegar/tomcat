@@ -1,5 +1,4 @@
-import http, { Server } from 'http';
-import koa from 'koa'
+import koa from 'koa';
 import { IServiceProvider } from '../../base/ServiceProvider';
 import { WebHost } from './WebHost';
 
