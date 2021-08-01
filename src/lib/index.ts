@@ -8,7 +8,4 @@ export * from './constants';
 export * from './base/';
 export * from './domain/index'
 
-export function addBinanceServices() {
-
-}
 

@@ -10,7 +10,9 @@ const f = child.fork('./tests/ChildProcessMain.js',);
 
 
 tomcat.hosts.getHostBuilder('')
-    .addServices(tomcat.Internals.Implementaions.Domain.Exchanges.addBinanceServices({ name: ';;;' }))
+    .addServices(tomcat.Internals.Index.addBinanceServices(cfg => { }))
+    .addMessageBus()
+
 
 
 
