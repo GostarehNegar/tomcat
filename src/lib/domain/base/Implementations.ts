@@ -1,1 +1,1 @@
-export * from './Implementations/CandleStickCollection'
+export * from './internals/CandleStickCollection'
