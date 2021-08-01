@@ -1,14 +1,16 @@
-import WebSocket from 'ws';
 import { Server } from 'http'
+
+import WebSocket from 'ws';
+
 // import { services } from '../../index';
-import { constants } from '../../interfaces';
-import { IHostedService, ITransportConnectInfo } from '../../index';
-import { hosts } from '../Implementations';
 import { IServiceProvider } from '../../base';
+import { IHostedService, ITransportConnectInfo } from '../../index';
+import { constants } from '../../interfaces';
+import { hosts } from '../Implementations';
 
 
 const messages = constants.messages.hub;
-const getConectionInfo = (client: any): ITransportConnectInfo => {
+const getConectionInfo = (client: unknown): ITransportConnectInfo => {
     return (client['clientinfo'] || {}) as ITransportConnectInfo
 }
 const setConnectionInfo = (client: unknown, info: unknown) => {
@@ -36,7 +38,7 @@ export class WebSocketHub implements IHostedService {
 
     }
     public stop(): Promise<unknown> {
-        var result = new Promise<unknown>((resolve, reject) => {
+        const result = new Promise<unknown>((resolve, reject) => {
             this._ws.close(err => {
                 err ? reject(err) : resolve(this)
 
@@ -54,13 +56,13 @@ export class WebSocketHub implements IHostedService {
 
         });
     }
-    public publish(from: WebSocket, message: any) {
-        let promises: Promise<unknown>[] = [];
+    public publish(from: WebSocket, message: unknown) {
+        const promises: Promise<unknown>[] = [];
         //console.warn("publish");
 
         this._ws.clients.forEach(x => {
-            var sender = getConectionInfo(from).channel;
-            var receiver = getConectionInfo(x).channel;
+            const sender = getConectionInfo(from).channel;
+            const receiver = getConectionInfo(x).channel;
             if (sender && sender != receiver) {
                 console.log("sender:", sender, "receiver:", receiver, "from:", message.payload.from)
                 promises.push(this._doSend(x, JSON.stringify(message)))
