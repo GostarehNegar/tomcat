@@ -1,5 +1,5 @@
 export * as Domain from './domain/interfaces';
-export * as Messaging from './MessageBus/interfaces'
+export * as Messaging from './bus/interfaces'
 export * as Hosting from './hosting/interfaces'
 import _constants from "./constants"
 import _config from './config'

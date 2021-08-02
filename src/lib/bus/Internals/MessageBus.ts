@@ -1,9 +1,10 @@
-import { Message } from './Message';
-import { MessageBusSubscription } from './MessageBusSubscription';
-import { MessageBusSubscriptions } from './MessageBusSubscriptions';
-import { MessageContext } from './MessageContext';
+import { Logger } from '../../base';
+import { ILogger } from '../../base/interfaces';
+import config from '../../config';
+import { CanellationToken } from '../../hosting/interfaces';
+import { BackgroundService } from "../../hosting/internals/BackgroundService";
 import { SignalRTransport } from '../SignalRTransport';
-import { MessageTopic } from './Topics';
+import { WebSocketTransport } from '../WebSocketTranstport';
 import {
 
   IHandler,
@@ -13,12 +14,13 @@ import {
   IMessageTransport,
 } from '../interfaces';
 
-import { WebSocketTransport } from '../WebSocketTranstport';
-import config from '../../config';
-import { BackgroundService } from "../../hosting/internals/BackgroundService";
-import { ILogger } from '../../base/interfaces';
-import { Logger } from '../../base';
-import { CanellationToken } from '../../hosting/interfaces';
+import { Message } from './Message';
+import { MessageBusSubscription } from './MessageBusSubscription';
+import { MessageBusSubscriptions } from './MessageBusSubscriptions';
+import { MessageContext } from './MessageContext';
+import { MessageTopic } from './Topics';
+
+
 
 type promise_def = {
   resolve: (e: unknown) => void;
@@ -26,7 +28,7 @@ type promise_def = {
 };
 
 export class MessageBus extends BackgroundService implements IMessageBus {
-  public name: string = "MessageBus";
+  public name = "MessageBus";
   protected run(token: CanellationToken): Promise<void> {
     (token);
     return Promise.resolve();
@@ -35,7 +37,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     new MessageBusSubscriptions();
   private promises: { [id: string]: promise_def } = {};
 
-  private _channelName: string = Math.random().toString();
+  private _endpoint: string = Math.random().toString();
   private _transports: IMessageTransport[] = [];
   private _config = config.messaging;
   private _logger: ILogger;
@@ -48,25 +50,25 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     this._logger = Logger.getLogger("tomcat.MessageBus");
     this._subscriptions;
     (SignalRTransport);
-    this._channelName = this._config.channel;// "test_channel@" + Math.random().toString();
+    this._endpoint = this._config.channel;// "test_channel@" + Math.random().toString();
     //this._channelName = channel || this.channelName;
 
     if (this._config.transports.websocket.diabled !== true) {
       this._transports.push(new WebSocketTransport(null, this._config.transports.websocket));
       this._transports[0].on(msg => {
         const _msg = JSON.parse(msg.toString()) as { method: string, payload: any };
-        var ctx = new MessageContext(_msg.payload, this);
+        const ctx = new MessageContext(_msg.payload, this);
         ctx.setScope('local');
         this.publish(ctx);
       });
     }
 
   }
-  get channelName(): string {
-    return this._channelName;
+  get endpoint(): string {
+    return this._endpoint;
   }
   async start(): Promise<void> {
-    await this._transports[0].open({ channel: this.channelName });
+    await this._transports[0].open({ endpoint: this.endpoint });
     this._logger.log("started");
   }
   async stop(): Promise<void> {
@@ -76,8 +78,8 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     //return this._transport.stop();
   }
 
-  subscribe(topic: string, handler: IHandler): Promise<IMessageBusSubscription> {
-    const result = new MessageBusSubscription(topic, this.channelName, handler);
+  subscribe(topic: string, handler: IHandler, channel?: string): Promise<IMessageBusSubscription> {
+    const result = new MessageBusSubscription(topic, channel, handler);
     return this._subscribe(result);
   }
   // public subscribeEx(
@@ -99,30 +101,29 @@ export class MessageBus extends BackgroundService implements IMessageBus {
      * sagduygusya
      */
     topic: string,
+    channel?: string,
     to?: string | null,
     body?: unknown
   }): IMessageContext {
     (config)
-    let { topic, to, body } = config;
+    let { topic, channel, body } = config;
+    const { to } = config;
     const _topic = MessageTopic.parse(topic);
-    to = to || _topic.channel || this.channelName;
+    channel = channel || _topic.channel;// || this.channelName;
     topic = _topic.topic
     //topic = _topic.topic;
     body = body || {};
-
-    return new MessageContext(new Message(topic, to, this.channelName, body), this);
-
-
+    return new MessageContext(new Message(topic, channel, this.endpoint, to, body), this);
   }
 
-  createMessage(topic: string, body?: unknown | null, to?: string | null): IMessageContext {
+  createMessage(topic: string, body?: unknown | null, to?: string | null, channel?: string): IMessageContext {
     const _topic = MessageTopic.parse(topic);
-    to = to || _topic.channel;//|| this.channelName;
+    channel = _topic.channel || channel;//|| this.channelName;
     topic = _topic.topic
     //topic = _topic.topic;
     body = body || {};
 
-    return new MessageContext(new Message(topic, to, this.channelName, body), this);
+    return new MessageContext(new Message(topic, channel, to, this.endpoint, body), this);
   }
   private _subscribe(
     subscription: MessageBusSubscription
@@ -142,7 +143,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
   }
   public publish(context: IMessageContext): Promise<void> {
     if (context && context.message &&
-      context.message.topic === MessageTopic.reply && context.message.to === this.channelName) {
+      context.message.topic === MessageTopic.reply && context.message.to === this.endpoint) {
       const promise = this.promises[context.message.reply_to];
       if (promise) {
         promise.resolve(context.message);

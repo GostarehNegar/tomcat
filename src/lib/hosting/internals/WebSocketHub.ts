@@ -2,8 +2,8 @@ import { Server } from 'http'
 
 import WebSocket from 'ws';
 
-// import { services } from '../../index';
-import { IServiceProvider } from '../../base';
+
+import { IServiceProvider, utils } from '../../base';
 import { IHostedService, ITransportConnectInfo } from '../../index';
 import { constants } from '../../interfaces';
 import { hosts } from '../Implementations';
@@ -23,6 +23,7 @@ export interface WebSocktHubOptions {
 }
 export class WebSocketHub implements IHostedService {
     private _ws: WebSocket.Server | null = null;
+    private log = utils.getLogger('WebSocketHub');
     public options: WebSocktHubOptions = null;
     constructor(private _services?: IServiceProvider, options?: WebSocktHubOptions) {
         (this._ws)
@@ -35,7 +36,6 @@ export class WebSocketHub implements IHostedService {
                 : this.options.server || this._services.getService(constants.ServiceNames.HttpServer);
         this.options.port = this.options.server ? undefined : this.options.port;
 
-
     }
     public stop(): Promise<unknown> {
         const result = new Promise<unknown>((resolve, reject) => {
@@ -46,7 +46,7 @@ export class WebSocketHub implements IHostedService {
         });
         return result;
     }
-    private _doSend(to: WebSocket, message: any): Promise<unknown> {
+    private _doSend(to: WebSocket, message: unknown): Promise<unknown> {
         if (typeof message === 'object')
             message = JSON.stringify(message)
         return new Promise<unknown>((resolve, reject) => {
@@ -56,15 +56,13 @@ export class WebSocketHub implements IHostedService {
 
         });
     }
-    public publish(from: WebSocket, message: unknown) {
+    public publish(from: WebSocket, message: any) {
         const promises: Promise<unknown>[] = [];
-        //console.warn("publish");
-
         this._ws.clients.forEach(x => {
-            const sender = getConectionInfo(from).channel;
-            const receiver = getConectionInfo(x).channel;
+            const sender = getConectionInfo(from).endpoint;
+            const receiver = getConectionInfo(x).endpoint;
             if (sender && sender != receiver) {
-                console.log("sender:", sender, "receiver:", receiver, "from:", message.payload.from)
+                this.log.log("sender:", sender, "receiver:", receiver, "from:", message.payload.from)
                 promises.push(this._doSend(x, JSON.stringify(message)))
             }
         });
@@ -82,22 +80,13 @@ export class WebSocketHub implements IHostedService {
                 if (!message)
                     return;
                 const _message = JSON.parse(message.toString()) as { method: string, payload: any };
-                console.log('received: %s', _message);
+                this.log.log('received: %s', _message);
                 switch (_message.method) {
                     case messages.publish:
-                        //console.log('publish');
                         this.publish(ws, _message)
-                        // this._ws.clients.forEach(x => {
-                        //     var sender = getConectionInfo(ws).channel;
-                        //     var receiver = getConectionInfo(x).channel;
-                        //     if (sender && sender != receiver) {
-                        //         console.log("sender:", sender, "receiver:", receiver, "from:", _message.payload.from)
-                        //         x.send(message)
-                        //     }
-                        // });
                         break;
                     case messages.connect:
-                        console.log('new connection: ', _message.payload.channel)
+                        this.log.log('new connection: ', _message.payload.channel)
                         setConnectionInfo(ws, _message.payload);
                         break;
                     default:

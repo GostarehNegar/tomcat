@@ -1,6 +1,6 @@
 import { IServiceProvider } from "../../base/ServiceProvider";
 import { config } from "../../interfaces";
-import { IMessageBus } from "../../MessageBus/interfaces";
+import { IMessageBus } from "../../bus/interfaces";
 import { CanellationToken, IHost, IHostedService } from "../interfaces";
 import { serviceNames } from "./ServerBuilder";
 

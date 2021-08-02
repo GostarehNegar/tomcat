@@ -1,7 +1,7 @@
 import { ILogger, IServiceProvider } from "../base";
 import express from 'express';
 import { config } from "../interfaces";
-import { IMessageBus } from "../MessageBus/interfaces";
+import { IMessageBus } from "../bus/interfaces";
 import { IncomingHttpHeaders, IncomingMessage, OutgoingHttpHeaders } from "http";
 import { ServerResponse } from "node:http";
 
