@@ -1,8 +1,9 @@
 import {
   IHandler,
   IMessageBusSubscription,
-  IMessageContext,
+  IMessageContext
 } from '../interfaces';
+
 import { MessageTopic } from './Topics';
 
 export class MessageBusSubscription implements IMessageBusSubscription {
@@ -12,16 +13,17 @@ export class MessageBusSubscription implements IMessageBusSubscription {
   constructor(public topicPattern: string, public channel: string, handler?: IHandler) {
     this.handler = handler;
     this._topic = MessageTopic.parse(topicPattern);
-    this._topic.channel = this._topic.channel || channel;
+    this._topic.channel = this._topic.channel || channel || '';
   }
   public matches(message: IMessageContext): boolean {
+
     return message
       &&
       (
-        message.message.to === "*"
-        || typeof message.message.to === 'undefined'
-        || message.message.to == null
-        || this._matchRuleShort(message.message.to, this._topic.channel)
+        message.message.channel === "*"
+        || typeof message.message.channel === 'undefined'
+        || message.message.channel == null
+        || this._matchRuleShort(message.message.channel, this._topic.channel || '*')
       )
       && this._matchRuleShort(message.message.topic, this._topic.topic);
   }

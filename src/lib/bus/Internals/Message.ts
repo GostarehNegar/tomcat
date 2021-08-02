@@ -11,10 +11,11 @@ export class Message implements IMessage {
   public id: string;
   public reply_to: string;
 
-  constructor(public topic: string, public to: string, public from: string, public payload: unknown) {
+  constructor(public topic: string, public channel: string, public from: string, public to: string, public payload: unknown) {
     this.id = uniqueId();
-    (MessageTopic)
-    //const _topic = MessageTopic.parse(topic);
+    const _topic = MessageTopic.parse(topic);
+    this.channel = channel || _topic.channel;
+    this.topic = _topic.topic;
 
 
 

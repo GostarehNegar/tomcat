@@ -6,7 +6,7 @@ import { serviceNames } from "./ServerBuilder";
 import { BackgroundService } from "./BackgroundService";
 import { Host } from "./Host";
 import { WebSocketHub } from "./WebSocketHub";
-import { MessageBus } from "../../MessageBus/Implementations";
+import { MessageBus } from "../../bus/Implementations";
 import config from "../../config";
 import { LightWebHost } from "./SimpleWebHost";
 import { api2 } from '../../domain/exchanges/internals/Binance.Exchange'

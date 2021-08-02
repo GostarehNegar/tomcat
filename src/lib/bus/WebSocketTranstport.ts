@@ -1,7 +1,8 @@
 import WebSocket from 'ws';
+
 import config from '../config';
 
-import { IMessageContext, ITransportConnectInfo, IMessageTransport } from './interfaces';
+import { IMessageContext, IMessageTransport, ITransportConnectInfo } from './interfaces';
 
 
 export class WebSocketTransport implements IMessageTransport {

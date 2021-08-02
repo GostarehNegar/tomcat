@@ -3,6 +3,7 @@
 // import WebSocket from 'ws';
 // import { HostBuilder, hosts } from '../src/lib/hosting';
 //import config from '../src/lib/config';
+import { utils } from '../src/lib';
 import { hosts } from '../src/lib/hosting';
 
 async function wait(ms) {
@@ -105,7 +106,7 @@ describe('WebSocketHub', () => {
         await client2.bus.createMessage(messageName, "hi there")
             .publish();
         await wait(500);
-        console.log(received);
+        utils.getLogger().info(received);
         await wait(500);
         await client1.stop();
         await client2.stop();

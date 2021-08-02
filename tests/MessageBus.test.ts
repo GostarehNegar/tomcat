@@ -1,6 +1,7 @@
-import { MessageBus } from '../src/lib/MessageBus/Implementations'
-import { IMessageBus } from '../src/lib/MessageBus/interfaces';
+import { MessageBus } from '../src/lib/bus/Implementations'
+import { IMessageBus } from '../src/lib/bus/interfaces';
 
+jest.setTimeout(2000);
 const bus = new MessageBus(cf => {
     cf.transports.websocket.diabled = true;
 }) as IMessageBus;
@@ -57,7 +58,7 @@ describe('MessageBus', () => {
             count3++;
             return Promise.resolve();
         });
-        bus.subscribe('request1', ctx => {
+        bus.subscribe('a://request1', ctx => {
             (ctx)
             count4++;
             return Promise.resolve();
@@ -76,6 +77,8 @@ describe('MessageBus', () => {
         expect(count2).toBe(2);
         expect(count3).toBe(2);
         expect(count4).toBe(1);
+
+
 
         await bus.createMessage('babak@mobile://request1')
             .publish();

@@ -1,5 +1,6 @@
 export interface IMessage {
   get id(): string;
+  get channel(): string;
   reply_to: string;
   get topic(): string;
   get to(): string;
@@ -34,20 +35,20 @@ export interface IMessageBus {
    * @param body Body/payload of the message, can be any json serializable object.
    * @param to Optionaly name of the destination endpoint. 
    */
-  createMessage(topic: string, body?: unknown | null, to?: string | null): IMessageContext;
+  createMessage(topic: string, body?: unknown | null, to?: string | null, channel?: string): IMessageContext;
 
   /**
    * 
    * @param topic 
    * @param handler 
    */
-  subscribe(topic: string, handler: IHandler): Promise<IMessageBusSubscription>;
+  subscribe(topic: string, handler: IHandler, channel?: string): Promise<IMessageBusSubscription>;
   start(): Promise<unknown>;
-  get channelName(): string;
+  get endpoint(): string;
   stop(): Promise<unknown>;
 }
 export interface ITransportConnectInfo {
-  channel: string;
+  endpoint: string;
 }
 export interface IMessageTransport {
   open(info: ITransportConnectInfo): Promise<IMessageTransport>;

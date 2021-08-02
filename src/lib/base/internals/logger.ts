@@ -1,13 +1,44 @@
 import { ILogger } from "../interfaces";
 
+export type LogLevel = 'log' | 'debug' | 'info' | 'error' | 'warn';
+const logLevels = {
+    'debug': 0,
+    'log': 1,
+    'info': 2,
+    'warn': 3,
+    'error': 4
+}
+const toNumber = (l: LogLevel) => logLevels[l];
 
 export class Logger implements ILogger {
 
+    public level: LogLevel = 'debug';
     constructor(public name?: string) {
-
     }
-    send(level: 'log' | 'debug' | 'info' | 'error' | 'warn', message?: any, ...params: any[]) {
-
+    info(message?: unknown, ...params: unknown[]) {
+        this.send('info', message, params);
+    }
+    warn(message?: unknown, ...params: unknown[]) {
+        this.send('warn', message, params);
+    }
+    error(message?: unknown, ...params: unknown[]) {
+        this.send('error', message, params);
+    }
+    log(message?: undefined, ...params: unknown[]) {
+        this.send('log', message, params);
+    }
+    debug(message?: undefined, ...params: unknown[]) {
+        this.send('debug', message, params);
+    }
+    send(level: 'log' | 'debug' | 'info' | 'error' | 'warn', message?: unknown, ...params: unknown[]) {
+        if (Logger.disabled)
+            return;
+        if (toNumber(level) < toNumber(Logger.level)) {
+            return
+        }
+        if (toNumber(level) < toNumber(this.level)) {
+            return
+        }
         message = `${this.name}: ${message}`;
         switch (level) {
             case 'log':
@@ -27,9 +58,6 @@ export class Logger implements ILogger {
 
         }
     }
-    log(message?: any, ...params: any[]) {
-        this.send('log', message, params);
-    }
 
     private static loggers: Map<string, Logger> = new Map<string, Logger>();
     public static getLogger(name: string): ILogger {
@@ -41,4 +69,6 @@ export class Logger implements ILogger {
         }
         return result;
     }
+    public static disabled = false;
+    public static level: LogLevel = 'info'
 }
