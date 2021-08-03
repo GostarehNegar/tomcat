@@ -56,7 +56,7 @@ export class WebSocketHub implements IHostedService {
 
         });
     }
-    public publish(from: WebSocket, message: unknown) {
+    public publish(from: WebSocket, message: any) {
         const promises: Promise<unknown>[] = [];
         //console.warn("publish");
 

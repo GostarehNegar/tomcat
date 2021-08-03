@@ -24,6 +24,10 @@ export class TimeEx {
     const coeff = 1000 * 60 * n;
     return new TimeEx(Math.round(this.ticks / coeff) * coeff)
   }
+  public floorToMinutes(n: number): TimeEx {
+    const coeff = 1000 * 60 * n;
+    return new TimeEx(Math.floor(this.ticks / coeff) * coeff)
+  }
   public toString() {
     return this.asDate.toUTCString();
   }

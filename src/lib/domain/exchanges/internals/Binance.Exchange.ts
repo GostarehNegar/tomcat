@@ -5,26 +5,27 @@ import { CandleStickCollection, ICandelStickData, Intervals, Markets, Symbols } 
 import { IExchange } from '../interfaces';
 const api = (_api: string) => 'https://api.binance.com/api/v3/' + _api;
 
+
+
 export class BinanceExchange implements IExchange {
   private _currenTime: TimeEx = null;
   get CurrenTime(): TimeEx {
     return this._currenTime;
   }
-  async getServerTime(): Promise<TimeEx> {
-    const response = await fetch(api('time'));
-    const json = await response.json();
-    let result: TimeEx = null;
-    if (json.serverTime) {
-      result = new TimeEx(json.serverTime);
-      this._currenTime = result;
-    }
-    return result;
-  }
-  async getData(market: Markets, symbol: Symbols, interval: Intervals, startTime, endTime): Promise<CandleStickCollection> {
+  async fetchData(market: Markets, symbol: Symbols, interval: Intervals, limit?, startTime?, endTime?): Promise<ICandelStickData[]> {
     (market);
-    (startTime);
-    const limit = 500
-    let result = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=${limit}&endtime=${endTime}`)
+    let url = `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}`;
+    if (startTime) {
+      url += `&starttime=${startTime}`
+    }
+    if (endTime) {
+      url += `&endtime=${endTime}`
+
+    }
+    if (limit) {
+      url += `&limit=${limit}`
+    }
+    const result = await fetch(url)
       .then((res) => res.json())
       .then((json) => {
         const result: ICandelStickData[] = []
@@ -43,9 +44,37 @@ export class BinanceExchange implements IExchange {
         })
         return result
       })
-    result = result.filter(x => x.openTime >= startTime)
+    return result
+
+  }
+
+
+  async getServerTime(): Promise<TimeEx> {
+    const response = await fetch(api('time'));
+    const json = await response.json();
+    let result: TimeEx = null;
+    if (json.serverTime) {
+      result = new TimeEx(json.serverTime);
+      this._currenTime = result;
+    }
+    return result;
+  }
+  async getData(market: Markets, symbol: Symbols, interval: Intervals, startTime, endTime): Promise<CandleStickCollection> {
+    const result = (await this.fetchData(market, symbol, interval, 500, startTime, endTime))
+      .filter(x => x.openTime >= startTime && x.openTime < endTime)
     return new CandleStickCollection(result, "binance", symbol, interval)
 
+  }
+  async getExactCandle(market: Markets, symbol: Symbols, interval: Intervals, time): Promise<ICandelStickData> {
+    const result = (await this.fetchData(market, symbol, interval, 1, time))
+      .filter(x => x.openTime == time)
+    return result.length == 0 ? null : result[0]
+
+  }
+  async getLatestCandle(market: Markets, symbol: Symbols, interval: Intervals): Promise<ICandelStickData> {
+    const result = (await this.fetchData(market, symbol, interval, 2))
+      .filter((_v, i) => i == 0);
+    return result.length == 0 ? null : result[0]
   }
 }
 type params = { symbol, interval }
