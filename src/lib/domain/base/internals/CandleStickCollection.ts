@@ -13,5 +13,9 @@ export class CandleStickCollection {
     get length(): number {
         return this.items.length
     }
+    setIndicatorValue(index: number, id: string, value: number) {
+        this.items[index].indicators = this.items[index].indicators || {}
+        this.items[index].indicators[id] = value
+    }
 
 }

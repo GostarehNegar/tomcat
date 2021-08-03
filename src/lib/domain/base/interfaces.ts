@@ -37,6 +37,7 @@ export type ICandelStickData = {
     V3?: number,
     V4?: number,
     indicators?: { [index: string]: number }
+
 }
 
 export type ICandleStickDataEx = {

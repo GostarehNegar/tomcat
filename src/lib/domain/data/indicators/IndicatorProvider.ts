@@ -1,56 +1,102 @@
+import { IMessageBus } from '../../../MessageBus';
 import { CandleStickCollection } from '../../base/internals/CandleStickCollection'
-export type IIndicator = {
-    name: string,
-    param1: number | string,
+import { DataProvider } from '../sources/DataProvider';
+
+export interface IIndicatorCalculationContext {
+    get candleSticks(): CandleStickCollection
+    get pass(): number;
+}
+export class IndicatorCalculationContext implements IIndicatorCalculationContext {
+    public pass = 0
+    constructor(public candleSticks: CandleStickCollection) {
+
+    }
+
 
 }
-export interface IIndicatorEx {
-    calculate(data: CandleStickCollection);
+
+export interface IIndicator {
+    calculate(context: IIndicatorCalculationContext): Promise<unknown>;
+}
+export type IndicatorConfig = {
+    name: string,
+    id: string
 }
 export class Indicator {
+    constructor(public cfg: IndicatorConfig) {
 
+        this.cfg.id
+    }
 }
-export class IndicatorFactory {
-    create(indicator: IIndicator): IIndicatorEx {
-        switch (indicator.name) {
-            case "EMA":
-                return new EMA(indicator)
-            case "ADX":
-                return new ADX(indicator)
-            default:
-                return null;
+
+
+
+export class EMA extends Indicator implements IIndicator {
+    constructor(cfg: IndicatorConfig, public period: number) {
+        super(cfg);
+
+
+    }
+
+    async calculate(context: IIndicatorCalculationContext) {
+        for (let i = 0; i < context.candleSticks.items.length; i++) {
+            context.candleSticks.setIndicatorValue(i, this.cfg.id, Math.random())
+
         }
-    }
-}
-export class EMA implements IIndicatorEx {
-    constructor(public d: IIndicator) {
 
     }
-    calculate(data: CandleStickCollection) {
-        (data)
-        data.items[0].indicators.EMA = 10
-        throw new Error('Method not implemented.')
-    }
 }
-export class ADX implements IIndicatorEx {
-    constructor(public d: IIndicator) {
+export class ADX extends Indicator implements IIndicator {
 
-    }
-    calculate(data: CandleStickCollection) {
-        (data)
+    async calculate(context: IIndicatorCalculationContext) {
+        (context)
         throw new Error('Method not implemented.')
     }
 }
 export class IndicatorProvider {
-    constructor(public indicators: IIndicator[]) {
+
+    constructor(public indicators?: IIndicator[]) {
+        this.indicators = indicators || []
+    }
+    async calculate(candles: CandleStickCollection) {
+        const context = new IndicatorCalculationContext(candles)
+
+        for (let i = 0; i < this.indicators.length; i++) {
+            await this.indicators[i].calculate(context)
+        }
+        context.pass = 1
+        for (let i = 0; i < this.indicators.length; i++) {
+            await this.indicators[i].calculate(context)
+        }
+
 
     }
-    calculate(candles: CandleStickCollection) {
+    addEMA(id: string, period: number) {
 
-        const factory = new IndicatorFactory()
-        this.indicators.map((i) => {
-            factory.create(i).calculate(candles)
-        })
+        this.indicators.push(new EMA({ name: "EMA", id: id }, period))
+        return this
     }
+    addADX() {
+        return this
+    }
+
 }
-const a = new IndicatorProvider([{ name: "EMA", param1: 5 }])
+export class Strategy {
+    constructor(public bus: IMessageBus) {
+
+    }
+    async run(startTime, endTime): Promise<unknown> {
+        const provider = new IndicatorProvider().addEMA("EMA8", 8)
+        const data = new DataProvider("binance", "future", "BTCUSDT", "1m")
+        const candleSticks = await data.getData(startTime, endTime)
+        await provider.calculate(candleSticks)
+        for (let i = 0; i < candleSticks.items.length; i++) {
+            const candle = candleSticks.items[i]
+            if (candle.indicators.EMA8 > 0.5) {
+                await this.bus.createMessage("signals/myStrategy/buy", {}).publish()
+            }
+        }
+        return true;
+    }
+
+}
