@@ -2,7 +2,7 @@ import { Exchanges, ICandelStickData, Intervals, Markets, Symbols } from "../int
 
 export class CandleStickCollection {
 
-    constructor(public items: ICandelStickData[], public exchange?: Exchanges, public symbol?: Symbols, public interval?: Intervals, public market?: Markets) {
+    constructor(public items: ICandelStickData[], public exchange?: Exchanges, public symbol?: Symbols, public interval?: Intervals, public market?: Markets, public sourceName?: string) {
     }
     get startTime(): number {
         return this.items.length > 0 ? this.items[0].openTime : undefined;
@@ -13,4 +13,9 @@ export class CandleStickCollection {
     get length(): number {
         return this.items.length
     }
+    setIndicatorValue(index: number, id: string, value: number) {
+        this.items[index].indicators = this.items[index].indicators || {}
+        this.items[index].indicators[id] = value
+    }
+
 }

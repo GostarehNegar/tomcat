@@ -1,6 +1,8 @@
 import { Database } from 'sqlite';
 import sqlite3 from 'sqlite3';
+import { CandleStickCollection } from '../../base';
 import { ICandelStickData } from '../../base/interfaces';
+import { IDataSource } from '../interfaces';
 import { CandleStick } from './Models';
 
 
@@ -82,19 +84,24 @@ SELECT * FROM ${market}
 
 }
 (_replace);
-(_insert)
+(_insert);
+(_select)
 
-export class CandleStickLiteDb {
+
+export class CandleStickLiteDb implements IDataSource {
   private _ensured: boolean = false;
   private _isDbOpen: boolean = false;
   private db: Database;
   private config: { filename: string };
 
-  constructor(public exhange: string, public market: string) {
+  constructor(public exhange: string, public market: string, public symbol: string, public interval: string) {
     this.config = {
       filename: `./db/ ${exhange}.db`,
     };
 
+  }
+  async getData(startTime: number, endTime: number): Promise<CandleStickCollection> {
+    return new CandleStickCollection((await this.select(startTime, endTime)), "binance", "BTCUSDT", "1m", "future", "DataBase")
   }
 
   public get isOpen(): boolean {
@@ -120,7 +127,7 @@ export class CandleStickLiteDb {
     this.db = null;
   }
   public get table(): string {
-    return this.market;
+    return this.market + this.symbol + this.interval;
   }
 
   public async push(model: ICandelStickData | CandleStick | ICandelStickData[] | CandleStick[], replace?: boolean) {
@@ -150,9 +157,31 @@ export class CandleStickLiteDb {
     return res.value == 1;
   }
 
-  public async select() {
-    //await this.open();
-    return (await this.db.all(_select(this.table)));
+  public async getLatestCandle(): Promise<ICandelStickData> {
+    const db = await this.open();
+    const res = await db.all(
+      `SELECT * FROM ${this.table} ORDER BY openTime DESC LIMIT 1;`
+    )
+    return res.length == 0 ? null : res[0];
+  }
+
+  public async getExactCandle(time): Promise<ICandelStickData> {
+    const db = await this.open();
+    const res = await db.get(
+      `SELECT * FROM ${this.table} WHERE openTime = ${time} ;`
+
+    )
+    return res || null
+  }
+
+
+  public async select(startTime: number, endTime: number): Promise<ICandelStickData[]> {
+    (startTime);
+    (endTime);
+    const db = await this.open();
+    const res = await db.all(
+      `SELECT * FROM ${this.table} WHERE openTime >= ${startTime} AND openTime < ${endTime}; `);
+    return res;
   }
   public async ensureTable() {
     if (this._ensured)
@@ -197,7 +226,7 @@ export class CandleStickLiteDb {
     const db = await this.open();
     const min = (await db.get<{ value: number }>(`SELECT MIN(openTime) as value from ${this.table} `))
       .value;
-    const max = (await db.get<{ value: Number }>(`SELECT MAX(openTime) as value from ${this.table} `))
+    const max = (await db.get<{ value: number }>(`SELECT MAX(openTime) as value from ${this.table} `))
       .value;
     return {
       min,

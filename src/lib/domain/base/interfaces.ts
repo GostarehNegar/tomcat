@@ -36,7 +36,28 @@ export type ICandelStickData = {
     V2?: number,
     V3?: number,
     V4?: number,
+    indicators?: { [index: string]: number }
+
 }
+
+export type ICandleStickDataEx = {
+    openTime: number,
+    open: number,
+    high: number,
+    low: number,
+    close: number,
+    closeTime: number,
+    volume?: number,
+    amount?: number,
+    V1?: number,
+    V2?: number,
+    V3?: number,
+    V4?: number,
+    indicators: { [index: string]: number }
+
+}
+
+
 export interface IHaveCandleStickData {
     getCandle(): ICandelStickData;
     setCandle(value: ICandelStickData);

@@ -2,7 +2,9 @@ import tomcat from '../src';
 import { CandleStick } from '../src/lib/domain/data/stores/Models';
 import utils from '../src/lib/domain/data/stores/Utils'
 import fs from 'fs';
-import { CandleStickArrayModel } from '../src/lib/domain/base/Models';
+import { } from '../src/lib/domain/'
+// import { DataSourceFactory } from '../src/lib/domain/data/sources/DataSourceFactory';
+
 const Database = tomcat.Internals.Implementaions.Data.CandleStickLiteDb;
 (CandleStick);
 (fs)
@@ -21,7 +23,7 @@ describe('LiteDb', () => {
     test('should create db based on exhange name.', async () => {
         const i = Number.parseInt("30m")
         console.log(i)
-        var db = new Database('binance', 'btcusd');
+        var db = new Database('binance', 'futures', 'btcusd', '1m');
         await db.run(async () => {
             await db.ensureTable();
         });
@@ -30,21 +32,9 @@ describe('LiteDb', () => {
     })
 
     test('should push data', async () => {
-        var db = new Database('binance', 'btcusd');
-        var d = new Date(1627454220000);
-        console.log(d);
-        const candle = new CandleStick({
-            openTime: 1000,
-            open: 256,
-            close: 6555,
-            high: 555,
-            low: 555,
-            closeTime: 5
-        });
-        const m = new CandleStickArrayModel(candle);
-        //m.setCandle(candle.getCandle());
-        const tt = JSON.stringify(m);
-        (tt)
+        var db = new Database('binance', 'futures', 'btcusd', '1m');
+
+
 
         const items: CandleStick[] = []
         const start = utils.toTimeEx();
@@ -59,13 +49,46 @@ describe('LiteDb', () => {
                 closeTime: 5
             }));
         }
+
         var exists = false;
         await db.run(async () => {
             await db.clear();
             await db.push(items, true);
             exists = await db.exists(items[0].data.openTime);
+            await db.select(start.ticks, 6)
         });
         expect(exists);
+
+    });
+    test('select data', async () => {
+        var db = new Database('binance', 'future', 'btcusd', '1m');
+
+        const items: CandleStick[] = []
+        for (var i = 0; i <= 5; i++) {
+            items.push(new CandleStick({
+                openTime: i,
+                open: 256,
+                close: 6555,
+                high: 555,
+                low: 555,
+                closeTime: 5
+            }));
+        }
+
+        await db.run(async () => {
+            await db.clear();
+            await db.push(items, true);
+            // const dataSource = new DataSourceFactory()
+
+            // exists = await db.exists(items[0].data.openTime);
+            const res = await db.select(0, 1)
+            expect(res.length).toBe(1)
+            expect((await db.getLatestCandle()).openTime).toBe(5)
+            expect((await db.getExactCandle(0))).not.toBeNull()
+            expect((await db.getExactCandle(0)).openTime).toBe(0)
+            expect((await db.getExactCandle(6))).toBeNull()
+
+        });
 
     });
 
