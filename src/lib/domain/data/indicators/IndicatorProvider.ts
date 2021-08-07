@@ -1,6 +1,5 @@
-import { IMessageBus } from '../../../MessageBus';
 import { CandleStickCollection } from '../../base/internals/CandleStickCollection'
-import { DataProvider } from '../sources/DataProvider';
+import { TalibWrapperEx } from './talibWrapper';
 
 export interface IIndicatorCalculationContext {
     get candleSticks(): CandleStickCollection
@@ -17,6 +16,7 @@ export class IndicatorCalculationContext implements IIndicatorCalculationContext
 
 export interface IIndicator {
     calculate(context: IIndicatorCalculationContext): Promise<unknown>;
+    pass?: number;
 }
 export type IndicatorConfig = {
     name: string,
@@ -34,23 +34,118 @@ export class Indicator {
 export class EMA extends Indicator implements IIndicator {
     constructor(cfg: IndicatorConfig, public period: number) {
         super(cfg);
-
-
     }
 
     async calculate(context: IIndicatorCalculationContext) {
-        for (let i = 0; i < context.candleSticks.items.length; i++) {
-            context.candleSticks.setIndicatorValue(i, this.cfg.id, Math.random())
-
-        }
-
+        const EMAArray = await TalibWrapperEx.execute({
+            name: this.cfg.name,
+            inReal: context.candleSticks.getSingleOHLCV("close"),
+            startIdx: 0,
+            endIdx: context.candleSticks.items.length - 1,
+            optInTimePeriod: this.period,
+        })
+        context.candleSticks.addIndicator(this.cfg.id, EMAArray)
     }
 }
 export class ADX extends Indicator implements IIndicator {
-
+    constructor(cfg: IndicatorConfig, public period: number) {
+        super(cfg);
+    }
     async calculate(context: IIndicatorCalculationContext) {
-        (context)
-        throw new Error('Method not implemented.')
+        const ADXArray = await TalibWrapperEx.execute({
+            name: this.cfg.name,
+            high: context.candleSticks.getSingleOHLCV("high"),
+            low: context.candleSticks.getSingleOHLCV("low"),
+            close: context.candleSticks.getSingleOHLCV("close"),
+            startIdx: 0,
+            endIdx: context.candleSticks.items.length - 1,
+            optInTimePeriod: this.period
+
+        })
+        context.candleSticks.addIndicator(this.cfg.id, ADXArray)
+    }
+}
+
+export class PlusDi extends Indicator implements IIndicator {
+    constructor(cfg: IndicatorConfig, public period: number) {
+        super(cfg);
+    }
+    async calculate(context: IIndicatorCalculationContext) {
+        const PDIArray = await TalibWrapperEx.execute({
+            name: this.cfg.name,
+            high: context.candleSticks.getSingleOHLCV("high"),
+            low: context.candleSticks.getSingleOHLCV("low"),
+            close: context.candleSticks.getSingleOHLCV("close"),
+            startIdx: 0,
+            endIdx: context.candleSticks.items.length - 1,
+            optInTimePeriod: this.period
+
+        })
+        context.candleSticks.addIndicator(this.cfg.id, PDIArray)
+    }
+}
+export class MinusDi extends Indicator implements IIndicator {
+    constructor(cfg: IndicatorConfig, public period: number) {
+        super(cfg);
+    }
+    async calculate(context: IIndicatorCalculationContext) {
+        const MDIArray = await TalibWrapperEx.execute({
+            name: this.cfg.name,
+            high: context.candleSticks.getSingleOHLCV("high"),
+            low: context.candleSticks.getSingleOHLCV("low"),
+            close: context.candleSticks.getSingleOHLCV("close"),
+            startIdx: 0,
+            endIdx: context.candleSticks.items.length - 1,
+            optInTimePeriod: this.period
+
+        })
+        context.candleSticks.addIndicator(this.cfg.id, MDIArray)
+    }
+}
+
+export class ATR extends Indicator implements IIndicator {
+    constructor(cfg: IndicatorConfig, public period: number) {
+        super(cfg);
+    }
+    async calculate(context: IIndicatorCalculationContext) {
+        const ATRArray = await TalibWrapperEx.execute({
+            name: this.cfg.name,
+            high: context.candleSticks.getSingleOHLCV("high"),
+            low: context.candleSticks.getSingleOHLCV("low"),
+            close: context.candleSticks.getSingleOHLCV("close"),
+            startIdx: 0,
+            endIdx: context.candleSticks.items.length - 1,
+            optInTimePeriod: this.period
+
+        })
+        context.candleSticks.addIndicator(this.cfg.id, ATRArray)
+    }
+}
+
+export class SAREXT extends Indicator implements IIndicator {
+    constructor(cfg: IndicatorConfig, public startValue: number, public acceleration: number, public maxAcceleration: number) {
+        super(cfg);
+    }
+    async calculate(context: IIndicatorCalculationContext) {
+        const SARArray = await TalibWrapperEx.execute({
+            name: this.cfg.name,
+            high: context.candleSticks.getSingleOHLCV("high"),
+            low: context.candleSticks.getSingleOHLCV("low"),
+            startIdx: 0,
+            endIdx: context.candleSticks.items.length - 1,
+            optInStartValue: this.startValue,
+            optInAcceleration: this.acceleration,
+            optInMaximum: this.maxAcceleration,
+            optInOffsetOnReverse: 0,
+            optInAccelerationInitShort: this.startValue,
+            optInAccelerationShort: this.acceleration,
+            optInAccelerationMaxShort: this.maxAcceleration,
+            optInAccelerationInitLong: this.startValue,
+            optInAccelerationLong: this.acceleration,
+            optInAccelerationMaxLong: this.maxAcceleration,
+
+        })
+        context.candleSticks.addIndicator(this.cfg.id, SARArray)
     }
 }
 export class IndicatorProvider {
@@ -60,43 +155,46 @@ export class IndicatorProvider {
     }
     async calculate(candles: CandleStickCollection) {
         const context = new IndicatorCalculationContext(candles)
-
-        for (let i = 0; i < this.indicators.length; i++) {
-            await this.indicators[i].calculate(context)
+        context.pass = 0
+        for (let pass = 0; pass < 5; pass++) {
+            context.pass = pass
+            for (let i = 0; i < this.indicators.length; i++) {
+                if ((this.indicators[i].pass || 0) == context.pass) {
+                    await this.indicators[i].calculate(context)
+                }
+            }
         }
-        context.pass = 1
-        for (let i = 0; i < this.indicators.length; i++) {
-            await this.indicators[i].calculate(context)
-        }
-
-
     }
-    addEMA(id: string, period: number) {
 
+    addCustomIndicator(i: IIndicator): IndicatorProvider {
+        this.indicators.push(i)
+        return this
+    }
+    addEMA(id: string, period: number): IndicatorProvider {
         this.indicators.push(new EMA({ name: "EMA", id: id }, period))
         return this
     }
-    addADX() {
+    addADX(id: string, period: number): IndicatorProvider {
+        this.indicators.push(new ADX({ name: "ADX", id: id }, period))
+        return this
+    }
+    addPlusDi(id: string, period: number): IndicatorProvider {
+        this.indicators.push(new PlusDi({ name: "PLUS_DI", id: id }, period))
+        return this
+    }
+    addMinusDi(id: string, period: number): IndicatorProvider {
+        this.indicators.push(new MinusDi({ name: "MINUS_DI", id: id }, period))
+        return this
+    }
+    addATR(id: string, period: number): IndicatorProvider {
+        this.indicators.push(new ATR({ name: "ATR", id: id }, period))
+        return this
+    }
+    addSAREXT(id: string, startValue: number, acceleration: number, maxAcceleration: number): IndicatorProvider {
+        this.indicators.push(new SAREXT({ name: "SAREXT", id: id }, startValue, acceleration, maxAcceleration))
         return this
     }
 
 }
-export class Strategy {
-    constructor(public bus: IMessageBus) {
 
-    }
-    async run(startTime, endTime): Promise<unknown> {
-        const provider = new IndicatorProvider().addEMA("EMA8", 8)
-        const data = new DataProvider("binance", "future", "BTCUSDT", "1m")
-        const candleSticks = await data.getData(startTime, endTime)
-        await provider.calculate(candleSticks)
-        for (let i = 0; i < candleSticks.items.length; i++) {
-            const candle = candleSticks.items[i]
-            if (candle.indicators.EMA8 > 0.5) {
-                await this.bus.createMessage("signals/myStrategy/buy", {}).publish()
-            }
-        }
-        return true;
-    }
 
-}

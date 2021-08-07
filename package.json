@@ -60,7 +60,8 @@
     "node": "^16.4.1",
     "node-fetch": "^2.6.1",
     "sqlite": "^4.0.23",
-    "sqlite3": "^5.0.2"
+    "sqlite3": "^5.0.2",
+    "talib": "^1.1.4"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",

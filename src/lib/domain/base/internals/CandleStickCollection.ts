@@ -17,5 +17,21 @@ export class CandleStickCollection {
         this.items[index].indicators = this.items[index].indicators || {}
         this.items[index].indicators[id] = value
     }
+    getSingleOHLCV(ohlcv: string) {
+        const result: number[] = [];
+        this.items.map((item) => {
+            result.push(item[ohlcv])
+        })
+        return result
+    }
+    addIndicator(id: string, data) {
+        let idx = 1;
+        data.reverse().map((x) => {
+            this.items[this.items.length - idx].indicators = this.items[this.items.length - idx].indicators || {}
+            this.items[this.items.length - idx].indicators[id] = x
+            idx++
+        })
+    }
+
 
 }
