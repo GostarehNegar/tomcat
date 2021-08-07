@@ -1,39 +1,24 @@
-import { CandleStickCollection, ICandelStickData } from "../src/lib/domain/base"
-import { IndicatorProvider, Strategy } from "../src/lib/domain/data/indicators/IndicatorProvider"
-import tomcat from "../src"
-import { TimeEx } from "../src/lib"
+import { CandleStickCollection, ICandelStickData, } from "../src/lib/domain/base"
+import { IndicatorProvider } from "../src/lib/domain/data/indicators/IndicatorProvider"
+
 jest.setTimeout(60000)
 describe("Indicator Provider", () => {
     test("Calculate", async () => {
         let items: ICandelStickData[] = []
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 30; i++) {
             items.push({ openTime: i, open: 1, high: 5, low: 1, close: 2, closeTime: i + 50 })
         }
         let a = new CandleStickCollection(items)
-        const Provider = new IndicatorProvider().addEMA("EMA8", 8)
+        const Provider = new IndicatorProvider().addCustomIndicator({
+            pass: 1,
+            calculate: async (context) => {
+                context.candleSticks.items.map((item) => {
+                    item.indicators = item.indicators || {}
+                    item.indicators["TEST"] = (item.indicators.EMA8 || 0) * 2
+                })
+            }
+        }).addEMA("EMA8", 8)
         await Provider.calculate(a)
-        expect(a.items[0].indicators.EMA8).toBe(10)
+        expect(a.items[10].indicators.TEST).toBe(a.items[10].indicators.EMA8 * 2)
     })
-})
-describe("strategy test", () => {
-    test('strategy', async () => {
-        let count = 0
-        const host = tomcat.hosts
-            .getHostBuilder("name")
-            .addMessageBus()
-            .buildWebHost()
-        host.bus.subscribe("signals/*", (ctx) => {
-            count++
-            (ctx)
-            return Promise.resolve()
-        })
-        const endTime = new TimeEx()
-        const startTime = endTime.addMinutes(-10)
-        const strategy = new Strategy(host.bus)
-
-        await strategy.run(startTime.ticks, endTime.ticks)
-        expect(count).toBeGreaterThan(0)
-    })
-
-
 })
