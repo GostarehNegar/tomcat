@@ -41,10 +41,10 @@ GET https://api.coinex.com/v1/market/kline?market=bchbtc&type=1min
 }
  */
 
-import { ICandelStickData, IHaveCandleStickData } from "../../base/interfaces";
+import { ICandelStickData, IHaveCandleStickData } from '../../base/_interfaces';
 
 /**
- * 
+ *
  */
 // export type CandleStickType = {
 //   openTime: number,
@@ -62,22 +62,23 @@ import { ICandelStickData, IHaveCandleStickData } from "../../base/interfaces";
 // }
 
 /**
- * 
+ *
  */
 export class CandleStick implements IHaveCandleStickData {
-  public data: ICandelStickData
+  public data: ICandelStickData;
   constructor(data: ICandelStickData | IHaveCandleStickData) {
-    const _data: ICandelStickData = data == null ? null
-      : (typeof (data as IHaveCandleStickData).getCandle === 'function')
-        ? (data as IHaveCandleStickData).getCandle()
-        : data as ICandelStickData;
+    const _data: ICandelStickData =
+      data == null
+        ? null
+        : typeof (data as IHaveCandleStickData).getCandle === 'function'
+          ? (data as IHaveCandleStickData).getCandle()
+          : (data as ICandelStickData);
     this.setCandle(_data);
   }
   getCandle(): ICandelStickData {
-    return this.data
+    return this.data;
   }
   setCandle(value: ICandelStickData) {
     this.data = value;
   }
 }
-

@@ -21,8 +21,6 @@ interface talib {
   execute(a, cb: (err, result) => void);
 }
 declare module 'talib' {
-
   const whatever: talib;
   export = whatever;
 }
-

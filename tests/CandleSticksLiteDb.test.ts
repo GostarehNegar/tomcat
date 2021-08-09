@@ -1,11 +1,12 @@
-import tomcat from '../src';
-import { CandleStick } from '../src/lib/domain/data/stores/Models';
-import utils from '../src/lib/domain/data/stores/Utils'
 import fs from 'fs';
-import { } from '../src/lib/domain/'
+
+import tomcat from '../src';
+import utils from '../src/lib/domain/data/stores/Domain.Data.Store.Utils'
+import { CandleStick } from '../src/lib/domain/data/stores/Models';
+
 // import { DataSourceFactory } from '../src/lib/domain/data/sources/DataSourceFactory';
 
-const Database = tomcat.Internals.Implementaions.Data.CandleStickLiteDb;
+const Database = tomcat.Internals.Implementaions.Domain.Data.Strores.CandleStickLiteDb;
 (CandleStick);
 (fs)
 
@@ -23,7 +24,7 @@ describe('LiteDb', () => {
     test('should create db based on exhange name.', async () => {
         const i = Number.parseInt("30m")
         console.log(i)
-        var db = new Database('binance', 'futures', 'btcusd', '1m');
+        const db = new Database('binance', 'futures', 'btcusd', '1m');
         await db.run(async () => {
             await db.ensureTable();
         });
@@ -32,14 +33,14 @@ describe('LiteDb', () => {
     })
 
     test('should push data', async () => {
-        var db = new Database('binance', 'futures', 'btcusd', '1m');
+        const db = new Database('binance', 'futures', 'btcusd', '1m');
 
 
 
         const items: CandleStick[] = []
         const start = utils.toTimeEx();
         console.log(start)
-        for (var i = 0; i < 50000; i++) {
+        for (let i = 0; i < 50000; i++) {
             items.push(new CandleStick({
                 openTime: start.ticks + i * 1000,
                 open: 256,
@@ -50,7 +51,7 @@ describe('LiteDb', () => {
             }));
         }
 
-        var exists = false;
+        let exists = false;
         await db.run(async () => {
             await db.clear();
             await db.push(items, true);
@@ -61,10 +62,10 @@ describe('LiteDb', () => {
 
     });
     test('select data', async () => {
-        var db = new Database('binance', 'future', 'btcusd', '1m');
+        const db = new Database('binance', 'future', 'btcusd', '1m');
 
         const items: CandleStick[] = []
-        for (var i = 0; i <= 5; i++) {
+        for (let i = 0; i <= 5; i++) {
             items.push(new CandleStick({
                 openTime: i,
                 open: 256,

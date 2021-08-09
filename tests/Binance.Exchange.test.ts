@@ -1,5 +1,5 @@
 import { TimeEx } from '../src/lib/base';
-import { BinanceExchange } from '../src/lib/domain/exchanges/internals/Binance.Exchange'
+import { BinanceExchange } from '../src/lib/domain/exchanges/Binance.Exchange'
 jest.setTimeout(20000)
 describe('BinanceExchange', () => {
 

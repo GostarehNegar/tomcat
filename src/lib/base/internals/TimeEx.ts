@@ -11,22 +11,23 @@ const msecPerSecond = 1000,
   msecPerHour = 3600000,
   msecPerDay = 86400000;
 export class TimeEx {
-  public ticks: number
+  public ticks: number;
   constructor(_ticks?: number | Date | TimeEx) {
     _ticks = _ticks || Date.now();
-    this.ticks = typeof _ticks == 'number' ? _ticks
-      : _ticks instanceof TimeEx
+    this.ticks =
+      typeof _ticks == 'number'
+        ? _ticks
+        : _ticks instanceof TimeEx
         ? (_ticks as TimeEx).ticks
         : (_ticks as Date).getTime();
-
   }
   public roundToMinutes(n: number): TimeEx {
     const coeff = 1000 * 60 * n;
-    return new TimeEx(Math.round(this.ticks / coeff) * coeff)
+    return new TimeEx(Math.round(this.ticks / coeff) * coeff);
   }
   public floorToMinutes(n: number): TimeEx {
     const coeff = 1000 * 60 * n;
-    return new TimeEx(Math.floor(this.ticks / coeff) * coeff)
+    return new TimeEx(Math.floor(this.ticks / coeff) * coeff);
   }
   public toString() {
     return this.asDate.toUTCString();
@@ -39,10 +40,10 @@ export class TimeEx {
     return this.ticks === other.ticks;
   }
   subtract(other: number | Date | TimeEx) {
-    return new TimeSpan(this.ticks - new TimeEx(other).ticks)
+    return new TimeSpan(this.ticks - new TimeEx(other).ticks);
   }
   addMinutes(n: number) {
-    return new TimeEx(this.ticks + (n * 1000 * 60))
+    return new TimeEx(this.ticks + n * 1000 * 60);
   }
 }
 export class TimeSpan {
@@ -75,13 +76,13 @@ export class TimeSpan {
     return Math.floor(this.msecs / msecPerSecond) % 60;
   }
   get absMinutes() {
-    return Math.abs(this.minutes)
+    return Math.abs(this.minutes);
   }
   get minutes() {
     return Math.floor(this.msecs / msecPerMinute) % 60;
   }
   get absHours() {
-    return Math.abs(this.hours)
+    return Math.abs(this.hours);
   }
   get hours() {
     return Math.floor(this.msecs / msecPerHour) % 24;
@@ -90,7 +91,7 @@ export class TimeSpan {
     return Math.floor(this.msecs / msecPerDay);
   }
   get absTotalMilliseconds() {
-    return Math.abs(this.totalMilliseconds)
+    return Math.abs(this.totalMilliseconds);
   }
 
   get totalMilliseconds() {
@@ -98,7 +99,7 @@ export class TimeSpan {
   }
 
   get absTotalSeconds() {
-    return Math.abs(this.totalSeconds)
+    return Math.abs(this.totalSeconds);
   }
   get totalSeconds() {
     return this.msecs / msecPerSecond;
@@ -110,7 +111,7 @@ export class TimeSpan {
     return this.msecs / msecPerMinute;
   }
   get absTotalHours() {
-    return Math.abs(this.totalHours)
+    return Math.abs(this.totalHours);
   }
   get totalHours() {
     return this.msecs / msecPerHour;

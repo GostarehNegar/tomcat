@@ -1,4 +1,4 @@
-import { MessageTopic } from "../src/lib/MessageBus/Internals/Topics";
+import { MessageTopic } from "../src/lib/bus";
 
 describe('Topics', () => {
     test('should correctly encode topic and channel to channel://topic ', () => {

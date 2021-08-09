@@ -1,5 +1,5 @@
-import { MessageBus } from '../src/lib/bus/Implementations'
-import { IMessageBus } from '../src/lib/bus/interfaces';
+import { MessageBus } from '../src/lib/bus/_implementations'
+import { IMessageBus } from '../src/lib/bus/_interfaces';
 
 jest.setTimeout(2000);
 const bus = new MessageBus(cf => {
