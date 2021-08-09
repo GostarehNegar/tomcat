@@ -1,11 +1,7 @@
 export const config = {
-
-    "transports": {
-        "websocket": {
-
-        }
-
-    }
-}
+  transports: {
+    websocket: {},
+  },
+};
 
 export default config;

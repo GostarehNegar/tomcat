@@ -12,7 +12,6 @@ export const Constants = {
     WebSocketHub: 'WebSocketHub',
     Router: 'Router',
     Config: 'Config',
-
   },
   DataSources: {
     bainance: 'binance',
@@ -24,11 +23,10 @@ export const Constants = {
   //hosting: hosting_constants,
   messages: {
     hub: {
-      "publish": "publish",
-      "connect": "connect",
-      "send": "send"
-
-    }
-  }
+      publish: 'publish',
+      connect: 'connect',
+      send: 'send',
+    },
+  },
 };
 export default Constants;

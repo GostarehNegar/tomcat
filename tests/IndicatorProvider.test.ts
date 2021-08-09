@@ -1,14 +1,14 @@
-import { CandleStickCollection, ICandelStickData, } from "../src/lib/domain/base"
-import { IndicatorProvider } from "../src/lib/domain/data/indicators/IndicatorProvider"
+import { CandleStickCollection, ICandelStickData, } from "../src/lib/domain/base/index"
+import { IndicatorProvider } from "../src/lib/domain/data/indicators/internals/IndicatorProvider"
 
 jest.setTimeout(60000)
 describe("Indicator Provider", () => {
     test("Calculate", async () => {
-        let items: ICandelStickData[] = []
+        const items: ICandelStickData[] = []
         for (let i = 0; i < 30; i++) {
             items.push({ openTime: i, open: 1, high: 5, low: 1, close: 2, closeTime: i + 50 })
         }
-        let a = new CandleStickCollection(items)
+        const a = new CandleStickCollection(items)
         const Provider = new IndicatorProvider().addCustomIndicator({
             pass: 1,
             calculate: async (context) => {

@@ -1,6 +1,7 @@
 import { ILogger } from '../interfaces';
-import { Logger } from './logger';
+
 import { TimeEx, TimeSpan } from './TimeEx';
+import { Logger } from './logger';
 
 export class Utils {
   public test(): string {
@@ -8,7 +9,6 @@ export class Utils {
   }
   public toTimeEx(ticks?: number | Date): TimeEx {
     return new TimeEx(ticks);
-
   }
   public toDate() {
     return new Date();
@@ -21,16 +21,15 @@ export class Utils {
   }
   public getLogger(name?: string): ILogger {
     return Logger.getLogger(name);
-
   }
   /**
    * Asynchronously waits ms miliseconds.
    * e.g await delay(3000);
-   * @param ms 
-   * @returns 
+   * @param ms
+   * @returns
    */
   public delay(ms: number): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
   }
@@ -42,7 +41,6 @@ export class Utils {
       '^' + rule.split('*').map(escapeRegex).join('.*') + '$'
     ).test(str);
   }
-
 }
 
 export const utils = Utils.instance;

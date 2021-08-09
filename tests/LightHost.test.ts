@@ -49,7 +49,7 @@ describe('LightHost', () => {
             return Promise.resolve();
         });
         await host2.listen(port2);
-        const res = await axios.get(`http://172.16.6.158:${port1}/test`);
+        const res = await axios.get(`http://localhost:${port1}/test`);
         (res)
         await host.stop();
         await host2.stop();
@@ -97,9 +97,9 @@ describe('LightHost', () => {
         });
         await host2.listen(port2);
         await host3.listen(port3);
-        const res = await axios.get(`http://172.16.6.158:${port1}/host3`);
+        const res = await axios.get(`http://localhost:${port1}/host3`);
         expect(res.data).toBe(expected_reply);
-        expect(axios.get(`http://172.16.6.158:${port1}/host4`)).rejects.toThrow()
+        expect(axios.get(`http://localhost:${port1}/host4`)).rejects.toThrow()
 
         //
         await host.stop();

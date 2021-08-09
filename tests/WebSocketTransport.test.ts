@@ -1,8 +1,8 @@
 
 import { utils } from '../src/lib';
+import { WebSocketTransport } from '../src/lib/bus/_implementations'
+import { MessageBus } from '../src/lib/bus/index';
 import hosts from '../src/lib/hosting/internals/HostCollection';
-import { MessageBus } from '../src/lib/MessageBus/Internals/MessageBus';
-import { WebSocketTransport } from '../src/lib/MessageBus/WebSocketTranstport'
 
 
 const bus = new MessageBus();
@@ -23,7 +23,7 @@ describe('WebSocketTransport', () => {
         });
 
         const m = bus.createMessage('topic', { 'name': 'babak' });
-        await transport.open({ channel: bus.channelName });
+        await transport.open({ endpoint: bus.endpoint });
         await transport.pubish(m);
         await utils.delay(1000)
         await transport.close();
