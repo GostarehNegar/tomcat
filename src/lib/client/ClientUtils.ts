@@ -1,3 +1,3 @@
-import { Utils } from '../base/internals/Utils';
+import { Utils } from '../base/implementations/Utils';
 
 export class ClientUtils extends Utils {}

@@ -1,4 +1,4 @@
-import { ILogger } from '../interfaces';
+import { ILogger } from '../_interfaces';
 
 export type LogLevel = 'log' | 'debug' | 'info' | 'error' | 'warn';
 const logLevels = {

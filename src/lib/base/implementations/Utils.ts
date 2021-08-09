@@ -1,4 +1,4 @@
-import { ILogger } from '../interfaces';
+import { ILogger } from '../_interfaces';
 
 import { TimeEx, TimeSpan } from './TimeEx';
 import { Logger } from './logger';

@@ -1,5 +1,5 @@
 import { Logger } from '../../base';
-import { ILogger } from '../../base/interfaces';
+import { ILogger } from '../../base/_interfaces';
 import config from '../../config';
 import { CanellationToken } from '../../hosting/_interfaces';
 import { BackgroundService } from '../../hosting/implementations/BackgroundService';

@@ -1,4 +1,4 @@
-import { Utils } from '../../base/internals/Utils';
+import { Utils } from '../../base/implementations/Utils';
 
 export class ServerUtils extends Utils {
   public test1(): string {
