@@ -1,4 +1,4 @@
-import { CandleStickCollection, ICandelStickData } from '../../base/index';
+import { CandleStickCollection, ICandelStickData } from '../../../base/index';
 
 export interface IDataSource {
   getData(startTime: number, endTime: number): Promise<CandleStickCollection>;

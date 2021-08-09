@@ -1,6 +1,6 @@
 import { CandleStickCollection } from '../../../base/internals/CandleStickCollection';
 
-import { IIndicatorCalculationContext } from './IIndicatorCalculationContext';
+import { IIndicatorCalculationContext } from '../interfaces/IIndicatorCalculationContext';
 
 export class IndicatorCalculationContext
   implements IIndicatorCalculationContext

@@ -14,10 +14,13 @@ declare module './interfaces/IHostBuilder' {
   interface IHostBuilder {
     kkk(): void;
   }
+}
+declare module './interfaces/IWebHost' {
   interface IWebHost {
     jjj(): void;
   }
 }
+
 declare module './implementations/HostBuilder' {
   interface HostBuilder {
     kkk(): void;

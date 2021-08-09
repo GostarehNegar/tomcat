@@ -1,4 +1,4 @@
-import { DomainUtils } from "../../base/Domain.Utils";
+import { DomainUtils } from "../../../base/Domain.Utils";
 
 
 export class DomainDataUtils extends DomainUtils {

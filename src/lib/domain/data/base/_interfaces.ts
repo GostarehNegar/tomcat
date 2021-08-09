@@ -1,1 +1,1 @@
-export * from './IDataSource';
+export * from './interfaces';

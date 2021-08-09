@@ -1,6 +1,6 @@
 import { CandleStickCollection } from '../../../base/internals/CandleStickCollection';
 
-import { IIndicator } from './IIndicator';
+import { IIndicator } from '../interfaces/IIndicator';
 import { IndicatorCalculationContext } from './IndicatorCalculationContext';
 import {
   ADX,
@@ -9,7 +9,7 @@ import {
   MinusDi,
   PlusDi,
   SAREXT,
-} from './indicators/_implemenations';
+} from './talib-indicators';
 
 export class IndicatorProvider {
   constructor(public indicators?: IIndicator[]) {

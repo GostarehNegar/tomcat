@@ -1,7 +1,7 @@
-import { IIndicator } from '../IIndicator';
-import { IIndicatorCalculationContext } from '../IIndicatorCalculationContext';
+import { IIndicator } from '../../interfaces/IIndicator';
+import { IIndicatorCalculationContext } from '../../interfaces/IIndicatorCalculationContext';
 import { Indicator } from '../Indicator';
-import { IndicatorConfig } from '../IndicatorConfig';
+import { IndicatorConfig } from '../../interfaces/IndicatorConfig';
 
 import { TalibWrapperEx } from './talibWrapper';
 

@@ -1,8 +1,8 @@
 //import { DataProvider } from '../data/sources/DataProvider';
 import { IMessageBus } from '../../bus';
-import { IIndicator } from '../data/indicators/internals/IIndicator';
-import { IIndicatorCalculationContext } from '../data/indicators/internals/IIndicatorCalculationContext';
-import { IndicatorProvider } from '../data/indicators/internals/IndicatorProvider';
+import { IIndicator } from '../data/indicators/interfaces/IIndicator';
+import { IIndicatorCalculationContext } from '../data/indicators/interfaces/IIndicatorCalculationContext';
+import { IndicatorProvider } from '../data/indicators/implementations/IndicatorProvider';
 import { DataProvider } from '../data/sources/DataProvider';
 
 export class Strategy {
