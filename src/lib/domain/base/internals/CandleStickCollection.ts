@@ -23,6 +23,11 @@ export class CandleStickCollection {
       ? this.items[this.items.length - 1].openTime
       : undefined;
   }
+  get closeTime(): number {
+    return this.items.length > 0
+      ? this.items[this.items.length - 1].closeTime
+      : undefined;
+  }
   get length(): number {
     return this.items.length;
   }

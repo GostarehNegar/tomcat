@@ -1,5 +1,5 @@
 import { CandleStickCollection, ICandelStickData, } from "../src/lib/domain/base/index"
-import { IndicatorProvider } from "../src/lib/domain/data/indicators/internals/IndicatorProvider"
+import { IndicatorProvider } from "../src/lib/domain/data/indicators/implementations/IndicatorProvider"
 
 jest.setTimeout(60000)
 describe("Indicator Provider", () => {

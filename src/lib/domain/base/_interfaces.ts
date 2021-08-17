@@ -1,6 +1,9 @@
 export type Exchanges = 'binance' | 'coinex';
 export type Symbols = 'BTCUSDT' | 'ETHUSDT';
-
+export type Positions = 'short' | 'long';
+export type States = 'open' | 'openShort' | 'openLong';
+export type Sides = 'sell' | 'buy';
+export type Types = 'open' | 'close';
 export type Markets = 'future' | 'spot';
 export type Intervals =
   | '1m'
@@ -62,4 +65,7 @@ export type ICandleStickDataEx = {
 export interface IHaveCandleStickData {
   getCandle(): ICandelStickData;
   setCandle(value: ICandelStickData);
+}
+export interface IStrategySignal {
+  candle: ICandelStickData
 }

@@ -1,4 +1,6 @@
+// import HttpsProxyAgent from "https-proxy-agent"
 import fetch from 'node-fetch';
+import { utils } from '../../base';
 
 import { IExchange } from "./IExchange";
 import {
@@ -12,6 +14,8 @@ import {
 const api = (_api: string) => 'https://api.binance.com/api/v3/' + _api;
 
 export class BinanceExchange implements IExchange {
+  private logger = utils.getLogger("BinanceExchange")
+
   private _currenTime: TimeEx = null;
   get CurrenTime(): TimeEx {
     return this._currenTime;
@@ -25,16 +29,17 @@ export class BinanceExchange implements IExchange {
     endTime?
   ): Promise<ICandelStickData[]> {
     market;
-    let url = `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}`;
+    let url = `https://api1.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}`;
     if (startTime) {
-      url += `&starttime=${startTime}`;
+      url += `&startTime=${startTime}`;
     }
     if (endTime) {
-      url += `&endtime=${endTime}`;
+      url += `&endTime=${endTime}`;
     }
     if (limit) {
       url += `&limit=${limit}`;
     }
+    // const proxyAgent = new HttpsProxyAgent.HttpsProxyAgent("http://172.16.6.158:8118")
     const result = await fetch(url)
       .then((res) => res.json())
       .then((json) => {
@@ -53,6 +58,7 @@ export class BinanceExchange implements IExchange {
         });
         return result;
       });
+    this.logger.debug(`${result.length} items fetched from binance`)
     return result;
   }
 
@@ -73,9 +79,32 @@ export class BinanceExchange implements IExchange {
     startTime,
     endTime
   ): Promise<CandleStickCollection> {
+    const res = await this._getData(market, symbol, interval, startTime, endTime)
+    while (res.closeTime <= endTime) {
+      const a = await this._getData(market, symbol, interval, res.closeTime, endTime)
+      if (a.length < 1) {
+        this.logger.warn(`_getdata fetched empty`)
+
+        break
+      }
+      a.items.map((item) => {
+        res.items.push(item)
+      })
+    }
+    this.logger.info(`_getData was called, ${res.length} items were fetched from binance from ${res.startTime} to ${res.endTime}`)
+    return res
+  }
+
+  async _getData(
+    market: Markets,
+    symbol: Symbols,
+    interval: Intervals,
+    startTime,
+    endTime
+  ): Promise<CandleStickCollection> {
     const result = (
       await this.fetchData(market, symbol, interval, 500, startTime, endTime)
-    ).filter((x) => x.openTime >= startTime && x.openTime < endTime);
+    ).filter((x) => x.openTime >= startTime && x.openTime <= endTime);
     return new CandleStickCollection(result, 'binance', symbol, interval);
   }
   async getExactCandle(
