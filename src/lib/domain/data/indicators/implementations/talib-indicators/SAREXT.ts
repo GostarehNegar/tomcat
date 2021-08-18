@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IIndicator } from '../../interfaces/IIndicator';
 import { IIndicatorCalculationContext } from '../../interfaces/IIndicatorCalculationContext';
 import { Indicator } from '../Indicator';
@@ -32,6 +33,7 @@ export class SAREXT extends Indicator implements IIndicator {
       optInAccelerationLong: this.acceleration,
       optInAccelerationMaxLong: this.maxAcceleration,
     });
-    context.candleSticks.addIndicator(this.cfg.id, SARArray);
+
+    context.candleSticks.addIndicator(this.cfg.id, (SARArray as any).map(x => Math.abs(x)));
   }
 }

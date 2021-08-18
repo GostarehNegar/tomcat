@@ -1,11 +1,13 @@
 //import { DataProvider } from '../data/sources/DataProvider';
 import { IMessageBus } from '../../bus';
+import { IStrategySignal } from '../base';
 import { IDataProvider } from '../data/_interfaces';
 import { IndicatorProvider } from '../data/indicators/implementations/IndicatorProvider';
 import { IIndicator } from '../data/indicators/interfaces/IIndicator';
 import { IIndicatorCalculationContext } from '../data/indicators/interfaces/IIndicatorCalculationContext';
 import { DataProvider } from '../data/sources/DataProvider';
-import { IStrategySignal } from '../base';
+
+import { IStrategy } from './IStrategy';
 
 export class Strategy {
   constructor(public bus: IMessageBus) { }
@@ -33,13 +35,12 @@ export class Strategy {
     return true;
   }
 }
-export class BaseStrategy {
+export class BaseStrategy implements IStrategy {
   public stream: string;
   constructor(public bus: IMessageBus, public dataProvider: IDataProvider) {
     this.stream = "signals/BaseStrategy"
   }
   async run(startTime, endTime): Promise<unknown> {
-    // const data = new DataProvider('binance', 'future', 'BTCUSDT', '1m');
     const candleSticks = await this.dataProvider.getData(startTime, endTime);
     const provider = new IndicatorProvider()
       .addADX('ADX14', 14)
@@ -103,7 +104,6 @@ export class TestStrategy extends BaseStrategy {
     this.stream = "signals/TestStrategy"
   }
   async run(startTime, endTime): Promise<unknown> {
-    // const data = new DataProvider('binance', 'future', 'BTCUSDT', '1m');
     const candleSticks = await this.dataProvider.getData(startTime, endTime);
     const provider = new IndicatorProvider()
       .addADX('ADX14', 14)
@@ -115,17 +115,19 @@ export class TestStrategy extends BaseStrategy {
       .addCustomIndicator(stopLossAtr)
       .addCustomIndicator(adxSlope);
     await provider.calculate(candleSticks);
+    const candle = candleSticks.items.find(x => x.openTime == 1577779200000)
+    console.log(candle);
     for (let i = 0; i < candleSticks.items.length; i++) {
       if (candleSticks.items[i].indicators && candleSticks.items[i].indicators.PDI && candleSticks.items[i].indicators.MDI &&
         candleSticks.items[i].indicators.isSarAbove && candleSticks.items[i].indicators.adxSlope) {
         const indicator = candleSticks.items[i].indicators;
         if (indicator.isSarAbove == -1 && indicator.PDI > indicator.MDI && indicator.adxSlope > 1) {
-          // const buyOrder = new Order(candleSticks.items[i], candleSticks.market, "ATR14", candleSticks.symbol, 'long', 'open')
+
           const buyOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/openLong`, buyOrder).publish();
         }
         else if (indicator.isSarAbove == 1 || indicator.PDI < indicator.MDI || indicator.adxSlope < -5) {
-          // const sellOrder = new Order(candleSticks.items[i], candleSticks.market, "ATR14", candleSticks.symbol, 'short', 'open')
+
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/openShort`, sellOrder).publish();
         }
@@ -150,7 +152,7 @@ const isSarAbove: IIndicator = {
         candle.indicators.SAR &&
         candle.indicators.SAR > median
       ) {
-        candle.indicators.isSarAbove = +1;
+        candle.indicators.isSarAbove = 1;
       }
     });
   },

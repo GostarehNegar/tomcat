@@ -12,6 +12,7 @@ namespace TomCat {
   export const config = _Interfaces.config;
   //export const builder: _Interfaces.Hosting.IHostBuilder = new _Implementaions.Hosting.HostBuilder(null);
   export const hosts = _Implementaions.Hosting.hosts;
+  export const Bot = _Implementaions.Domain.Bot
   export namespace Internals {
     export import Interfaces = _Interfaces;
     export import Implementaions = _Implementaions;

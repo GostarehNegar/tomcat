@@ -21,7 +21,6 @@ export interface IMessageBus {
         to?: string | null,
         channel?: string
     ): IMessageContext;
-
     /**
      *
      * @param topic

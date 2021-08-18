@@ -65,6 +65,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     return this._endpoint;
   }
   async start(): Promise<void> {
+    if (this._transports.length < 1) return Promise.resolve();
     await this._transports[0].open({ endpoint: this.endpoint });
     this._logger.log('started');
   }

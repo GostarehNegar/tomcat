@@ -45,8 +45,7 @@ export class CandleStickCollection {
   addIndicator(id: string, data) {
     let idx = 1;
     data.reverse().map((x) => {
-      this.items[this.items.length - idx].indicators =
-        this.items[this.items.length - idx].indicators || {};
+      this.items[this.items.length - idx].indicators = this.items[this.items.length - idx].indicators || {};
       this.items[this.items.length - idx].indicators[id] = x;
       idx++;
     });
