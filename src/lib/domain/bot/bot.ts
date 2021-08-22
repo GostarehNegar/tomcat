@@ -1,10 +1,22 @@
 import { IMessageBus } from "../../bus";
 import { Exchanges, Intervals, IStrategySignal, Markets, States, Symbols } from "../base/_interfaces"
 import { IDataProvider } from "../data/_interfaces";
+import { IIndicator } from "../data/indicators/_interfaces";
 import { DataProvider } from "../data/sources/DataProvider";
 import { IStrategy } from "../strategy/IStrategy";
 import { StrategyFactory } from "../strategy/StrategyFactory";
 import { Order, Wallet } from "../wallet/wallet";
+
+export interface IStrategyContext {
+    startTime: number,
+    endTime: number,
+    adx?: { id: string, period: number },
+    atr?: { id: string, period: number },
+    minusDi?: { id: string, period: number },
+    plusDi?: { id: string, period: number },
+    sar?: { id: string, startIndex: number, acceleration: number, maxAcceleration: number }
+    customIndicators?: IIndicator[],
+}
 
 export class Bot {
     public state: States
@@ -42,8 +54,8 @@ export class Bot {
         })
         return this
     }
-    async execute(startTime, endTime) {
-        await this.strategy.run(startTime, endTime)
+    async execute(cxt: IStrategyContext) {
+        await this.strategy.run(cxt)
     }
     async openLong(message: IStrategySignal) {
         if (this.state == 'open') {

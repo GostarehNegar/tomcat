@@ -1,8 +1,8 @@
-import { Bot } from "./lib/domain/bot/bot"
+import { TimeEx } from "./lib";
+import { Bot, IStrategyContext } from "./lib/domain/bot/bot"
 import { Trade } from "./lib/domain/wallet/wallet";
 
 import tomcat from ".";
-import { TimeEx } from "./lib";
 
 const host = tomcat
     .hosts
@@ -32,7 +32,8 @@ host.bus.subscribe("Wallet/tradesRegistered", async (ctx) => {
 });
 
 (async () => {
-    await bot.execute(startTime.ticks, endTime.ticks);
+    const strategyContext: IStrategyContext = { startTime: startTime.ticks, endTime: endTime.ticks }
+    await bot.execute(strategyContext);
     console.log("hi");
 
 })();

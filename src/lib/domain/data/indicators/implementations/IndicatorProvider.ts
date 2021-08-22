@@ -1,6 +1,6 @@
 import { CandleStickCollection } from '../../../base/internals/CandleStickCollection';
-
 import { IIndicator } from '../interfaces/IIndicator';
+
 import { IndicatorCalculationContext } from './IndicatorCalculationContext';
 import {
   ADX,

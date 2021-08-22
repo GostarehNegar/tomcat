@@ -1,13 +1,15 @@
-//import { DataProvider } from '../data/sources/DataProvider';
 import { IMessageBus } from '../../bus';
 import { IStrategySignal } from '../base';
+import { IStrategyContext } from '../bot';
 import { IDataProvider } from '../data/_interfaces';
 import { IndicatorProvider } from '../data/indicators/implementations/IndicatorProvider';
+import { IndicatorFactory } from '../data/indicators/implementations/indicatorFactory';
 import { IIndicator } from '../data/indicators/interfaces/IIndicator';
 import { IIndicatorCalculationContext } from '../data/indicators/interfaces/IIndicatorCalculationContext';
 import { DataProvider } from '../data/sources/DataProvider';
 
 import { IStrategy } from './IStrategy';
+
 
 export class Strategy {
   constructor(public bus: IMessageBus) { }
@@ -36,12 +38,13 @@ export class Strategy {
   }
 }
 export class BaseStrategy implements IStrategy {
+  public data;
   public stream: string;
   constructor(public bus: IMessageBus, public dataProvider: IDataProvider) {
     this.stream = "signals/BaseStrategy"
   }
-  async run(startTime, endTime): Promise<unknown> {
-    const candleSticks = await this.dataProvider.getData(startTime, endTime);
+  async run(cxt: IStrategyContext): Promise<unknown> {
+    const candleSticks = await this.dataProvider.getData(cxt.startTime, cxt.endTime);
     const provider = new IndicatorProvider()
       .addADX('ADX14', 14)
       .addATR('ATR14', 14)
@@ -98,13 +101,47 @@ export class BaseStrategy implements IStrategy {
   }
 }
 
+export class CustomStrategy extends BaseStrategy {
+  constructor(public bus: IMessageBus, public dataProvider: IDataProvider) {
+    super(bus, dataProvider);
+    this.stream = "signals/CustomStrategy"
+  }
+
+  async run(cxt: IStrategyContext): Promise<unknown> {
+    const candleSticks = await this.dataProvider.getData(cxt.startTime, cxt.endTime);
+    const provider = IndicatorFactory.getIndicatorProvider(cxt)
+    provider
+      .addCustomIndicator(isSarAbove)
+      .addCustomIndicator(stopLossAtr)
+      .addCustomIndicator(adxSlope);
+    await provider.calculate(candleSticks);
+    for (let i = 0; i < candleSticks.items.length; i++) {
+      if (candleSticks.items[i].indicators && candleSticks.items[i].indicators.PDI && candleSticks.items[i].indicators.MDI &&
+        candleSticks.items[i].indicators.isSarAbove && candleSticks.items[i].indicators.adxSlope) {
+        const indicator = candleSticks.items[i].indicators;
+        if (indicator.isSarAbove == -1 && indicator.PDI > indicator.MDI && indicator.adxSlope > 1) {
+
+          const buyOrder: IStrategySignal = { candle: candleSticks.items[i] }
+          await this.bus.createMessage(`${this.stream}/openLong`, buyOrder).publish();
+        }
+        else if (indicator.isSarAbove == 1 || indicator.PDI < indicator.MDI || indicator.adxSlope < -5) {
+
+          const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
+          await this.bus.createMessage(`${this.stream}/openShort`, sellOrder).publish();
+        }
+      }
+    }
+    return true;
+  }
+}
+
 export class TestStrategy extends BaseStrategy {
   constructor(public bus: IMessageBus, public dataProvider: IDataProvider) {
     super(bus, dataProvider);
     this.stream = "signals/TestStrategy"
   }
-  async run(startTime, endTime): Promise<unknown> {
-    const candleSticks = await this.dataProvider.getData(startTime, endTime);
+  async run(cxt: IStrategyContext): Promise<unknown> {
+    const candleSticks = await this.dataProvider.getData(cxt.startTime, cxt.endTime);
     const provider = new IndicatorProvider()
       .addADX('ADX14', 14)
       .addATR('ATR14', 14)
@@ -115,8 +152,6 @@ export class TestStrategy extends BaseStrategy {
       .addCustomIndicator(stopLossAtr)
       .addCustomIndicator(adxSlope);
     await provider.calculate(candleSticks);
-    const candle = candleSticks.items.find(x => x.openTime == 1577779200000)
-    console.log(candle);
     for (let i = 0; i < candleSticks.items.length; i++) {
       if (candleSticks.items[i].indicators && candleSticks.items[i].indicators.PDI && candleSticks.items[i].indicators.MDI &&
         candleSticks.items[i].indicators.isSarAbove && candleSticks.items[i].indicators.adxSlope) {
