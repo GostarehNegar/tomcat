@@ -23,6 +23,6 @@ export class Message implements IMessage {
     this.topic = _topic.topic;
   }
   cast<T>(): T {
-    return this as unknown as T
+    return this.payload as unknown as T
   }
 }

@@ -2,8 +2,8 @@ import { IMessageBus } from "../../bus"
 import { Sides, Symbols } from "../base/_interfaces"
 
 export class Trade {
-    constructor(symbol: Symbols, side: Sides, price: number, quantity: number) {
-        this.time = Date.now()
+    constructor(symbol: Symbols, side: Sides, price: number, quantity: number, time: number) {
+        this.time = time
         this.symbol = symbol
         this.side = side
         this.price = price
@@ -28,12 +28,12 @@ export class Trade {
         }
     }
     public static createFromOrder(order: Order) {
-        return new Trade(order.symbol, order.side, order.price, order.amount)
+        return new Trade(order.symbol, order.side, order.price, order.amount, order.time)
     }
 }
 export class Order {
-    constructor(symbol: Symbols, side: Sides, price, amount) {
-        this.time = Date.now()
+    constructor(symbol: Symbols, side: Sides, price, amount, time) {
+        this.time = time
         this.symbol = symbol
         this.side = side
         this.price = price

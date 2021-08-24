@@ -1,11 +1,13 @@
 import { IMessageBus } from "../../bus";
-import { Exchanges, Intervals, IStrategySignal, Markets, States, Symbols } from "../base/_interfaces"
+import { Exchanges, ICandelStickData, Intervals, IStrategySignal, Markets, States, Symbols } from "../base/_interfaces"
 import { IDataProvider } from "../data/_interfaces";
 import { IIndicator } from "../data/indicators/_interfaces";
 import { DataProvider } from "../data/sources/DataProvider";
 import { IStrategy } from "../strategy/IStrategy";
 import { StrategyFactory } from "../strategy/StrategyFactory";
+import { BaseStrategyExtended } from "../strategy/strategy";
 import { Order, Wallet } from "../wallet/wallet";
+
 
 export interface IStrategyContext {
     startTime: number,
@@ -27,7 +29,7 @@ export class Bot {
     public symbol: Symbols;
     constructor(public bus: IMessageBus) {
         this.state = 'open'
-        this.wallet = new Wallet(100, this.bus)
+        this.wallet = new Wallet(10000, this.bus)
     }
     addDataProvider(exchange: Exchanges, market: Markets, symbol: Symbols, interval: Intervals) {
         this.symbol = symbol
@@ -57,13 +59,17 @@ export class Bot {
     async execute(cxt: IStrategyContext) {
         await this.strategy.run(cxt)
     }
+    get Strategy() {
+        return this.strategy as BaseStrategyExtended
+    }
     async openLong(message: IStrategySignal) {
         if (this.state == 'open') {
             const price = message.candle.close
-            const amount = ((0.03 * this.wallet.balance) * message.candle.indicators.stopLossAtr) / message.candle.close
-            this.wallet.leverage = message.candle.indicators.stopLossAtr
-            const orderEX = new Order(this.symbol, 'buy', price, amount)
+            const amount = ((0.03 * this.wallet.balance) * message.candle.indicators.getNumberValue(this.Strategy.indicators.stopLossAtr) / message.candle.close)
+            this.wallet.leverage = message.candle.indicators_deprecated.stopLossAtr
+            const orderEX = new Order(this.symbol, 'buy', price, amount, message.candle.closeTime)
             await this.wallet.processOrder(orderEX)
+            await this.emitOrderCreated(message.candle, orderEX, 'openLong')
             this.state = 'openLong'
         }
         else if (this.state == 'openShort') {
@@ -74,39 +80,54 @@ export class Bot {
     async openShort(message: IStrategySignal) {
         if (this.state == 'open') {
             const price = message.candle.close
-            const amount = ((0.03 * this.wallet.balance) * message.candle.indicators.stopLossAtr) / message.candle.close
-            this.wallet.leverage = message.candle.indicators.stopLossAtr
-            const orderEX = new Order(this.symbol, 'sell', price, amount)
+            const amount = ((0.03 * this.wallet.balance) * message.candle.indicators.getNumberValue(this.Strategy.indicators.stopLossAtr)) / message.candle.close
+            this.wallet.leverage = message.candle.indicators.getNumberValue(this.Strategy.indicators.stopLossAtr)
+            const orderEX = new Order(this.symbol, 'sell', price, amount, message.candle.closeTime)
             await this.wallet.processOrder(orderEX)
+            await this.emitOrderCreated(message.candle, orderEX, 'openShort')
             this.state = 'openShort'
         }
         else if (this.state == 'openLong') {
-            await this.closeLong(message)
+            await this.closeLong(message, true)
             this.state = 'open'
         }
     }
-    async closeLong(message: IStrategySignal) {
-        (message)
+    async closeLong(message: IStrategySignal, closingOpenposition = false) {
         if (this.state == 'openLong') {
             const price = message.candle.close
             const latestTrade = this.wallet.getLatestOpenTrade()
             const amount = latestTrade.quantity
-            const orderEX = new Order(this.symbol, 'sell', price, amount)
+            const orderEX = new Order(this.symbol, 'sell', price, amount, message.candle.closeTime)
             await this.wallet.processOrder(orderEX)
+            if (!closingOpenposition) {
+                await this.emitOrderCreated(message.candle, orderEX, 'closeLong')
+            } else {
+                await this.emitOrderCreated(message.candle, orderEX, 'openShort')
+
+            }
+
+
             this.state = 'open'
         }
     }
-    async closeShort(message: IStrategySignal) {
-        (message)
-
+    async closeShort(message: IStrategySignal, closingOpenposition = false) {
         if (this.state == 'openShort') {
             const price = message.candle.close
             const latestTrade = this.wallet.getLatestOpenTrade()
             const amount = latestTrade.quantity
-            const orderEX = new Order(this.symbol, 'buy', price, amount)
+            const orderEX = new Order(this.symbol, 'buy', price, amount, message.candle.closeTime)
             await this.wallet.processOrder(orderEX)
+            if (!closingOpenposition) {
+                await this.emitOrderCreated(message.candle, orderEX, 'closeShort')
+            } else {
+                await this.emitOrderCreated(message.candle, orderEX, 'openLong')
+            }
+
             this.state = 'open'
         }
+    }
+    async emitOrderCreated(candle: ICandelStickData, order: Order, state: string) {
+        await this.bus.createMessage("Bot/stateChange", { candle, order, state }).publish()
     }
 
 }

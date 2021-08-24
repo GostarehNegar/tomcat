@@ -1,7 +1,7 @@
 import { Database } from 'sqlite';
 import sqlite3 from 'sqlite3';
 
-import { CandleStickCollection } from '../../base/index';
+import { CandleStickCollection, CandleStickData } from '../../base/index';
 import { ICandelStickData } from '../../base/_interfaces';
 
 
@@ -172,7 +172,7 @@ export class CandleStickLiteDb implements IDataStore {
     const res = await db.all(
       `SELECT * FROM ${this.table} ORDER BY openTime DESC LIMIT 1;`
     );
-    return res.length == 0 ? null : res[0];
+    return res.length == 0 ? null : CandleStickData.from(res[0]);
   }
 
   public async getExactCandle(time): Promise<ICandelStickData> {
@@ -180,7 +180,7 @@ export class CandleStickLiteDb implements IDataStore {
     const res = await db.get(
       `SELECT * FROM ${this.table} WHERE openTime = ${time} ;`
     );
-    return res || null;
+    return res ? CandleStickData.from(res) : null;
   }
 
   public async select(
@@ -193,7 +193,7 @@ export class CandleStickLiteDb implements IDataStore {
     const res = await db.all(
       `SELECT * FROM ${this.table} WHERE openTime >= ${startTime} AND openTime < ${endTime}; `
     );
-    return res;
+    return res.map(x => CandleStickData.from(x));
   }
   public async ensureTable() {
     if (this._ensured) return;

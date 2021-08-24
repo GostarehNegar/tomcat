@@ -1,6 +1,8 @@
 // import HttpsProxyAgent from "https-proxy-agent"
 import fetch from 'node-fetch';
+
 import { utils } from '../../base';
+import { CandleStickData } from '../base/_interfaces';
 
 import { IExchange } from "./IExchange";
 import {
@@ -42,19 +44,13 @@ export class BinanceExchange implements IExchange {
     // const proxyAgent = new HttpsProxyAgent.HttpsProxyAgent("http://172.16.6.158:8118")
     const result = await fetch(url)
       .then((res) => res.json())
-      .then((json) => {
+      .then((json: []) => {
         const result: ICandelStickData[] = [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         json.map((candle: any[]) => {
-          result.push({
-            openTime: candle[0],
-            open: parseFloat(candle[1]),
-            high: parseFloat(candle[2]),
-            low: parseFloat(candle[3]),
-            close: parseFloat(candle[4]),
-            volume: parseFloat(candle[5]),
-            closeTime: candle[6],
-          });
+          result.push(new CandleStickData
+            (candle[0], parseFloat(candle[1]), parseFloat(candle[2]), parseFloat(candle[3]), parseFloat(candle[4]), candle[6], parseFloat(candle[5]))
+          );
         });
         return result;
       });
