@@ -2,7 +2,7 @@
 import { utils } from '../src/lib';
 import { WebSocketTransport } from '../src/lib/bus/_implementations'
 import { MessageBus } from '../src/lib/bus/index';
-import hosts from '../src/lib/hosting/internals/HostCollection';
+import hosts from '../src/lib/hosting/implementations/HostCollection';
 
 
 const bus = new MessageBus();

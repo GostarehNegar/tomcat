@@ -16,6 +16,9 @@ class TalibWrapper {
           reject(err);
         }
       });
+      // (inidicatorParameters)
+      // resolve("hi")
+      // reject("h")
     });
     return executePromise;
   }

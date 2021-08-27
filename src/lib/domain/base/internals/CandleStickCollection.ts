@@ -1,3 +1,4 @@
+import { IIndicator } from '../../data';
 import {
   Exchanges,
   ICandelStickData,
@@ -23,12 +24,17 @@ export class CandleStickCollection {
       ? this.items[this.items.length - 1].openTime
       : undefined;
   }
+  get closeTime(): number {
+    return this.items.length > 0
+      ? this.items[this.items.length - 1].closeTime
+      : undefined;
+  }
   get length(): number {
     return this.items.length;
   }
   setIndicatorValue(index: number, id: string, value: number) {
-    this.items[index].indicators = this.items[index].indicators || {};
-    this.items[index].indicators[id] = value;
+    this.items[index].indicators_deprecated = this.items[index].indicators_deprecated || {};
+    this.items[index].indicators_deprecated[id] = value;
   }
   getSingleOHLCV(ohlcv: string) {
     const result: number[] = [];
@@ -37,12 +43,12 @@ export class CandleStickCollection {
     });
     return result;
   }
-  addIndicator(id: string, data) {
+  addIndicator(indicator: IIndicator, data) {
     let idx = 1;
     data.reverse().map((x) => {
-      this.items[this.items.length - idx].indicators =
-        this.items[this.items.length - idx].indicators || {};
-      this.items[this.items.length - idx].indicators[id] = x;
+      this.items[this.items.length - idx].indicators_deprecated = this.items[this.items.length - idx].indicators_deprecated || {};
+      this.items[this.items.length - idx].indicators_deprecated[indicator.id] = x;
+      this.items[this.items.length - idx].indicators.setValue(indicator, x)
       idx++;
     });
   }

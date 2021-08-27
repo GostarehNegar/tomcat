@@ -7,11 +7,12 @@ import {
   Symbols,
 } from '../../base/index';
 import { BinanceDataSource } from '../../exchanges/BinanceDataSource';
+import { IDataProvider } from '../_interfaces';
 import { CandleStickLiteDb } from '../stores/CandleSticksLiteDb';
 
 import { IDataSource } from './_interfaces';
 
-export class DataProvider implements IDataSource {
+export class DataProvider implements IDataProvider {
   public db: CandleStickLiteDb;
   public exchange: IDataSource;
   constructor(

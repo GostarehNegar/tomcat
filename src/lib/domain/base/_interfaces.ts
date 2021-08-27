@@ -1,6 +1,11 @@
+import { IIndicator } from "../data";
+
 export type Exchanges = 'binance' | 'coinex';
 export type Symbols = 'BTCUSDT' | 'ETHUSDT';
-
+export type Positions = 'short' | 'long';
+export type States = 'open' | 'openShort' | 'openLong';
+export type Sides = 'sell' | 'buy';
+export type Types = 'open' | 'close';
 export type Markets = 'future' | 'spot';
 export type Intervals =
   | '1m'
@@ -27,6 +32,36 @@ export const toMinutes = (interval: Intervals): number => {
   return null;
 };
 
+export interface IIndicatorValueCollection {
+  [key: string]: number | boolean
+}
+export class IndicatorValueCollection {
+  // [key: string]: number | boolean;
+  public values: { [index: string]: number | boolean } = {}
+
+  getValue<T>(indicator: IIndicator): T {
+    return this.values[indicator.id] == null || this.values[indicator.id] == undefined ? null : this.values[indicator.id] as unknown as T
+  }
+  setValue(indicator: IIndicator, value: number | boolean) {
+    this.values[indicator.id] = value
+  }
+  getNumberValue(indicator: IIndicator) {
+    return this.getValue<number>(indicator)
+  }
+  getBoolValue(indicator: IIndicator) {
+    return this.getValue<boolean>(indicator)
+  }
+  has(...indicators: IIndicator[]) {
+    for (const i in indicators) {
+      if (this.values[indicators[i].id] == null || this.values[indicators[i].id] == undefined) {
+        return false
+      }
+    }
+    return true
+  }
+
+}
+
 export type ICandelStickData = {
   openTime: number;
   open: number;
@@ -40,26 +75,36 @@ export type ICandelStickData = {
   V2?: number;
   V3?: number;
   V4?: number;
-  indicators?: { [index: string]: number };
+  indicators_deprecated?: { [index: string]: number };
+  indicators?: IndicatorValueCollection
 };
+export class CandleStickData implements ICandelStickData {
 
-export type ICandleStickDataEx = {
-  openTime: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  closeTime: number;
-  volume?: number;
-  amount?: number;
-  V1?: number;
-  V2?: number;
-  V3?: number;
-  V4?: number;
-  indicators: { [index: string]: number };
-};
+  constructor(public openTime: number,
+    public open: number,
+    public high: number,
+    public low: number,
+    public close: number,
+    public closeTime: number,
+    public volume?: number,
+    public amount?: number,
+    public V1?: number,
+    public V2?: number,
+    public V3?: number,
+    public V4?: number,
+    public indicators?: IndicatorValueCollection) {
+    this.indicators = indicators || new IndicatorValueCollection()
+  }
+  public static from(data: ICandelStickData): ICandelStickData {
+    return new CandleStickData(data.openTime, data.open, data.high, data.low, data.close, data.closeTime, data.volume, data.amount, data.V1, data.V2, data.V3, data.V4, data.indicators)
+  }
+}
+
 
 export interface IHaveCandleStickData {
   getCandle(): ICandelStickData;
   setCandle(value: ICandelStickData);
+}
+export interface IStrategySignal {
+  candle: ICandelStickData
 }

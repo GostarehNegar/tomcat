@@ -22,4 +22,7 @@ export class Message implements IMessage {
     this.channel = channel || _topic.channel;
     this.topic = _topic.topic;
   }
+  cast<T>(): T {
+    return this.payload as unknown as T
+  }
 }

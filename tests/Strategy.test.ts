@@ -1,5 +1,6 @@
 import tomcat from "../src"
 import { TimeEx } from "../src/lib"
+import { DataProvider } from "../src/lib/domain/data/sources/DataProvider"
 import { BaseStrategy } from "../src/lib/domain/strategy/strategy"
 jest.setTimeout(200000)
 describe("strategy test", () => {
@@ -16,7 +17,8 @@ describe("strategy test", () => {
         })
         const endTime = new TimeEx()
         const startTime = endTime.addMinutes(-100)
-        const strategy = new BaseStrategy(host.bus)
+        const dataProvider = new DataProvider("binance", 'future', 'BTCUSDT', '1m')
+        const strategy = new BaseStrategy(host.bus, dataProvider)
 
         await strategy.run(startTime.ticks, endTime.ticks)
         expect(count).toBeGreaterThan(0)

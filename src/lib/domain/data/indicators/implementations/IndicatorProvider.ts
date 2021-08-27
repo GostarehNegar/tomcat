@@ -1,16 +1,7 @@
 import { CandleStickCollection } from '../../../base/internals/CandleStickCollection';
-
 import { IIndicator } from '../interfaces/IIndicator';
-import { IndicatorCalculationContext } from './IndicatorCalculationContext';
-import {
-  ADX,
-  ATR,
-  EMA,
-  MinusDi,
-  PlusDi,
-  SAREXT,
-} from './talib-indicators';
 
+import { IndicatorCalculationContext } from './IndicatorCalculationContext';
 export class IndicatorProvider {
   constructor(public indicators?: IIndicator[]) {
     this.indicators = indicators || [];
@@ -28,44 +19,46 @@ export class IndicatorProvider {
     }
   }
 
-  addCustomIndicator(i: IIndicator): IndicatorProvider {
-    this.indicators.push(i);
-    return this;
-  }
-  addEMA(id: string, period: number): IndicatorProvider {
-    this.indicators.push(new EMA({ name: 'EMA', id: id }, period));
-    return this;
-  }
-  addADX(id: string, period: number): IndicatorProvider {
-    this.indicators.push(new ADX({ name: 'ADX', id: id }, period));
-    return this;
-  }
-  addPlusDi(id: string, period: number): IndicatorProvider {
-    this.indicators.push(new PlusDi({ name: 'PLUS_DI', id: id }, period));
-    return this;
-  }
-  addMinusDi(id: string, period: number): IndicatorProvider {
-    this.indicators.push(new MinusDi({ name: 'MINUS_DI', id: id }, period));
-    return this;
-  }
-  addATR(id: string, period: number): IndicatorProvider {
-    this.indicators.push(new ATR({ name: 'ATR', id: id }, period));
-    return this;
-  }
-  addSAREXT(
-    id: string,
-    startValue: number,
-    acceleration: number,
-    maxAcceleration: number
-  ): IndicatorProvider {
-    this.indicators.push(
-      new SAREXT(
-        { name: 'SAREXT', id: id },
-        startValue,
-        acceleration,
-        maxAcceleration
-      )
-    );
-    return this;
+  // addCustomIndicator(i: IIndicator): IndicatorProvider {
+  //   this.indicators.push(i);
+  //   return this;
+  // }
+  // addEMA(id: string, period: number): IndicatorProvider {
+  //   this.indicators.push(new EMA({ name: 'EMA', id: id }, period));
+  //   return this;
+  // }
+  // addADX(id: string, period: number): IndicatorProvider {
+  //   this.indicators.push(new ADX({ name: 'ADX', id: id }, period));
+  //   return this;
+  // }
+  // addPlusDi(id: string, period: number): IndicatorProvider {
+  //   this.indicators.push(new PlusDi({ name: 'PLUS_DI', id: id }, period));
+  //   return this;
+  // }
+  // addMinusDi(id: string, period: number): IndicatorProvider {
+  //   this.indicators.push(new MinusDi({ name: 'MINUS_DI', id: id }, period));
+  //   return this;
+  // }
+  // addATR(period: number): IndicatorProvider {
+  //   this.indicators.push(new ATR(period));
+  //   return this;
+  // }
+  // addSAREXT(
+  //   startValue: number,
+  //   acceleration: number,
+  //   maxAcceleration: number
+  // ): IndicatorProvider {
+  //   this.indicators.push(
+  //     new SAREXT(
+  //       startValue,
+  //       acceleration,
+  //       maxAcceleration
+  //     )
+  //   );
+  //   return this;
+  // }
+  add(indicator: IIndicator) {
+    this.indicators.push(indicator)
+    return this
   }
 }

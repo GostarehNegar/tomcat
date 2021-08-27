@@ -1,7 +1,7 @@
-import { IndicatorConfig } from '../interfaces/IndicatorConfig';
+import { IIndicator, IIndicatorCalculationContext } from '../interfaces';
 
-export class Indicator {
-  constructor(public cfg: IndicatorConfig) {
-    this.cfg.id;
-  }
+export abstract class Indicator implements IIndicator {
+  constructor(public name: string, public id: string) { }
+  abstract calculate(context: IIndicatorCalculationContext): Promise<unknown>;
+  pass?: number;
 }
