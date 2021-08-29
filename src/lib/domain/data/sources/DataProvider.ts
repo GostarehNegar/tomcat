@@ -1,7 +1,8 @@
+import { Ticks, utils } from '../../../base';
 import {
   CandleStickCollection,
   Exchanges,
-  ICandelStickData,
+  ICandleStickData,
   Intervals,
   Markets,
   Symbols,
@@ -11,6 +12,7 @@ import { IDataProvider } from '../_interfaces';
 import { CandleStickLiteDb } from '../stores/CandleSticksLiteDb';
 
 import { IDataSource } from './_interfaces';
+// import { TimeEx, utils } from '../../../base';
 
 export class DataProvider implements IDataProvider {
   public db: CandleStickLiteDb;
@@ -19,27 +21,33 @@ export class DataProvider implements IDataProvider {
     exchange: Exchanges,
     market: Markets,
     symbol: Symbols,
-    interval: Intervals
+    interval: Intervals,
   ) {
     this.db = new CandleStickLiteDb(exchange, market, symbol, interval);
     this.exchange = new BinanceDataSource(market, symbol, interval);
+
   }
+
   async getData(
-    startTime: number,
-    endTime: number
+    startTime: Ticks,
+    endTime: Ticks
   ): Promise<CandleStickCollection> {
+    startTime = utils.ticks(startTime)
+    endTime = utils.ticks(endTime)
     let result = await this.db.getData(startTime, endTime);
+
     if (
       result.length === 0 ||
-      result.endTime === endTime ||
-      result.startTime === startTime
+      result.endTime != endTime ||
+      result.startTime != startTime
     ) {
       result = await this.exchange.getData(startTime, endTime);
       await this.db.push(result.items);
     }
     return result;
   }
-  async getExactCandle(time: number): Promise<ICandelStickData> {
+  async getExactCandle(time: Ticks): Promise<ICandleStickData> {
+    time = utils.ticks(time)
     let result = await this.db.getExactCandle(time);
     if (result == null) {
       result = await this.exchange.getExactCandle(time);
@@ -47,7 +55,7 @@ export class DataProvider implements IDataProvider {
     }
     return result;
   }
-  async getLatestCandle(): Promise<ICandelStickData> {
+  async getLatestCandle(): Promise<ICandleStickData> {
     let result = await this.db.getLatestCandle();
     if (result == null) {
       result = await this.exchange.getLatestCandle();

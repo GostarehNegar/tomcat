@@ -10,6 +10,7 @@
   "keywords": [],
   "scripts": {
     "run": "run-s build && node ./build/main/runBot.js",
+    "data": "run-s build && node ./build/main/dataFetch.js",
     "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
@@ -61,6 +62,7 @@
     "nan": "^2.14.2",
     "node": "^16.4.1",
     "node-fetch": "^2.6.1",
+    "set-interval-async": "^2.0.3",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
     "talib": "^1.1.4"
@@ -72,6 +74,7 @@
     "@types/command-line-usage": "^5.0.2",
     "@types/cron": "^1.7.3",
     "@types/jest": "^26.0.24",
+    "@types/set-interval-async": "^1.0.0",
     "@types/sqlite3": "^3.1.7",
     "@types/ws": "^7.4.6",
     "@typescript-eslint/eslint-plugin": "^4.0.1",

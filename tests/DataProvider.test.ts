@@ -1,6 +1,6 @@
 import { TimeEx } from "../src/lib"
 import { DataProvider } from "../src/lib/domain/data/sources/DataProvider"
-jest.setTimeout(20000)
+jest.setTimeout(2 * 60 * 60 * 1000)
 describe("data Provider", () => {
     test("tests", async () => {
         const endTime = new TimeEx()
@@ -10,6 +10,14 @@ describe("data Provider", () => {
         const latestCandle2 = await dataProvider.getData(startTime.ticks, endTime.ticks)
         expect(latestCandle.sourceName || null).toBeNull()
         expect(latestCandle2.sourceName).toBe("DataBase")
+
+    })
+    test("dataprovider start", async () => {
+        const dataProvider = new DataProvider("binance", 'spot', "BTCUSDT", "1m")
+        const endTime = new TimeEx(Date.UTC(2020, 2, 9, 0, 0, 0, 0))
+        const startTime = new TimeEx(Date.UTC(2020, 2, 9, 10, 0, 0, 0))
+        const res = await dataProvider.getData(startTime, endTime)
+        expect(res.endTime).toBe(endTime.ticks)
 
     })
 })

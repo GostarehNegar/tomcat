@@ -1,17 +1,17 @@
-import { ICandelStickData, IHaveCandleStickData } from './_interfaces';
+import { ICandleStickData, IHaveCandleStickData } from './_interfaces';
 
 export abstract class CandelStickBase implements IHaveCandleStickData {
-  constructor(data?: ICandelStickData | IHaveCandleStickData) {
-    const _data: ICandelStickData =
+  constructor(data?: ICandleStickData | IHaveCandleStickData) {
+    const _data: ICandleStickData =
       data == null
         ? null
         : typeof (data as IHaveCandleStickData).getCandle === 'function'
           ? (data as IHaveCandleStickData).getCandle()
-          : (data as ICandelStickData);
+          : (data as ICandleStickData);
     this.setCandle(_data);
   }
-  abstract getCandle(): ICandelStickData;
-  abstract setCandle(value: ICandelStickData);
+  abstract getCandle(): ICandleStickData;
+  abstract setCandle(value: ICandleStickData);
 }
 
 export class CandleStickArrayModel
@@ -22,7 +22,7 @@ export class CandleStickArrayModel
   public get name(): string {
     return 'lll';
   }
-  getCandle(): ICandelStickData {
+  getCandle(): ICandleStickData {
     return {
       openTime: this._values[0],
       open: this._values[1],
@@ -38,7 +38,7 @@ export class CandleStickArrayModel
       V4: this._values[11],
     };
   }
-  setCandle(value: ICandelStickData) {
+  setCandle(value: ICandleStickData) {
     this._values = CandleStickArrayModel._blank;
     this._values[0] = value.openTime;
     this._values[1] = value.open;

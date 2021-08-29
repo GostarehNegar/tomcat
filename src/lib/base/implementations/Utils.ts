@@ -1,14 +1,24 @@
 import { ILogger } from '../_interfaces';
 
-import { TimeEx, TimeSpan } from './TimeEx';
+import { Ticks, TimeEx, TimeSpan } from './TimeEx';
 import { Logger } from './logger';
 
 export class Utils {
   public test(): string {
     return 'test from 1';
   }
-  public toTimeEx(ticks?: number | Date): TimeEx {
+  public ticks(input: Date | number | TimeEx) {
+    if (input instanceof TimeEx) {
+      return input.ticks
+    }
+    if (input instanceof Date) {
+      return input.getTime()
+    }
+    return input
+  }
+  public toTimeEx(ticks?: Ticks): TimeEx {
     return new TimeEx(ticks);
+
   }
   public toDate() {
     return new Date();
