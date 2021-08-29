@@ -1,8 +1,8 @@
 import { Exchanges, Intervals, Markets, Symbols } from '../../base/index';
 import { BinanceDataSource } from '../../exchanges/BinanceDataSource';
-import { IDataSource } from './_interfaces';
+import { IDataSource } from '../base';
 import { CandleStickLiteDb } from '../stores/CandleSticksLiteDb';
-//import { Binance } from "./Binance";
+
 
 export class DataSourceFactory {
   creatDataSource(

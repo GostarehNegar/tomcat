@@ -1,22 +1,11 @@
 import { Database } from 'sqlite';
 import sqlite3 from 'sqlite3';
 
-import { ICandleStickData } from '../../base/_interfaces';
-import { CandleStickCollection, CandleStickData } from '../../base/index';
+import { CandleStickCollection, CandleStickData, ICandleStickData } from '../../base';
 
-
+import { IDataStore } from './IDataStore';
 import { CandleStick } from './Models';
-import { IDataStore } from './_interfaces';
 
-// const _getCandleValues = (model: CandleStickType) => {
-//   return `
-//     ${model.openTime},
-//     ${model.open},${model.high},${model.low},${model.close},
-//     ${model.closeTime},
-//     ${model.volume || null}, ${model.amount || null},
-//     ${model.V1 || null},${model.V2 || null},${model.V3 || null},${model.V4 || null}
-// `
-// }
 const _getCandleValuesEx = (models: ICandleStickData[]) => {
   const _get = (model: ICandleStickData) => {
     return `

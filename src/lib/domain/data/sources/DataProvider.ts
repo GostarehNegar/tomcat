@@ -6,12 +6,12 @@ import {
   Intervals,
   Markets,
   Symbols,
-} from '../../base/index';
+} from '../../base';
 import { BinanceDataSource } from '../../exchanges/BinanceDataSource';
-import { IDataProvider } from '../_interfaces';
+import { IDataProvider } from '../IDataProvider';
+import { IDataSource } from '../base';
 import { CandleStickLiteDb } from '../stores/CandleSticksLiteDb';
 
-import { IDataSource } from './_interfaces';
 // import { TimeEx, utils } from '../../../base';
 
 export class DataProvider implements IDataProvider {
