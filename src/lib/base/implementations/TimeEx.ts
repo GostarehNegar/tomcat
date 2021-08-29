@@ -10,16 +10,17 @@ const msecPerSecond = 1000,
   msecPerMinute = 60000,
   msecPerHour = 3600000,
   msecPerDay = 86400000;
+export type Ticks = number | Date | TimeEx
 export class TimeEx {
   public ticks: number;
-  constructor(_ticks?: number | Date | TimeEx) {
+  constructor(_ticks?: Ticks) {
     _ticks = _ticks || Date.now();
     this.ticks =
       typeof _ticks == 'number'
         ? _ticks
         : _ticks instanceof TimeEx
-        ? (_ticks as TimeEx).ticks
-        : (_ticks as Date).getTime();
+          ? (_ticks as TimeEx).ticks
+          : (_ticks as Date).getTime();
   }
   public roundToMinutes(n: number): TimeEx {
     const coeff = 1000 * 60 * n;
@@ -31,6 +32,9 @@ export class TimeEx {
   }
   public toString() {
     return this.asDate.toUTCString();
+  }
+  public get asUTCDate() {
+    return this.toString()
   }
   public get asDate() {
     return new Date(this.ticks);

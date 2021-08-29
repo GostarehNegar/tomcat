@@ -1,7 +1,8 @@
-import { CandleStickCollection, ICandelStickData } from '../../../base/index';
+import { Ticks } from '../../../../base/implementations/TimeEx';
+import { CandleStickCollection, ICandleStickData } from '../../../base/index';
 
 export interface IDataSource {
-  getData(startTime: number, endTime: number): Promise<CandleStickCollection>;
-  getExactCandle(time: number): Promise<ICandelStickData>;
-  getLatestCandle(): Promise<ICandelStickData>;
+  getData(startTime: Ticks, endTime: Ticks): Promise<CandleStickCollection>;
+  getExactCandle(time: Ticks): Promise<ICandleStickData>;
+  getLatestCandle(): Promise<ICandleStickData>;
 }

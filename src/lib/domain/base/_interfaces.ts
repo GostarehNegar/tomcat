@@ -62,7 +62,7 @@ export class IndicatorValueCollection {
 
 }
 
-export type ICandelStickData = {
+export interface ICandleStickData {
   openTime: number;
   open: number;
   high: number;
@@ -75,10 +75,10 @@ export type ICandelStickData = {
   V2?: number;
   V3?: number;
   V4?: number;
-  indicators_deprecated?: { [index: string]: number };
+  // indicators_deprecated?: { [index: string]: number };
   indicators?: IndicatorValueCollection
 };
-export class CandleStickData implements ICandelStickData {
+export class CandleStickData implements ICandleStickData {
 
   constructor(public openTime: number,
     public open: number,
@@ -92,19 +92,31 @@ export class CandleStickData implements ICandelStickData {
     public V2?: number,
     public V3?: number,
     public V4?: number,
+    public candleType?: string,
     public indicators?: IndicatorValueCollection) {
+
     this.indicators = indicators || new IndicatorValueCollection()
+
   }
-  public static from(data: ICandelStickData): ICandelStickData {
-    return new CandleStickData(data.openTime, data.open, data.high, data.low, data.close, data.closeTime, data.volume, data.amount, data.V1, data.V2, data.V3, data.V4, data.indicators)
+  public equals(other: ICandleStickData): boolean {
+    return other != null && other.openTime == this.openTime && other.open == this.open && other.high == this.high && other.low == this.low && other.close == this.close && other.closeTime == this.closeTime
+  }
+  public sameTime(other: ICandleStickData) {
+    return other != null && other.openTime == this.openTime
+  }
+  public static from(data: ICandleStickData): CandleStickData {
+    if (data instanceof CandleStickData) {
+      return data
+    }
+    return new CandleStickData(data.openTime, data.open, data.high, data.low, data.close, data.closeTime, data.volume, data.amount, data.V1, data.V2, data.V3, data.V4, "", data.indicators)
   }
 }
 
 
 export interface IHaveCandleStickData {
-  getCandle(): ICandelStickData;
-  setCandle(value: ICandelStickData);
+  getCandle(): ICandleStickData;
+  setCandle(value: ICandleStickData);
 }
 export interface IStrategySignal {
-  candle: ICandelStickData
+  candle: ICandleStickData
 }

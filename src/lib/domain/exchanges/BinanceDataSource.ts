@@ -1,5 +1,7 @@
 
 
+import { Ticks, utils } from '../../base';
+
 import { BinanceExchange } from './Binance.Exchange';
 import {
   CandleStickCollection,
@@ -17,10 +19,12 @@ export class BinanceDataSource implements IDataSource {
     public interval: Intervals
   ) { }
   async getData(
-    startTime: number,
-    endTime: number
+    startTime: Ticks,
+    endTime: Ticks
   ): Promise<CandleStickCollection> {
     const a = new BinanceExchange();
+    startTime = utils.ticks(startTime)
+    endTime = utils.ticks(endTime)
     return await a.getData(
       this.market,
       this.symbol,
@@ -29,7 +33,8 @@ export class BinanceDataSource implements IDataSource {
       endTime
     );
   }
-  async getExactCandle(time: number): Promise<ICandelStickData> {
+  async getExactCandle(time: Ticks): Promise<ICandelStickData> {
+    time = utils.ticks(time)
     const a = new BinanceExchange();
     return await a.getExactCandle(
       this.market,

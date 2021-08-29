@@ -1,8 +1,8 @@
 import { Database } from 'sqlite';
 import sqlite3 from 'sqlite3';
 
+import { ICandleStickData } from '../../base/_interfaces';
 import { CandleStickCollection, CandleStickData } from '../../base/index';
-import { ICandelStickData } from '../../base/_interfaces';
 
 
 import { CandleStick } from './Models';
@@ -17,8 +17,8 @@ import { IDataStore } from './_interfaces';
 //     ${model.V1 || null},${model.V2 || null},${model.V3 || null},${model.V4 || null}
 // `
 // }
-const _getCandleValuesEx = (models: ICandelStickData[]) => {
-  const _get = (model: ICandelStickData) => {
+const _getCandleValuesEx = (models: ICandleStickData[]) => {
+  const _get = (model: ICandleStickData) => {
     return `
     (
       ${model.openTime}, 
@@ -29,7 +29,7 @@ const _getCandleValuesEx = (models: ICandelStickData[]) => {
       })`;
   };
   if (models == null) return '';
-  const items = models as ICandelStickData[];
+  const items = models as ICandleStickData[];
   let res = 'VALUES ';
   if (typeof items.map == 'function') {
     items.map((v, i) => {
@@ -47,14 +47,14 @@ const _getCandleValuesEx = (models: ICandelStickData[]) => {
   //     ${model.V1 || null},${model.V2 || null},${model.V3 || null},${model.V4 || null})`
 };
 
-const _insert = (market: string, model: ICandelStickData[]) => {
+const _insert = (market: string, model: ICandleStickData[]) => {
   return `
   INSERT OR IGNORE INTO ${market} (openTime, open, high, low, close, closeTime, volume, amount, V1, V2, V3, V4)
   ${_getCandleValuesEx(model)};
   `;
 };
 
-const _replace = (market: string, model: ICandelStickData[]) => {
+const _replace = (market: string, model: ICandleStickData[]) => {
   return `
   REPLACE INTO ${market} (openTime, open, high, low, close, closeTime, volume, amount, V1, V2, V3, V4)
   ${_getCandleValuesEx(model)};
@@ -143,20 +143,22 @@ export class CandleStickLiteDb implements IDataStore {
   }
 
   public async push(
-    model: ICandelStickData | CandleStick | ICandelStickData[] | CandleStick[],
+    model: ICandleStickData | CandleStick | ICandleStickData[] | CandleStick[],
     replace?: boolean
   ) {
     if (model == null) return;
-    const models: ICandelStickData[] = [];
+    const models: ICandleStickData[] = [];
     if (Array.isArray(model)) {
       model.map((m) => models.push(new CandleStick(m).data));
     } else {
       models.push(new CandleStick(model).data);
     }
-    const db = await this.open();
-    await db.exec(
-      replace ? _replace(this.table, models) : _insert(this.table, models)
-    );
+    if (models.length > 0) {
+      const db = await this.open();
+      await db.exec(
+        replace ? _replace(this.table, models) : _insert(this.table, models)
+      );
+    }
   }
 
   public async exists(openTime: number): Promise<boolean> {
@@ -167,7 +169,7 @@ export class CandleStickLiteDb implements IDataStore {
     return res.value == 1;
   }
 
-  public async getLatestCandle(): Promise<ICandelStickData> {
+  public async getLatestCandle(): Promise<ICandleStickData> {
     const db = await this.open();
     const res = await db.all(
       `SELECT * FROM ${this.table} ORDER BY openTime DESC LIMIT 1;`
@@ -175,7 +177,7 @@ export class CandleStickLiteDb implements IDataStore {
     return res.length == 0 ? null : CandleStickData.from(res[0]);
   }
 
-  public async getExactCandle(time): Promise<ICandelStickData> {
+  public async getExactCandle(time): Promise<ICandleStickData> {
     const db = await this.open();
     const res = await db.get(
       `SELECT * FROM ${this.table} WHERE openTime = ${time} ;`
@@ -186,12 +188,12 @@ export class CandleStickLiteDb implements IDataStore {
   public async select(
     startTime: number,
     endTime: number
-  ): Promise<ICandelStickData[]> {
+  ): Promise<ICandleStickData[]> {
     startTime;
     endTime;
     const db = await this.open();
     const res = await db.all(
-      `SELECT * FROM ${this.table} WHERE openTime >= ${startTime} AND openTime < ${endTime}; `
+      `SELECT * FROM ${this.table} WHERE openTime >= ${startTime} AND openTime <= ${endTime}; `
     );
     return res.map(x => CandleStickData.from(x));
   }

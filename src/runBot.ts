@@ -1,6 +1,6 @@
-import { TimeEx } from "./lib";
+import { Bot, Logger, TimeEx } from "./lib";
 // import { ICandelStickData } from "./lib/domain/base";
-import { Bot, IStrategyContext } from "./lib/domain/bot/bot"
+// import { Bot, IStrategyContext } from "./lib/domain/bot/bot"
 // import { Order } from "./lib/domain/wallet/wallet";
 
 import tomcat from ".";
@@ -34,7 +34,8 @@ const host = tomcat
 
 
 
-const bot = new Bot(host.bus).addDataProvider("binance", "future", "BTCUSDT", "4h").addStrategy("BaseStrategyExtended");
+const bot = new Bot(host.bus)
+// .addDataProvider("binance", "future", "BTCUSDT", "4h").addStrategy("BaseStrategyExtended");
 host.use(async (cxt) => {
     if (cxt.request.url == "/trades") {
         let report = 'NO. \t DATE \t \t SIDE \t QUANTITY \t \t PRICE \t \t \t PNL'
@@ -51,12 +52,20 @@ host.use(async (cxt) => {
     //     cxt.response.end()
     // }
 }).listen(3000);
+let count = 0
+host.bus.subscribe("Wallet/tradesRegistered", async (cxt) => {
+    (cxt)
+    count++
+    console.log(count);
+});
+
 
 (async () => {
     const endTime = new TimeEx(Date.UTC(2020, 11, 31, 23, 59, 59, 999));
     const startTime = new TimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0));
-    const strategyContext: IStrategyContext = { startTime: startTime.ticks, endTime: endTime.ticks }
-    await bot.execute(strategyContext);
+    // const strategyContext: IStrategyContext = { startTime: startTime.ticks, endTime: endTime.ticks }
+    Logger.level = 'log'
+    await bot.start(startTime.ticks, endTime.ticks);
     console.log("DONE!");
 
 })();

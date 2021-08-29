@@ -2,7 +2,7 @@ import { TimeEx } from '../../base';
 import { IHttpContext } from '../../hosting';
 import {
     CandleStickCollection,
-    ICandelStickData,
+    ICandleStickData,
     Intervals,
     Markets,
     Symbols,
@@ -12,7 +12,7 @@ import { IDataSource } from '../data/_interfaces';
 
 export {
     CandleStickCollection,
-    ICandelStickData,
+    ICandleStickData as ICandelStickData,
     Intervals,
     Markets,
     Symbols,

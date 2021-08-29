@@ -1,5 +1,5 @@
 import { IMessageBus } from '../../bus';
-import { IStrategySignal } from '../base';
+import { CandleStickCollection, IStrategySignal } from '../base';
 import { IStrategyContext } from '../bot';
 import { IDataProvider } from '../data/_interfaces';
 import { IndicatorProvider } from '../data/indicators/implementations/IndicatorProvider';
@@ -40,9 +40,65 @@ export class Strategy {
 export class BaseStrategy implements IStrategy {
   public data;
   public stream: string;
-  public indicators = { ADX: Indicators.ADX(14), ATR: Indicators.ATR(14), SAR: Indicators.SAREXT(0.02, 0.005, 0.2), minusDi: Indicators.MinusDi(14), plusDi: Indicators.PlusDi(14), isSarAbove: isSarAbove, adxSlope: adxSlope }
+  public indicators = { ADX: Indicators.ADX(14), ATR: Indicators.ATR(14), SAR: Indicators.SAREXT(0.02, 0.005, 0.2), minusDi: Indicators.MinusDi(14), plusDi: Indicators.PlusDi(14), isSarAbove: isSarAbove, adxSlope: adxSlope, stopLossAtr: stopLossAtr }
   constructor(public bus: IMessageBus, public dataProvider: IDataProvider) {
     this.stream = "signals/BaseStrategy"
+  }
+  async exec(candleSticks: CandleStickCollection): Promise<string> {
+    let result = ""
+    const provider = new IndicatorProvider()
+      .add(this.indicators.ADX)
+      .add(this.indicators.ATR)
+      .add(this.indicators.SAR)
+      .add(this.indicators.minusDi)
+      .add(this.indicators.plusDi)
+      .add(isSarAbove)
+      .add(stopLossAtr)
+      .add(adxSlope);
+    await provider.calculate(candleSticks);
+    const candle = candleSticks.items[candleSticks.items.length - 1]
+    const indicator = candle.indicators;
+    if (
+      indicator &&
+      indicator.has(this.indicators.plusDi, this.indicators.minusDi, this.indicators.adxSlope, this.indicators.isSarAbove)
+    ) {
+      if (
+        indicator.getBoolValue(this.indicators.isSarAbove) == false &&
+        indicator.getValue(this.indicators.plusDi) > (indicator.getNumberValue(this.indicators.minusDi) + 5) &&
+        indicator.getValue(this.indicators.adxSlope) > 1
+      ) {
+        const buyOrder: IStrategySignal = { candle: candle }
+        result = "openLong"
+        await this.bus.createMessage(`${this.stream}/openLong`, buyOrder).publish();
+      } else if (
+        indicator.getBoolValue(this.indicators.isSarAbove) == true &&
+        indicator.getValue(this.indicators.plusDi) < (indicator.getNumberValue(this.indicators.minusDi) - 5) &&
+        indicator.getValue(this.indicators.adxSlope) > 1
+      ) {
+        const sellOrder: IStrategySignal = { candle: candle }
+        result = 'openShort'
+        await this.bus.createMessage(`${this.stream}/openShort`, sellOrder).publish();
+      }
+      else if (
+        indicator.getBoolValue(this.indicators.isSarAbove) == true ||
+        indicator.getValue(this.indicators.plusDi) < (indicator.getNumberValue(this.indicators.minusDi) - 5) ||
+        indicator.getValue(this.indicators.adxSlope) < -5
+      ) {
+        const sellOrder: IStrategySignal = { candle: candle }
+        result = 'closeLong'
+        await this.bus.createMessage(`${this.stream}/closeLong`, sellOrder).publish();
+      }
+      else if (
+        indicator.getBoolValue(this.indicators.isSarAbove) == false ||
+        indicator.getValue(this.indicators.plusDi) > (indicator.getNumberValue(this.indicators.minusDi) + 5) ||
+        indicator.getValue(this.indicators.adxSlope) < -5
+      ) {
+        const sellOrder: IStrategySignal = { candle: candle }
+        result = 'closeShort'
+        await this.bus.createMessage(`${this.stream}/closeShort`, sellOrder).publish();
+      }
+    }
+    return result
   }
   async run(cxt: IStrategyContext): Promise<unknown> {
     const candleSticks = await this.dataProvider.getData(cxt.startTime, cxt.endTime);
@@ -103,6 +159,28 @@ export class BaseStrategyEX implements IStrategy {
   constructor(public bus: IMessageBus, public dataProvider: IDataProvider) {
     this.stream = "signals/BaseStrategyEX"
   }
+  // async run2() {
+  //   const provider = new IndicatorProvider()
+  //     .add(this.indicators.ADX)
+  //     .add(this.indicators.ATR)
+  //     .add(this.indicators.SAR)
+  //     .add(this.indicators.minusDi)
+  //     .add(this.indicators.plusDi)
+  //     .add(this.indicators.isSarAbove)
+  //     .add(this.indicators.stopLossAtr)
+  //     .add(this.indicators.adxSlope);
+  //   var candles = []
+  //   this.dataProvider.start((candle) => {
+  //     var a = new CandleStickCollection(candles)
+  //     a.items.push(candle)
+
+  //     provider.calculate(a)
+  //     if (candle.candleType == "complete") {
+
+  //       candles.push(candle)
+  //     }
+  //   })
+  // }
   async run(cxt: IStrategyContext): Promise<unknown> {
     const candleSticks = await this.dataProvider.getData(cxt.startTime, cxt.endTime);
     const provider = new IndicatorProvider()
