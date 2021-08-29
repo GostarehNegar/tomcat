@@ -60,6 +60,7 @@
 
 class ServiceDef {
   name = '';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   cnst: any;
   identifier = '';
 }
@@ -137,6 +138,7 @@ export class ServiceProvider implements IServiceProvider {
   static instances: IServiceProvider[] = [];
   static instance: IServiceProvider = new ServiceProvider();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   findFirstIndex(serviceName: any, instanceName: any) {
     return this.serviceDefinitions.findIndex(
       (s) => s.name === serviceName && s.identifier === instanceName
@@ -176,11 +178,12 @@ export class ServiceProvider implements IServiceProvider {
     }
     return result;
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _ctor(def: ServiceDef): any {
     if (typeof def.cnst === 'function') {
       try {
         return new def.cnst();
-      } catch {}
+      } catch { (1) }
       return def.cnst(this);
     }
     return def.cnst;

@@ -1,4 +1,5 @@
-import { ICandleStickData, IHaveCandleStickData } from './_interfaces';
+import { ICandleStickData } from "./ICandleStickData";
+import { IHaveCandleStickData } from "./IHaveCandleStickData";
 
 export abstract class CandelStickBase implements IHaveCandleStickData {
   constructor(data?: ICandleStickData | IHaveCandleStickData) {

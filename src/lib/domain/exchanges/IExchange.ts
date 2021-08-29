@@ -1,4 +1,4 @@
-import { TimeEx } from '../../base/implementations/TimeEx';
+import { TimeEx } from "../../base";
 
 
 export interface IExchange {

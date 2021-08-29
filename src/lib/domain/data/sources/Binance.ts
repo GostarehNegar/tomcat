@@ -1,5 +1,5 @@
 import { CandleStickCollection, ICandleStickData } from '../../base/';
-import { IDataSource } from './_interfaces';
+import { IDataSource } from '../base';
 
 export class Binance implements IDataSource {
   getData(startTime: number, endTime: number): Promise<CandleStickCollection> {

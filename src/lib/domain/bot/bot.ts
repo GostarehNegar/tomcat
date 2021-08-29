@@ -1,9 +1,10 @@
 
-import { Ticks, utils } from "../..";
+import { IIndicator, Ticks, utils } from "../..";
 import { IMessageBus } from "../../bus";
 import { CandleStickCollection } from "../base";
-import { ICandleStickData, States, Symbols } from "../base/_interfaces"
-import { IIndicator } from "../data/indicators/_interfaces";
+import { Symbols } from "../base/Symbols";
+import { States } from "../base/States";
+import { ICandleStickData } from "../base/ICandleStickData";
 import { DataProvider } from "../data/sources/DataProvider";
 import { BaseStrategy } from "../strategy/strategy";
 import { Order, Wallet } from "../wallet/wallet";

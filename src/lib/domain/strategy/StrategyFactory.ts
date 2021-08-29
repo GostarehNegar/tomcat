@@ -1,5 +1,5 @@
 import { IMessageBus } from "../../bus";
-import { IDataProvider } from "../data/_interfaces";
+import { IDataProvider } from "../data";
 
 import { IStrategy } from "./IStrategy";
 import { BaseStrategy, BaseStrategyEX, BaseStrategyExtended, TestStrategy } from "./strategy";

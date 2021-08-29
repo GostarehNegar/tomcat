@@ -1,11 +1,7 @@
 import { IMessageBus } from '../../bus';
 import { CandleStickCollection, IStrategySignal } from '../base';
 import { IStrategyContext } from '../bot';
-import { IDataProvider } from '../data/_interfaces';
-import { IndicatorProvider } from '../data/indicators/implementations/IndicatorProvider';
-import { Indicators } from '../data/indicators/implementations/indicatorFactory';
-import { IIndicator } from '../data/indicators/interfaces/IIndicator';
-import { IIndicatorCalculationContext } from '../data/indicators/interfaces/IIndicatorCalculationContext';
+import { IDataProvider, IIndicator, IIndicatorCalculationContext, IndicatorProvider, Indicators } from '../data';
 import { DataProvider } from '../data/sources/DataProvider';
 
 import { IStrategy } from './IStrategy';

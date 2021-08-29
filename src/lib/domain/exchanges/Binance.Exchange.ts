@@ -1,18 +1,10 @@
-// import HttpsProxyAgent from "https-proxy-agent"
 import fetch from 'node-fetch';
 
-import { utils } from '../../base';
-import { CandleStickData } from '../base/_interfaces';
+import { TimeEx, utils } from '../../base';
+import { IHttpContext } from '../../hosting';
+import { CandleStickCollection, CandleStickData, ICandleStickData, Intervals, Markets, Symbols } from '../base';
 
 import { IExchange } from "./IExchange";
-import {
-  CandleStickCollection,
-  ICandelStickData,
-  IHttpContext,
-  Intervals,
-  Markets, Symbols, TimeEx
-
-} from './_imports';
 const api = (_api: string) => 'https://api.binance.com/api/v3/' + _api;
 
 export class BinanceExchange implements IExchange {
@@ -29,7 +21,7 @@ export class BinanceExchange implements IExchange {
     limit?,
     startTime?,
     endTime?
-  ): Promise<ICandelStickData[]> {
+  ): Promise<ICandleStickData[]> {
     market;
     let url = `https://api1.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}`;
     if (startTime) {
@@ -45,7 +37,7 @@ export class BinanceExchange implements IExchange {
     const result = await fetch(url)
       .then((res) => res.json())
       .then((json: []) => {
-        const result: ICandelStickData[] = [];
+        const result: ICandleStickData[] = [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         json.map((candle: any[]) => {
           result.push(new CandleStickData
@@ -108,7 +100,7 @@ export class BinanceExchange implements IExchange {
     symbol: Symbols,
     interval: Intervals,
     time
-  ): Promise<ICandelStickData> {
+  ): Promise<ICandleStickData> {
     const result = (
       await this.fetchData(market, symbol, interval, 1, time)
     ).filter((x) => x.openTime == time);
@@ -118,7 +110,7 @@ export class BinanceExchange implements IExchange {
     market: Markets,
     symbol: Symbols,
     interval: Intervals
-  ): Promise<ICandelStickData> {
+  ): Promise<ICandleStickData> {
     const result = (await this.fetchData(market, symbol, interval, 2)).filter(
       (_v, i) => i == 0
     );

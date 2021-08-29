@@ -4,7 +4,6 @@ import { Bot, Logger, TimeEx } from "./lib";
 // import { Order } from "./lib/domain/wallet/wallet";
 
 import tomcat from ".";
-
 const host = tomcat
     .hosts
     .getHostBuilder("bot")

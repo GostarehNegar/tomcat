@@ -1,23 +1,21 @@
-import * as _Implementaions from './implementations';
-import * as _Interfaces from './interfaces';
+
+import { Utils } from './base';
 
 import * as _all from './';
-export import Interfaces = _Interfaces;
-export import Implementaions = _Implementaions;
-export import Index = _all;
+
 
 namespace TomCat {
-  export const utils = _Implementaions.Base.Utils.instance;
-  export const constants = _Interfaces.constants;
-  export const config = _Interfaces.config;
+  export const utils = Utils.instance
+  export const constants = _all.constants;
+  export const config = _all.config;
   //export const builder: _Interfaces.Hosting.IHostBuilder = new _Implementaions.Hosting.HostBuilder(null);
-  export const hosts = _Implementaions.Hosting.hosts;
-  export const Bot = _Implementaions.Domain.Bot
-  export namespace Internals {
-    export import Interfaces = _Interfaces;
-    export import Implementaions = _Implementaions;
-    export import Index = _all;
-  }
+
+  export const hosts = _all.hosts;
+  export const Bot = _all.Bot;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  export import Index = _all;
+
 }
 //const tomcat = TomCat
 export default TomCat;

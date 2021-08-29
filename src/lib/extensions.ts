@@ -5,15 +5,17 @@ import Constants from './constants';
 
 declare module './base/ServiceProvider' {
   interface ServiceProvider {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getMessageBus(elseValue: any): any;
     getConfig(): typeof config;
   }
   interface IServiceProvider {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getMessageBus(elseValue: any): any;
     getConfig(): typeof config;
   }
 }
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ServiceProvider.prototype.getMessageBus = function (elseValue: any): any {
   return this.isSome() ? this.value : elseValue;
 };
