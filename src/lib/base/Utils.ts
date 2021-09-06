@@ -1,8 +1,9 @@
 
+import ping from 'ping'
+
 import { ILogger } from './ILogger';
 import { Ticks, TimeEx, TimeSpan } from './TimeEx';
 import { Logger } from './logger';
-import ping from 'ping'
 
 export class Utils {
   public test(): string {

@@ -1,11 +1,12 @@
 
-import { IndicatorCalculationContext } from "..";
-import { IIndicator, Ticks, utils } from "../..";
+import { Ticks, utils } from "../../base";
 import { IMessageBus } from "../../bus";
 import { CandleStickCollection } from "../base";
 import { ICandleStickData } from "../base/ICandleStickData";
 import { States } from "../base/States";
 import { Symbols } from "../base/Symbols";
+import { IIndicator } from "../data";
+import { IndicatorCalculationContext } from "../data/indicators/IndicatorCalculationContext";
 import { DataProvider } from "../data/sources/DataProvider";
 import { BaseStrategy } from "../strategy/strategy";
 import { Order, Wallet } from "../wallet/wallet";

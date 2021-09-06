@@ -23,7 +23,8 @@ export * from './KoaWebHost'
 export * from './Peers'
 export * from './ServerBuilder'
 export * from './ServerUtils'
-
+import { hosts as host } from './HostCollection'
+export const hosts = host;
 
 
 

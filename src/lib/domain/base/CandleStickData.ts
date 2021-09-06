@@ -1,4 +1,4 @@
-import { Ticks, utils } from "../..";
+import { Ticks, utils } from '../../base';
 
 import { ICandleStickData } from "./ICandleStickData";
 import { IndicatorValueCollection } from "./IndicatorValueCollection";

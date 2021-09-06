@@ -1,4 +1,4 @@
-import { Ticks, utils } from "../..";
+import { Ticks, utils } from "../../base";
 import { IIndicator } from "../data";
 
 import { CandleStickData } from "./CandleStickData";

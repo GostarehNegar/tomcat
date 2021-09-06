@@ -1,5 +1,8 @@
 import tomcat from '../src'
-import { TimeEx, TimeSpan } from '../src/lib/base';
+
+const TimeEx = tomcat.Index.Base.TimeEx
+const TimeSpan = tomcat.Index.Base.TimeSpan
+
 describe("utils", () => {
   test('timeEx', () => {
     const now = TimeEx.now();

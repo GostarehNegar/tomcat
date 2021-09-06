@@ -31,6 +31,9 @@ export class DataProvider implements IDataProvider {
     this.exchange = new BinanceDataSource(market, symbol, interval);
     this.interval = interval;
   }
+  temp() {
+    throw new Error('Method not implemented.');
+  }
 
   async getData(
     startTime: Ticks,

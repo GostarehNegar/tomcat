@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-import tomcat from '../src/index'
-(axios);
-(tomcat);
+import tomcat from '../src'
+
 jest.setTimeout(20000);
 describe('LightHost', () => {
     test('should create light host', async () => {

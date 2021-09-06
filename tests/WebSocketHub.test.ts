@@ -1,11 +1,4 @@
-// import { WebSocketHub } from '../src/lib/hosting/internals/WebSocketHub'
-// import http, { Server } from 'http'
-// import WebSocket from 'ws';
-// import { HostBuilder, hosts } from '../src/lib/hosting';
-//import config from '../src/lib/config';
-import { utils } from '../src/lib';
-import { hosts } from '../src/lib/hosting';
-
+import tomcat from "../src"
 async function wait(ms) {
     return new Promise(resolve => {
         setTimeout(resolve, ms);
@@ -71,16 +64,16 @@ describe('WebSocketHub', () => {
         // lets spin up two servers on different ports
         // const builder = new HostBuilder();
         const port = 8081;
-        const hub = hosts.getHostBuilder('hub')
+        const hub = tomcat.hosts.getHostBuilder('hub')
             .addWebSocketHub()
             .buildWebHost();
         //config.messaging.transports.websocket.url = "http://localhost:8080/hub";
-        const client1 = hosts.getHostBuilder('client1')
+        const client1 = tomcat.hosts.getHostBuilder('client1')
             .addMessageBus(cfg => {
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
             .build();
-        const client2 = hosts.getHostBuilder('client2')
+        const client2 = tomcat.hosts.getHostBuilder('client2')
             .addMessageBus(cfg => {
                 cfg.channel = `sample-${Math.random()}}`
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
@@ -106,7 +99,7 @@ describe('WebSocketHub', () => {
         await client2.bus.createMessage(messageName, "hi there")
             .publish();
         await wait(500);
-        utils.getLogger().info(received);
+        tomcat.utils.getLogger().info(received);
         await wait(500);
         await client1.stop();
         await client2.stop();

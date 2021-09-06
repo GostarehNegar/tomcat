@@ -7,11 +7,11 @@ import * as _all from './';
 namespace TomCat {
   export const utils = Utils.instance
   export const constants = _all.constants;
-  export const config = _all.config;
+  export const config = _all.Config.config;
   //export const builder: _Interfaces.Hosting.IHostBuilder = new _Implementaions.Hosting.HostBuilder(null);
 
-  export const hosts = _all.hosts;
-  export const Bot = _all.Bot;
+  export const hosts = _all.Hosting.hosts;
+  // export const Bot = _all.Bot;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export import Index = _all;

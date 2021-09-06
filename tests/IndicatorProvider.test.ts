@@ -1,8 +1,13 @@
-import { DataProvider } from "../src/lib"
-import { CandleStickCollection, ICandleStickData } from "../src/lib/domain/base"
-import { IIndicator, IndicatorCalculationContext, IndicatorProvider } from "../src/lib/domain/data/indicators"
-import { Indicators } from "../src/lib/domain/data/indicators"
-// import { ADX } from "../src/lib/domain/data/indicators"
+import tomcat from "../src"
+
+type IIndicator = tomcat.Index.Domain.Data.IIndicator
+type ICandleStickData = tomcat.Index.Domain.Base.ICandleStickData
+const CandleStickCollection = tomcat.Index.Domain.Base.CandleStickCollection
+const IndicatorProvider = tomcat.Index.Domain.Data.IndicatorProvider
+const Indicators = tomcat.Index.Domain.Data.Indicators
+const IndicatorCalculationContext = tomcat.Index.Domain.Data.IndicatorCalculationContext
+const DataProvider = tomcat.Index.Domain.Data.DataProvider
+
 
 jest.setTimeout(60000)
 describe("Indicator Provider", () => {

@@ -1,5 +1,8 @@
-import { TimeEx } from "../src/lib"
-import { DataProvider } from "../src/lib/domain/data/sources/DataProvider"
+import tomcat from "../src"
+
+const TimeEx = tomcat.Index.Base.TimeEx
+const DataProvider = tomcat.Index.Domain.Data.DataProvider
+
 jest.setTimeout(2 * 60 * 60 * 1000)
 describe("data Provider", () => {
     test("tests", async () => {

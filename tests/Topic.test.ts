@@ -1,4 +1,6 @@
-import { MessageTopic } from "../src/lib/bus";
+import tomcat from "../src"
+
+const MessageTopic = tomcat.Index.Bus.MessageTopic
 
 describe('Topics', () => {
     test('should correctly encode topic and channel to channel://topic ', () => {

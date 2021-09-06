@@ -1,9 +1,7 @@
+import tomcat from "../src"
 
-import { utils } from '../src/lib';
-import { WebSocketTransport } from '../src/lib/bus/_implementations'
-import { MessageBus } from '../src/lib/bus/index';
-import hosts from '../src/lib/hosting/implementations/HostCollection';
-
+const MessageBus = tomcat.Index.Bus.MessageBus
+const WebSocketTransport = tomcat.Index.Bus.WebSocketTransport
 
 const bus = new MessageBus();
 
@@ -12,7 +10,7 @@ describe('WebSocketTransport', () => {
 
     test('send', async () => {
         const port = 8083
-        const host = hosts.getHostBuilder("host")
+        const host = tomcat.hosts.getHostBuilder("host")
             .addWebSocketHub()
             .buildWebHost();
 
@@ -25,7 +23,7 @@ describe('WebSocketTransport', () => {
         const m = bus.createMessage('topic', { 'name': 'babak' });
         await transport.open({ endpoint: bus.endpoint });
         await transport.pubish(m);
-        await utils.delay(1000)
+        await tomcat.utils.delay(1000)
         await transport.close();
         await host.stop();
     });

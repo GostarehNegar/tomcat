@@ -1,10 +1,13 @@
-import { TimeEx } from '../src/lib/base';
-import { BinanceExchange } from '../src/lib/domain/exchanges/Binance.Exchange'
+import tomcat from "../src"
+
+const BinanceExchange = tomcat.Index.Domain.Exchange.BinanceExchange
+const TimeEx = tomcat.Index.Base.TimeEx
+
 jest.setTimeout(20000000)
 describe('BinanceExchange', () => {
 
     test('should get server time', async () => {
-
+        // const target = new BinanceExchange();
         const target = new BinanceExchange();
         const curren_time = await target.getServerTime();
         expect(curren_time.ticks).toBeGreaterThan(0);

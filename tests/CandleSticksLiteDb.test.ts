@@ -1,20 +1,11 @@
 import fs from 'fs';
 
 import tomcat from '../src';
-import utils from '../src/lib/domain/data/stores/Domain.Data.Store.Utils'
-import { CandleStick } from '../src/lib/domain/data/stores/Models';
 
-// import { DataSourceFactory } from '../src/lib/domain/data/sources/DataSourceFactory';
+const Database = tomcat.Index.Domain.Data.CandleStickLiteDb;
+const CandleStick = tomcat.Index.Domain.Data.CandleStick;
 
-const Database = tomcat.Internals.Implementaions.Domain.Data.Strores.CandleStickLiteDb;
-(CandleStick);
 (fs)
-
-
-
-
-
-
 // var roundToNearestMinute = function (date) {
 //     var coeff = 1000 * 60 * 1; // <-- Replace {5} with interval
 
@@ -37,8 +28,8 @@ describe('LiteDb', () => {
 
 
 
-        const items: CandleStick[] = []
-        const start = utils.toTimeEx();
+        const items: tomcat.Index.Domain.Data.CandleStick[] = []
+        const start = tomcat.utils.toTimeEx();
         console.log(start)
         for (let i = 0; i < 50000; i++) {
             items.push(new CandleStick({
@@ -64,7 +55,7 @@ describe('LiteDb', () => {
     test('select data', async () => {
         const db = new Database('binance', 'future', 'btcusd', '1m');
 
-        const items: CandleStick[] = []
+        const items: tomcat.Index.Domain.Data.CandleStick[] = []
         for (let i = 0; i <= 5; i++) {
             items.push(new CandleStick({
                 openTime: i,

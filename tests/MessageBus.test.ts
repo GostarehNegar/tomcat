@@ -1,5 +1,9 @@
-import { MessageBus } from '../src/lib/bus/_implementations'
-import { IMessageBus } from '../src/lib/bus/_interfaces';
+// import { MessageBus } from '../src/lib/bus/_implementations'
+// import { IMessageBus } from '../src/lib/bus/_interfaces';
+import tomcat from "../src"
+
+const MessageBus = tomcat.Index.Bus.MessageBus
+type IMessageBus = tomcat.Index.Bus.IMessageBus
 
 jest.setTimeout(2000);
 const bus = new MessageBus(cf => {
@@ -11,7 +15,7 @@ afterAll(async () => {
 });
 describe('MessageBus', () => {
     test('should create message', () => {
-        var body = { name: "babak" }
+        const body = { name: "babak" }
         const message = bus.createMessage("test", body);
         message.message.headers["on"] = Date.now().toString();
         expect(message.message.topic).toBe("test");

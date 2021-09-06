@@ -1,7 +1,7 @@
+import tomcat from "../src";
 
-import * as impl from '../src/lib/implementations'
-const hosts = impl.Hosting.hosts;
-const utils = impl.Base.utils;
+const hosts = tomcat.hosts
+const utils = tomcat.utils;
 
 describe('HostCollection', () => {
 

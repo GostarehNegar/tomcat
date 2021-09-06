@@ -1,17 +1,9 @@
-import { Logger } from "../src/lib/base/"
-import { IServiceProvider, ServiceProvider } from "../src/lib/base/ServiceProvider";
-import '../src/lib/base';
-import '../src/lib/extensions'
-// eslint-disable-next-line import/order
-import { TimeEx, utils } from "../src/lib/base";
-//import tomcat from '../src'
+import tomcat from "../src";
 
-
-
-
-const provider = new ServiceProvider() as IServiceProvider;
-
-
+const provider = new tomcat.Index.Base.ServiceProvider() as tomcat.Index.Base.IServiceProvider;
+const Logger = tomcat.Index.Base.Logger
+const TimeEx = tomcat.Index.Base.TimeEx
+const utils = tomcat.utils
 
 describe('ServiceLocator', () => {
 
@@ -33,7 +25,7 @@ describe('ServiceLocator', () => {
 describe('Logger', () => {
     test('should create logger', () => {
         const logger = Logger.getLogger("test");
-        const logger2 = Logger.getLogger("test");
+        const logger2 = tomcat.Index.Base.Logger.getLogger("test");
         (logger);
         (logger2);
         logger.log("hi", logger2)

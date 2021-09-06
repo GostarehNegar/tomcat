@@ -1,9 +1,9 @@
-import { Bot, Logger, TimeEx } from "./lib";
-// import { ICandelStickData } from "./lib/domain/base";
-// import { Bot, IStrategyContext } from "./lib/domain/bot/bot"
-// import { Order } from "./lib/domain/wallet/wallet";
-
 import tomcat from ".";
+
+const Bot = tomcat.Index.Domain.Bot.Bot
+const TimeEx = tomcat.Index.Base.TimeEx
+const Logger = tomcat.Index.Base.Logger
+
 const host = tomcat
     .hosts
     .getHostBuilder("bot")

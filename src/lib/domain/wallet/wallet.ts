@@ -1,6 +1,6 @@
 import { IMessageBus } from "../../bus"
-import { Symbols } from "../base/Symbols"
 import { Sides } from "../base/Sides"
+import { Symbols } from "../base/Symbols"
 
 export class Trade {
     constructor(symbol: Symbols, side: Sides, price: number, quantity: number, time: number) {

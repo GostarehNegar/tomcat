@@ -1,11 +1,12 @@
-import { CanellationToken } from "../src/lib/hosting/interfaces";
-import { HostBuilder, BackgroundService } from "../src/lib/hosting";
+import tomcat from "../src"
 
-
+const BackgroundService = tomcat.Index.Hosting.BackgroundService
+type CanellationToken = tomcat.Index.Hosting.CanellationToken
+const HostBuilder = tomcat.Index.Hosting.HostBuilder
 class dummyTask extends BackgroundService {
     public started = false;
     public stopped = false;
-    public name: string = "dummy-task";
+    public name = "dummy-task";
 
     protected run(token: CanellationToken): Promise<void> {
         (token)
@@ -25,7 +26,7 @@ describe('ServerBuilder', () => {
 
     test('how server builder works', async () => {
         const builder = new HostBuilder();
-        var server = builder
+        const server = builder
             .addService("my-service", "my-service-value")
             .build();
         expect("my-service-value").toBe(server.services.getService("my-service"));
@@ -33,7 +34,7 @@ describe('ServerBuilder', () => {
     test('server tasks are started', async () => {
         const builder = new HostBuilder();
         const task = new dummyTask();
-        var server = builder
+        const server = builder
             .addService("my-service", "my-service-value")
             .addHostedService(task)
             .build();

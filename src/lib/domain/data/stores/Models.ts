@@ -41,8 +41,8 @@ GET https://api.coinex.com/v1/market/kline?market=bchbtc&type=1min
 }
  */
 
-import { IHaveCandleStickData } from "../../base/IHaveCandleStickData";
 import { ICandleStickData } from "../../base/ICandleStickData";
+import { IHaveCandleStickData } from "../../base/IHaveCandleStickData";
 
 /**
  *

@@ -1,4 +1,7 @@
-import { IndicatorDB } from "../src/lib/domain/data/indicators/indicatorsDB"
+import tomcat from "../src"
+
+const IndicatorDB = tomcat.Index.Domain.Data.IndicatorDB
+
 jest.setTimeout(5 * 60 * 1000)
 describe("indicatorCache", () => {
     test("test indicatorCache", async () => {
