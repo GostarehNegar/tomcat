@@ -45,6 +45,17 @@ export class BinanceExchange implements IExchange {
           );
         });
         return result;
+      })
+      .catch((err) => {
+
+        err = err.code == "EAI_AGAIN" ?
+          {
+            message: "failed to fetch data from binance. Probably internet connection or vpn has been disconnected",
+            code: "InternetConnection"
+          }
+          : err
+        console.log(err);
+        throw err
       });
     this.logger.debug(`${result.length} items fetched from binance`)
     return result;

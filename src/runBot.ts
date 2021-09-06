@@ -61,7 +61,7 @@ host.bus.subscribe("Wallet/tradesRegistered", async (cxt) => {
 
 (async () => {
     const endTime = new TimeEx(Date.UTC(2020, 11, 31, 23, 59, 59, 999));
-    const startTime = new TimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0));
+    const startTime = new TimeEx(Date.UTC(2020, 1, 8, 0, 0, 0, 0));
     // const strategyContext: IStrategyContext = { startTime: startTime.ticks, endTime: endTime.ticks }
     Logger.level = 'log'
     await bot.start(startTime.ticks, endTime.ticks);

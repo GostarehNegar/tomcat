@@ -17,20 +17,20 @@ import { ADX, ATR, EMA, MinusDi, PlusDi, SAREXT } from "./talib-indicators";
 //     }
 // }
 export class Indicators {
-    public static ADX(period: number): IIndicator {
-        return new ADX(period)
+    public static ADX(period: number, maxCount = 200): IIndicator {
+        return new ADX(period, maxCount)
     }
-    public static ATR(period: number): IIndicator {
-        return new ATR(period)
+    public static ATR(period: number, maxCount = 200): IIndicator {
+        return new ATR(period, maxCount)
     }
-    public static MinusDi(period: number): IIndicator {
-        return new MinusDi(period)
+    public static MinusDi(period: number, maxCount = 200): IIndicator {
+        return new MinusDi(period, maxCount)
     }
-    public static PlusDi(period: number): IIndicator {
-        return new PlusDi(period)
+    public static PlusDi(period: number, maxCount = 200): IIndicator {
+        return new PlusDi(period, maxCount)
     }
-    public static SAREXT(startIndex: number, acceleration: number, maxAcceleration: number): IIndicator {
-        return new SAREXT(startIndex, acceleration, maxAcceleration)
+    public static SAREXT(startIndex: number, acceleration: number, maxAcceleration: number, maxCount = 400): IIndicator {
+        return new SAREXT(startIndex, acceleration, maxAcceleration, maxCount)
     }
     public static EMA(period: number): IIndicator {
         return new EMA(period)

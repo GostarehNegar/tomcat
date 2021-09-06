@@ -1,6 +1,6 @@
 import { TimeEx } from '../src/lib/base';
 import { BinanceExchange } from '../src/lib/domain/exchanges/Binance.Exchange'
-jest.setTimeout(20000)
+jest.setTimeout(20000000)
 describe('BinanceExchange', () => {
 
     test('should get server time', async () => {
@@ -35,6 +35,17 @@ describe('BinanceExchange', () => {
         expect(res.openTime).toBe(time.ticks)
         expect(res).not.toBeNull()
 
+    })
+    test("missing candle", async () => {
+        const target = new BinanceExchange();
+        const startTime = Date.UTC(2020, 1, 19, 0, 0, 0, 0)
+        const endTime = Date.UTC(2020, 1, 20, 0, 0, 0, 0)
+        const res = await target.getData("future", "BTCUSDT", "1m", startTime, endTime);
+        const missing = res.getMissingCandles(startTime, endTime);
+        res.populate(startTime, endTime)
+        const missing2 = res.getMissingCandles(startTime, endTime);
+        expect(missing.length).toBeGreaterThan(0)
+        expect(missing2.length).toBe(0)
     })
 
 })

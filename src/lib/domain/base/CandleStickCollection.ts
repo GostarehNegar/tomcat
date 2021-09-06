@@ -1,11 +1,14 @@
+import { Ticks, utils } from "../..";
 import { IIndicator } from "../data";
 
 import { CandleStickData } from "./CandleStickData";
+import domainUtils from "./Domain.Utils";
 import { Exchanges } from "./Exchanges";
 import { ICandleStickData } from "./ICandleStickData";
 import { Intervals } from "./Intervals";
 import { Markets } from "./Markets";
 import { Symbols } from "./Symbols";
+
 
 
 
@@ -25,6 +28,9 @@ export class CandleStickCollection {
       }
       return CandleStickData.from(x)
     })
+  }
+  get minutesInInterval(): number {
+    return domainUtils.toMinutes(this.interval)
   }
   get startTime(): number {
     return this.items.length > 0 ? this.items[0].openTime : undefined;
@@ -55,18 +61,31 @@ export class CandleStickCollection {
   getSingleOHLCV(ohlcv: string) {
     const result: number[] = [];
     this.items.map((item) => {
-      result.push(item[ohlcv]);
+      if (!item.isMissing)
+        result.push(item[ohlcv]);
     });
     return result;
+  }
+  getLast(index: number) {
+    return new CandleStickCollection(this.items.filter((candle, i) => {
+      (candle)
+      return i >= this.items.length - index
+    }))
   }
   merge(): CandleStickData {
     let high = -10000 * 10000
     let low = 10000 * 10000
-    this.items.map((x) => {
+    this.items.filter(x => !x.isMissing).map((x) => {
       high = x.high > high ? x.high : high
       low = x.low < low ? x.low : low
     })
-    return this.length == 0 ? null : new CandleStickData(this.firstCandle.openTime, this.firstCandle.open, high, low, this.lastCandle.close, this.lastCandle.closeTime)
+    const first = this.items.find(x => !x.isMissing)
+    const last = this.items.reverse().find(x => !x.isMissing)
+    this.items.reverse()
+    return first != null
+      ? new CandleStickData(first.openTime, first.open, high, low, last.close, last.closeTime)
+      : null
+
 
   }
   push(candle: CandleStickData | ICandleStickData) {
@@ -84,10 +103,47 @@ export class CandleStickCollection {
     this.items = []
   }
   addIndicator(indicator: IIndicator, data) {
+    const items = this.items.filter(x => !x.isMissing)
     let idx = 1;
     data.reverse().map((x) => {
-      this.items[this.items.length - idx].indicators.setValue(indicator, x)
+      items[items.length - idx].indicators.setValue(indicator, x)
       idx++;
     });
+  }
+  find(openTime) {
+    return this.items.find((x) => x.openTime == openTime)
+  }
+  getMissingCandles(expectedStart: Ticks, expectedEnd: Ticks) {
+    expectedStart = utils.toTimeEx(expectedStart).floorToMinutes(this.minutesInInterval).ticks
+    expectedEnd = utils.toTimeEx(expectedEnd).floorToMinutes(this.minutesInInterval).ticks
+    const miliInterval = this.minutesInInterval * 60 * 1000
+    const res: CandleStickData[] = []
+    for (let i = expectedStart; i <= expectedEnd; i += miliInterval) {
+      if (this.find(i) == null) {
+        const candle = CandleStickData.fromMissing(i, i + miliInterval)
+        res.push(candle)
+      }
+    }
+    return res
+  }
+  add(candle: CandleStickData) {
+    const index = this.items.findIndex((x) => x.openTime >= candle.openTime)
+    if (index < 0) {
+      this.items.push(candle)
+    }
+    else {
+      if (this.items[index].openTime == candle.openTime) {
+        this.items[index] = candle
+      }
+      else {
+        this.items.splice(index, 0, candle)
+      }
+    }
+  }
+  populate(expectedStart: Ticks, expectedEnd: Ticks) {
+    this.getMissingCandles(expectedStart, expectedEnd).map(x => this.add(x))
+  }
+  clone(): CandleStickCollection {
+    return new CandleStickCollection(this.items.map(x => x.clone()), this.exchange, this.symbol, this.interval, this.market, this.sourceName)
   }
 }

@@ -20,4 +20,14 @@ describe("data Provider", () => {
         expect(res.endTime).toBe(endTime.ticks)
 
     })
+    test("missing", async () => {
+        const dataProvider = new DataProvider("binance", 'spot', "BTCUSDT", "1m")
+        const endTime = new TimeEx(Date.UTC(2020, 1, 20, 0, 0, 0, 0))
+        const startTime = new TimeEx(1582112160000)
+        const res = await dataProvider.getData(startTime, endTime);
+        (res)
+        const candle = dataProvider.getExactCandle(startTime);
+        (candle)
+    })
 })
+

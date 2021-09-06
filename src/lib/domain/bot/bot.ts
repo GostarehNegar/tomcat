@@ -1,10 +1,11 @@
 
+import { IndicatorCalculationContext } from "..";
 import { IIndicator, Ticks, utils } from "../..";
 import { IMessageBus } from "../../bus";
 import { CandleStickCollection } from "../base";
-import { Symbols } from "../base/Symbols";
-import { States } from "../base/States";
 import { ICandleStickData } from "../base/ICandleStickData";
+import { States } from "../base/States";
+import { Symbols } from "../base/Symbols";
 import { DataProvider } from "../data/sources/DataProvider";
 import { BaseStrategy } from "../strategy/strategy";
 import { Order, Wallet } from "../wallet/wallet";
@@ -156,44 +157,57 @@ export class Bot {
         const allCandles = new CandleStickCollection([])
         const candles = new CandleStickCollection([])
         const dataProvider = new DataProvider("binance", "spot", "BTCUSDT", "1m")
-        let busy = false
         let targetStart = now.floorToMinutes(4 * 60)
         let targetEnd = targetStart.addMinutes(4 * 60)
         const runner = async () => {
-            if (busy) { return }
-            busy = true
             if (now.addMinutes(1).ticks > Date.now()) { return }
-            const lastCandle = candles.length == 0 ? null : candles[candles.length - 1]
+            const lastCandle = candles.length == 0 ? null : candles.items[candles.length - 1]
 
             if (lastCandle && lastCandle.openTime == targetEnd.addMinutes(-1).ticks) {
                 candles.clear()
                 targetStart = targetEnd
                 targetEnd = targetStart.addMinutes(4 * 60)
-                this.logger.log("4 hour candle has been pushed")
+                const date = utils.toTimeEx(allCandles.lastCandle.closeTime).asUTCDate
+
+                this.logger.log(`4 hour candle has been pushed ${date}`)
             }
             const candle = await dataProvider.getExactCandle(now.ticks)
             if (candle !== null) {
                 candles.push(candle)
-                allCandles.push(candles.merge())
-                this.logger.log(`pushed a candle at ${now.toString()}`)
-                this.onData(allCandles)
+                const didMerge = candles.merge()
+                if (didMerge) {
+                    allCandles.push(didMerge)
+                    const context = new IndicatorCalculationContext(allCandles)
+                    context.lastCandle = true
+                    context.time = now.ticks
+                    await this.onData(context)
+                }
+
+                // this.logger.log(`pushed a candle at ${now.toString()}`)
 
             }
-            busy = false
             now = now.addMinutes(1)
 
         }
         // setIntervalAsync(runner, 1)
         let finish = false
         while (!finish) {
-            await runner()
+            try {
+                await runner()
+                await utils.delay(10)
+            } catch (err) {
+                console.error(err);
+                if (err.code == "internetConnection") {
+                    console.warn("Waiting for internet connection...");
+                    await utils.waitForInternetConnection()
+                }
+            }
             finish = this._stop || (endTime && now.ticks > endTime)
-            await utils.delay(10)
         }
     }
-    async onData(candleSticks: CandleStickCollection) {
-        const res = await this.strategy.exec(candleSticks)
-        const targetCandle = candleSticks.lastCandle
+    async onData(context: IndicatorCalculationContext) {
+        const res = await this.strategy.exec(context)
+        const targetCandle = context.candleSticks.lastCandle
         switch (res) {
             case "openShort":
                 this.openShort(targetCandle)

@@ -1,22 +1,26 @@
 import { Ticks, utils } from '../../../base';
 import {
   CandleStickCollection,
+  CandleStickData,
   Exchanges,
   ICandleStickData,
   Intervals,
   Markets,
   Symbols,
 } from '../../base';
+import domainUtils from '../../base/Domain.Utils';
 import { BinanceDataSource } from '../../exchanges/BinanceDataSource';
 import { IDataProvider } from '../IDataProvider';
 import { IDataSource } from '../base';
 import { CandleStickLiteDb } from '../stores/CandleSticksLiteDb';
+
 
 // import { TimeEx, utils } from '../../../base';
 
 export class DataProvider implements IDataProvider {
   public db: CandleStickLiteDb;
   public exchange: IDataSource;
+  public interval: Intervals;
   constructor(
     exchange: Exchanges,
     market: Markets,
@@ -25,7 +29,7 @@ export class DataProvider implements IDataProvider {
   ) {
     this.db = new CandleStickLiteDb(exchange, market, symbol, interval);
     this.exchange = new BinanceDataSource(market, symbol, interval);
-
+    this.interval = interval;
   }
 
   async getData(
@@ -42,6 +46,7 @@ export class DataProvider implements IDataProvider {
       result.startTime != startTime
     ) {
       result = await this.exchange.getData(startTime, endTime);
+      result.populate(startTime, endTime)
       await this.db.push(result.items);
     }
     return result;
@@ -51,6 +56,8 @@ export class DataProvider implements IDataProvider {
     let result = await this.db.getExactCandle(time);
     if (result == null) {
       result = await this.exchange.getExactCandle(time);
+      result == result || CandleStickData.fromMissing(time, time + domainUtils.toMinutes(this.interval) * 60 * 1000)
+
       if (result) await this.db.push(result);
     }
     return result;
