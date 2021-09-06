@@ -62,6 +62,7 @@
     "nan": "^2.14.2",
     "node": "^16.4.1",
     "node-fetch": "^2.6.1",
+    "ping": "^0.4.1",
     "set-interval-async": "^2.0.3",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",

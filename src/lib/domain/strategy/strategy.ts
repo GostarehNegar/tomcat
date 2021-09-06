@@ -1,12 +1,12 @@
 import { IMessageBus } from '../../bus';
 import { CandleStickCollection, IStrategySignal } from '../base';
 import { IStrategyContext } from '../bot';
-import { IDataProvider, IIndicator, IIndicatorCalculationContext, IndicatorProvider, Indicators } from '../data';
+import { IDataProvider, IIndicator, IIndicatorCalculationContext, IndicatorCalculationContext, IndicatorProvider, Indicators } from '../data';
 import { DataProvider } from '../data/sources/DataProvider';
 
 import { IStrategy } from './IStrategy';
 
-
+(CandleStickCollection)
 
 
 export class Strategy {
@@ -14,10 +14,11 @@ export class Strategy {
   constructor(public bus: IMessageBus) { }
   async run(startTime, endTime): Promise<unknown> {
     const provider = new IndicatorProvider().add(Indicators.EMA(8));
-
+    (provider)
     const data = new DataProvider('binance', 'future', 'BTCUSDT', '1m');
     const candleSticks = await data.getData(startTime, endTime);
-    await provider.calculate(candleSticks);
+    throw 'not implemented'
+    // await provider.calculate(candleSticks);
     for (let i = 0; i < candleSticks.items.length; i++) {
       const candle = candleSticks.items[i];
       if (
@@ -40,7 +41,7 @@ export class BaseStrategy implements IStrategy {
   constructor(public bus: IMessageBus, public dataProvider: IDataProvider) {
     this.stream = "signals/BaseStrategy"
   }
-  async exec(candleSticks: CandleStickCollection): Promise<string> {
+  async exec(context: IndicatorCalculationContext): Promise<string> {
     let result = ""
     const provider = new IndicatorProvider()
       .add(this.indicators.ADX)
@@ -51,7 +52,9 @@ export class BaseStrategy implements IStrategy {
       .add(isSarAbove)
       .add(stopLossAtr)
       .add(adxSlope);
-    await provider.calculate(candleSticks);
+    provider.isCacheEnabled = false;
+    await provider.calculate(context);
+    const candleSticks = context.candleSticks
     const candle = candleSticks.items[candleSticks.items.length - 1]
     const indicator = candle.indicators;
     if (
@@ -107,7 +110,8 @@ export class BaseStrategy implements IStrategy {
       .add(isSarAbove)
       .add(stopLossAtr)
       .add(adxSlope);
-    await provider.calculate(candleSticks);
+    throw 'not implemented'
+    await provider.calculate(null);
     for (let i = 0; i < candleSticks.items.length; i++) {
       if (candleSticks.items[i].indicators && candleSticks.items[i].indicators.has(this.indicators.plusDi, this.indicators.minusDi, this.indicators.isSarAbove, this.indicators.adxSlope)) {
         const indicator = candleSticks.items[i].indicators;
@@ -188,7 +192,7 @@ export class BaseStrategyEX implements IStrategy {
       .add(this.indicators.isSarAbove)
       .add(this.indicators.stopLossAtr)
       .add(this.indicators.adxSlope);
-    await provider.calculate(candleSticks);
+    await provider.calculate(null);
     for (let i = 0; i < candleSticks.items.length; i++) {
       if (
         candleSticks.items[i].indicators &&
@@ -248,7 +252,7 @@ export class BaseStrategyExtended implements IStrategy {
       .add(this.indicators.isSarAbove)
       .add(this.indicators.stopLossAtr)
       .add(this.indicators.adxSlope)
-    await provider.calculate(candleSticks);
+    await provider.calculate(null);
     for (let i = 0; i < candleSticks.items.length; i++) {
       if (i == 28) {
         console.log("hi");
@@ -314,7 +318,7 @@ export class TestStrategy extends BaseStrategy {
       .add(this.indicators.isSarAbove)
       .add(this.indicators.stopLossAtr)
       .add(this.indicators.adxSlope)
-    await provider.calculate(candleSticks);
+    await provider.calculate(null);
     for (let i = 0; i < candleSticks.items.length; i++) {
       if (candleSticks.items[i].indicators && candleSticks.items[i].indicators.has(this.indicators.plusDi, this.indicators.minusDi, this.indicators.adxSlope, this.indicators.isSarAbove)) {
         const indicator = candleSticks.items[i].indicators;
@@ -379,7 +383,7 @@ const adxSlope: IIndicator = {
     for (let i = 0; i < context.candleSticks.items.length; i++) {
       const candle = context.candleSticks.items[i];
       const previousCandle = context.candleSticks.items[i - 1];
-      if (
+      if (previousCandle &&
         candle.indicators &&
         candle.indicators.has(Indicators.ADX(14)) &&
         previousCandle.indicators &&

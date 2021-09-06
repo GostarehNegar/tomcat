@@ -2,6 +2,7 @@
 import { ILogger } from './ILogger';
 import { Ticks, TimeEx, TimeSpan } from './TimeEx';
 import { Logger } from './logger';
+import ping from 'ping'
 
 export class Utils {
   public test(): string {
@@ -51,6 +52,28 @@ export class Utils {
       '^' + rule.split('*').map(escapeRegex).join('.*') + '$'
     ).test(str);
   }
+  public async checkInternetConnection(host = "4.2.2.4", timeOut = 10): Promise<number> {
+    const res = await ping.promise.probe(host, {
+      timeout: timeOut,
+    });
+    return res.alive ? res.time : null
+  }
+  public async checkVPNConnection() {
+    return this.checkInternetConnection("youtube.com")
+  }
+  public waitForInternetConnection(interval: number = 10 * 1000): Promise<unknown> {
+    const res = new Promise((resolve) => {
+      setInterval(() => {
+        this.checkInternetConnection().then((res) => {
+          if (res) {
+            resolve(res)
+          }
+        })
+      }, interval)
+    })
+    return res
+  }
+
 }
 
 export const utils = Utils.instance;
