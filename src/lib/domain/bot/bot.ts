@@ -1,8 +1,8 @@
 
+
 import { Ticks, utils } from "../../base";
 import { IMessageBus } from "../../bus";
-import { CandleStickCollection } from "../base";
-import { ICandleStickData } from "../base/ICandleStickData";
+import { CandleStickCollection, CandleStickData } from "../base";
 import { States } from "../base/States";
 import { Symbols } from "../base/Symbols";
 import { IIndicator } from "../data";
@@ -130,11 +130,17 @@ export interface IStrategyContext {
 //             this.state = 'open'
 //         }
 //     }
-//     async emitOrderCreated(candle: ICandleStickData, order: Order, state: string) {
-//         await this.bus.createMessage("Bot/stateChange", { candle, order, state }).publish()
-//     }
+// async emitOrderCreated(candle: ICandleStickData, order: Order, state: string) {
+//     await this.bus.createMessage("Bot/stateChange", { candle, order, state }).publish()
+// }
 
 // }
+
+export interface IReportContext {
+    candle: CandleStickData,
+    order: Order,
+    state: string
+}
 export class Bot {
     public logger = utils.getLogger("Bot")
     private _stop = false;
@@ -226,29 +232,31 @@ export class Bot {
                 break;
         }
     }
-    async openLong(candle: ICandleStickData) {
+    async openLong(candle: CandleStickData) {
         if (this.state == 'open') {
             const price = candle.close
             const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue(this.strategy.indicators.stopLossAtr) / candle.close)
             this.wallet.leverage = candle.indicators.getNumberValue(this.strategy.indicators.stopLossAtr)
             const orderEX = new Order(this.symbol, 'buy', price, amount, candle.closeTime)
             await this.wallet.processOrder(orderEX)
-            // await this.emitOrderCreated(candle, orderEX, 'openLong')
+            const report: IReportContext = { order: orderEX, candle: candle, state: 'openLong' }
+            await this.bus.createMessage("Bot/Report", report).publish()
             this.state = 'openLong'
         }
         else if (this.state == 'openShort') {
-            await this.closeShort(candle)
+            await this.closeShort(candle, true)
             this.state = 'open'
         }
     }
-    async openShort(candle: ICandleStickData) {
+    async openShort(candle: CandleStickData) {
         if (this.state == 'open') {
             const price = candle.close
             const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue(this.strategy.indicators.stopLossAtr)) / candle.close
             this.wallet.leverage = candle.indicators.getNumberValue(this.strategy.indicators.stopLossAtr)
             const orderEX = new Order(this.symbol, 'sell', price, amount, candle.closeTime)
             await this.wallet.processOrder(orderEX)
-            // await this.emitOrderCreated(candle, orderEX, 'openShort')
+            const report: IReportContext = { order: orderEX, candle: candle, state: 'openShort' }
+            await this.bus.createMessage("Bot/Report", report).publish()
             this.state = 'openShort'
         }
         else if (this.state == 'openLong') {
@@ -256,39 +264,39 @@ export class Bot {
             this.state = 'open'
         }
     }
-    async closeLong(candle: ICandleStickData, closingOpenposition = false) {
-        (closingOpenposition)
+    async closeLong(candle: CandleStickData, closingOpenposition = false) {
         if (this.state == 'openLong') {
             const price = candle.close
             const latestTrade = this.wallet.getLatestOpenTrade()
             const amount = latestTrade.quantity
             const orderEX = new Order(this.symbol, 'sell', price, amount, candle.closeTime)
             await this.wallet.processOrder(orderEX)
-            // if (!closingOpenposition) {
-            //     await this.emitOrderCreated(candle, orderEX, 'closeLong')
-            // } else {
-            //     await this.emitOrderCreated(candle, orderEX, 'openShort')
-
-            // }
-
-
+            if (!closingOpenposition) {
+                const report: IReportContext = { order: orderEX, candle: candle, state: "closeLong" }
+                await this.bus.createMessage("Bot/Report", report).publish()
+            } else {
+                const report: IReportContext = { order: orderEX, candle: candle, state: "openShort" }
+                await this.bus.createMessage("Bot/Report", report).publish()
+            }
             this.state = 'open'
         }
     }
-    async closeShort(candle: ICandleStickData, closingOpenposition = false) {
-        (closingOpenposition)
+    async closeShort(candle: CandleStickData, closingOpenposition = false) {
         if (this.state == 'openShort') {
             const price = candle.close
             const latestTrade = this.wallet.getLatestOpenTrade()
             const amount = latestTrade.quantity
             const orderEX = new Order(this.symbol, 'buy', price, amount, candle.closeTime)
             await this.wallet.processOrder(orderEX)
-            // if (!closingOpenposition) {
-            //     await this.emitOrderCreated(candle, orderEX, 'closeShort')
-            // } else {
-            //     await this.emitOrderCreated(candle, orderEX, 'openLong')
-            // }
 
+            if (!closingOpenposition) {
+                const report: IReportContext = { order: orderEX, candle: candle, state: "closeShort" }
+                await this.bus.createMessage("Bot/Report", report).publish()
+            }
+            else {
+                const report: IReportContext = { order: orderEX, candle: candle, state: "openLong" }
+                await this.bus.createMessage("Bot/Report", report).publish()
+            }
             this.state = 'open'
         }
     }

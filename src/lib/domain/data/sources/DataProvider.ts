@@ -18,6 +18,7 @@ import { CandleStickLiteDb } from '../stores/CandleSticksLiteDb';
 // import { TimeEx, utils } from '../../../base';
 
 export class DataProvider implements IDataProvider {
+  public logger = utils.getLogger("DataProvider")
   public db: CandleStickLiteDb;
   public exchange: IDataSource;
   public interval: Intervals;
@@ -57,9 +58,18 @@ export class DataProvider implements IDataProvider {
   async getExactCandle(time: Ticks): Promise<ICandleStickData> {
     time = utils.ticks(time)
     let result = await this.db.getExactCandle(time);
+
+    if (result) {
+      this.logger.info(`Candlestick data from ${time} was fetched from Database`)
+    }
     if (result == null) {
       result = await this.exchange.getExactCandle(time);
-      result == result || CandleStickData.fromMissing(time, time + domainUtils.toMinutes(this.interval) * 60 * 1000)
+      if (result) {
+        this.logger.info(`Candlestick data from ${time} was fetched from Binance`)
+      } else {
+        result = CandleStickData.fromMissing(time, time + domainUtils.toMinutes(this.interval) * 60 * 1000)
+        this.logger.info(`Missing candlestick was generated for ${time}`)
+      }
 
       if (result) await this.db.push(result);
     }

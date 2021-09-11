@@ -1,3 +1,4 @@
+import { utils } from "../../base"
 import { IMessageBus } from "../../bus"
 import { Sides } from "../base/Sides"
 import { Symbols } from "../base/Symbols"
@@ -70,22 +71,15 @@ export class Order {
 
 export class Wallet {
     public leverage: number;
+    public logger = utils.getLogger("Wallet")
     public tradeList: Trade[] = []
     constructor(public balance: number, public bus: IMessageBus) { }
     async processOrder(order: Order) {
         if (order == null) {
             throw "order cannot be null"
         }
-        if (order.side == 'buy') {
-            const trade = Trade.createFromOrder(order)
-            this.addTrade(trade)
-
-        }
-        if (order.side == 'sell') {
-            const trade = Trade.createFromOrder(order)
-            this.addTrade(trade)
-        }
-
+        const trade = Trade.createFromOrder(order)
+        this.addTrade(trade)
     }
     addTrade(trade: Trade) {
         const latestTrade = this.getLatestOpenTrade()
@@ -95,6 +89,10 @@ export class Wallet {
             this.balance += trade.realizedProfit
             this.tradeList.push(trade)
             this.bus.createMessage("Wallet/tradesRegistered", trade).publish()
+            const date = new Date(trade.time)
+            const count = this.tradeList.length
+            const formattedDate = `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()},${date.getUTCHours()}:${date.getUTCMinutes()}`
+            this.logger.info(`\n${count}\t${formattedDate}\t${trade.side}\t${trade.quantity}\t${trade.price}\t\t${trade.realizedProfit}`);
         } else {
             console.log('mano nabayad bebini')
         }

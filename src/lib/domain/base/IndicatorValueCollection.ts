@@ -3,6 +3,9 @@ import { IIndicator } from "../data";
 export class IndicatorValueCollection {
     // [key: string]: number | boolean;
     public values: { [index: string]: number | boolean; } = {};
+    constructor(values?: { [index: string]: number | boolean; }) {
+        this.values = values || {}
+    }
 
     getValue<T>(indicator: IIndicator): T {
         return this.values[indicator.id] == null || this.values[indicator.id] == undefined ? null : this.values[indicator.id] as unknown as T;
