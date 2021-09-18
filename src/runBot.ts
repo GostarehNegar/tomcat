@@ -1,14 +1,15 @@
-import fs from 'fs'
+// import fs from 'fs'
 
-import { IndicatorValueCollection } from './lib/domain/base';
-import { IReportContext } from './lib/domain/bot';
+// import { IndicatorValueCollection } from './lib/domain/base';
+// import { IReportContext, JobOrder } from './lib/domain/bot';
 
 import tomcat from ".";
+import { JobOrder } from "./lib/domain/bot";
 // import { utils } from "./lib/base";
 // import { Trade } from "./lib/domain/wallet";
 const Bot = tomcat.Index.Domain.Bot.Bot
-// const TimeEx = tomcat.Index.Base.TimeEx
-// const Logger = tomcat.Index.Base.Logger
+const TimeEx = tomcat.Index.Base.TimeEx
+const Logger = tomcat.Index.Base.Logger
 
 const host = tomcat
     .hosts
@@ -65,21 +66,24 @@ const host = tomcat
 
 
 
-const bot = new Bot(host.bus)
+const bot = new Bot(host.bus);
 // let now: Date;
 // let formattedDate: string;
-// (async () => {
-//     const startTime = new TimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0));
-//     const endTime = new TimeEx(Date.UTC(2020, 11, 31, 23, 59, 59, 999));
-//     // const strategyContext: IStrategyContext = { startTime: startTime.ticks, endTime: endTime.ticks }
-//     Logger.level = 'log'
-//     Logger.getLogger('DataProvider').level = 'error'
-//     // now = new Date(Date.now())
-//     // formattedDate = `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}-${now.getUTCHours()}-${now.getUTCMinutes()}`
-//     await bot.start(startTime.ticks, endTime.ticks);
-//     console.log("DONE!");
+(async () => {
+    const startTime = new TimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0));
+    const endTime = new TimeEx(Date.UTC(2020, 11, 31, 23, 59, 59, 999));
+    // const strategyContext: IStrategyContext = { startTime: startTime.ticks, endTime: endTime.ticks }
+    console.log("DONE!");
 
-// })();
+    Logger.level = 'log'
+    Logger.getLogger('DataProvider').level = 'error'
+    // now = new Date(Date.now())
+    // formattedDate = `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}-${now.getUTCHours()}-${now.getUTCMinutes()}`
+    const jobOrder = new JobOrder(startTime, endTime)
+    await bot.start(jobOrder);
+    console.log("DONE!");
+
+})();
 
 // const report = [];
 // host.bus.subscribe("Bot/Report", async (ctx) => {
@@ -93,29 +97,29 @@ const bot = new Bot(host.bus)
 //     })
 // });
 
-const indicators = bot.strategy.indicators;
-let report = 'NO.\tDATE\t\t\tposition\tSIDE\tamount\t\tPRICE\t\tADX\tPDI\tMDI\tSAR\t\tADXSlope SARAbove';
-fs.readFile(`./Report/2021-9-10-13-44.json`, 'utf8', (err, data) => {
-    if (err) {
-        console.error(err)
-        return
-    } else {
+// const indicators = bot.strategy.indicators;
+// let report = 'NO.\tDATE\t\t\tposition\tSIDE\tamount\t\tPRICE\t\tADX\tPDI\tMDI\tSAR\t\tADXSlope SARAbove';
+// fs.readFile(`./Report/2021-9-10-13-44.json`, 'utf8', (err, data) => {
+//     if (err) {
+//         console.error(err)
+//         return
+//     } else {
 
-        (JSON.parse(data) as IReportContext[]).map((item, index) => {
-            const date = new Date(item.order.time)
-            const formattedDate = `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()},${date.getUTCHours()}:${date.getUTCMinutes()}`
-            item.candle.indicators = new IndicatorValueCollection(item.candle.indicators.values)
-            report += `\n${(index += 1).toString().padEnd(3, " ")}\t${formattedDate.toString().padEnd(16, " ")}\t${item.state.padEnd(10, " ")}\t${item.order.side.toString().padEnd(4, " ")}\t${item.order.amount.toFixed(4).padEnd(8, " ")}\t${item.order.price.toString().padEnd(8, " ")}\t${item.candle.indicators.getNumberValue(indicators.ADX).toFixed(4).padEnd(7, " ")}\t${item.candle.indicators.getNumberValue(indicators.plusDi).toFixed(4).padEnd(7, " ")}\t${item.candle.indicators.getNumberValue(indicators.minusDi).toFixed(4).padEnd(7, " ")}\t${item.candle.indicators.getNumberValue(indicators.SAR).toFixed(4).padEnd(10, " ")}\t${item.candle.indicators.getNumberValue(indicators.adxSlope).toFixed(4).padStart(7, " ")}\t${item.candle.indicators.getNumberValue(indicators.isSarAbove).toString().padStart(2, " ")}`
-            // console.log(item.candle.indicators.getNumberValue(indicators.ADX));
+//         (JSON.parse(data) as IReportContext[]).map((item, index) => {
+//             const date = new Date(item.order.time)
+//             const formattedDate = `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()},${date.getUTCHours()}:${date.getUTCMinutes()}`
+//             item.candle.indicators = new IndicatorValueCollection(item.candle.indicators.values)
+//             report += `\n${(index += 1).toString().padEnd(3, " ")}\t${formattedDate.toString().padEnd(16, " ")}\t${item.state.padEnd(10, " ")}\t${item.order.side.toString().padEnd(4, " ")}\t${item.order.amount.toFixed(4).padEnd(8, " ")}\t${item.order.price.toString().padEnd(8, " ")}\t${item.candle.indicators.getNumberValue(indicators.ADX).toFixed(4).padEnd(7, " ")}\t${item.candle.indicators.getNumberValue(indicators.plusDi).toFixed(4).padEnd(7, " ")}\t${item.candle.indicators.getNumberValue(indicators.minusDi).toFixed(4).padEnd(7, " ")}\t${item.candle.indicators.getNumberValue(indicators.SAR).toFixed(4).padEnd(10, " ")}\t${item.candle.indicators.getNumberValue(indicators.adxSlope).toFixed(4).padStart(7, " ")}\t${item.candle.indicators.getNumberValue(indicators.isSarAbove).toString().padStart(2, " ")}`
+//             // console.log(item.candle.indicators.getNumberValue(indicators.ADX));
 
-        })
-    }
-})
-host.use(async (cxt) => {
-    if (cxt.request.url == "/report") {
-        cxt.response.write(report);
-        cxt.response.end()
-    }
-}).listen(3000)
+//         })
+//     }
+// })
+// host.use(async (cxt) => {
+//     if (cxt.request.url == "/report") {
+//         cxt.response.write(report);
+//         cxt.response.end()
+//     }
+// }).listen(3000)
 
 

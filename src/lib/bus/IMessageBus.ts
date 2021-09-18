@@ -1,3 +1,4 @@
+import { Message } from ".";
 import { IHandler } from "./IHandler";
 import { IMessageBusSubscription } from "./IMessageBusSubscription";
 import { IMessageContext } from "./IMessageContext";
@@ -33,4 +34,5 @@ export interface IMessageBus {
     ): Promise<IMessageBusSubscription>;
     start(): Promise<unknown>;
     get endpoint(): string; stop(): Promise<unknown>;
+    publish2(m: Message): Promise<unknown>;
 }

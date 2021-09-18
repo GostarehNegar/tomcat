@@ -67,6 +67,9 @@ export class MessageBus extends BackgroundService implements IMessageBus {
       });
     }
   }
+  publish2(m: Message): Promise<unknown> {
+    return this.publish(new MessageContext(m, this))
+  }
   get endpoint(): string {
     return this._endpoint;
   }
