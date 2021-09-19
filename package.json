@@ -1,5 +1,5 @@
 {
-  "name": "tomcat",
+  "name": "@gostarehnegar/tomcat",
   "version": "1.0.0",
   "description": "shared",
   "main": "build/main/index.js",

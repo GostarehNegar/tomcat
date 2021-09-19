@@ -14,8 +14,11 @@ export class MessageContext implements IMessageContext {
   setScope(scope: 'local' | 'remote' | 'both'): void {
     this.headers['scope'] = scope;
   }
-  get scope(): string {
-    return this.headers['scope'] || '';
+  get scope(): 'local' | 'remote' | 'both' | '' {
+    return (this.headers['scope'] || '') as 'local' | 'remote' | 'both' | '';
+  }
+  set scope(value: 'local' | 'remote' | 'both' | '') {
+    this.headers['scope'] = value;
   }
 
   isLocal(): boolean {
@@ -31,7 +34,7 @@ export class MessageContext implements IMessageContext {
     return result;
   }
   publish(): Promise<unknown> {
-    return this._bus.publish(this);
+    return this._bus.publishMessageContext(this);
   }
   reply(body: unknown): Promise<unknown> {
     const message = this._bus.createMessage(
