@@ -1,7 +1,7 @@
 import { IMessageBus } from '../../bus';
 import { CandleStickCollection, IStrategySignal } from '../base';
-import { IStrategyContext } from '../bot';
-import { IDataProvider, IIndicator, IIndicatorCalculationContext, IndicatorCalculationContext, IndicatorProvider, Indicators } from '../data';
+import { IStrategyContext, JobContext } from '../bot';
+import { IDataProvider, IIndicator, IIndicatorCalculationContext, IndicatorProvider, Indicators } from '../data';
 import { DataProvider } from '../data/sources/DataProvider';
 
 import { IStrategy } from './IStrategy';
@@ -41,7 +41,7 @@ export class BaseStrategy implements IStrategy {
   constructor(public bus: IMessageBus, public dataProvider: IDataProvider) {
     this.stream = "signals/BaseStrategy"
   }
-  async exec(context: IndicatorCalculationContext): Promise<string> {
+  async exec(jobContext: JobContext): Promise<string> {
     let result = ""
     const provider = new IndicatorProvider()
       .add(this.indicators.ADX)
@@ -53,8 +53,8 @@ export class BaseStrategy implements IStrategy {
       .add(stopLossAtr)
       .add(adxSlope);
     provider.isCacheEnabled = false;
-    await provider.calculate(context);
-    const candleSticks = context.candleSticks
+    await provider.calculate(jobContext.indicatorCalculationContext);
+    const candleSticks = jobContext.candles
     const candle = candleSticks.items[candleSticks.items.length - 1]
     const indicator = candle.indicators;
     if (
@@ -68,7 +68,7 @@ export class BaseStrategy implements IStrategy {
       ) {
         const buyOrder: IStrategySignal = { candle: candle }
         result = "openLong"
-        await this.bus.createMessage(`${this.stream}/openLong`, buyOrder).publish();
+        await this.bus.createMessage(`${jobContext.streamID}/openLong`, buyOrder).publish();
       } else if (
         indicator.getBoolValue(this.indicators.isSarAbove) == true &&
         indicator.getValue(this.indicators.plusDi) < (indicator.getNumberValue(this.indicators.minusDi) - 5) &&
@@ -76,7 +76,7 @@ export class BaseStrategy implements IStrategy {
       ) {
         const sellOrder: IStrategySignal = { candle: candle }
         result = 'openShort'
-        await this.bus.createMessage(`${this.stream}/openShort`, sellOrder).publish();
+        await this.bus.createMessage(`${jobContext.streamID}/openShort`, sellOrder).publish();
       }
       else if (
         indicator.getBoolValue(this.indicators.isSarAbove) == true ||
@@ -85,7 +85,7 @@ export class BaseStrategy implements IStrategy {
       ) {
         const sellOrder: IStrategySignal = { candle: candle }
         result = 'closeLong'
-        await this.bus.createMessage(`${this.stream}/closeLong`, sellOrder).publish();
+        await this.bus.createMessage(`${jobContext.streamID}/closeLong`, sellOrder).publish();
       }
       else if (
         indicator.getBoolValue(this.indicators.isSarAbove) == false ||
@@ -94,7 +94,7 @@ export class BaseStrategy implements IStrategy {
       ) {
         const sellOrder: IStrategySignal = { candle: candle }
         result = 'closeShort'
-        await this.bus.createMessage(`${this.stream}/closeShort`, sellOrder).publish();
+        await this.bus.createMessage(`${jobContext.streamID}/closeShort`, sellOrder).publish();
       }
     }
     return result

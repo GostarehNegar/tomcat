@@ -1,3 +1,4 @@
+import { LogLevel } from ".";
 
 export interface ILogger {
     log(message?: unknown, ...params: unknown[]);
@@ -5,4 +6,5 @@ export interface ILogger {
     warn(message?: unknown, ...params: unknown[]);
     error(message?: unknown, ...params: unknown[]);
     debug(message?: unknown, ...params: unknown[]);
+    level: LogLevel;
 }
