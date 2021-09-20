@@ -1,4 +1,4 @@
-// import { MessageBus } from '../src/lib/bus/_implementations'
+//import { MessageBus, IMessageBus } from '../src/lib/bus'
 // import { IMessageBus } from '../src/lib/bus/_interfaces';
 import tomcat from "../src"
 
@@ -21,7 +21,7 @@ describe('MessageBus', () => {
         expect(message.message.topic).toBe("test");
         expect(message.message.payload).toBe(body);
     });
-    test('should publish messages to subscribers.', async () => {
+    test('BABAK should publish messages to subscribers.', async () => {
 
         let called = null;
         let called_count = 0;

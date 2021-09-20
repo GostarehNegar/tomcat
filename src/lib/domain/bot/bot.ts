@@ -87,7 +87,7 @@ export class Bot {
 
         }
         let finish = false
-        await this.bus.publish2(Messages.startMessage(jobContext.streamID, Date.now()));
+        await this.bus.publish(Messages.startMessage(jobContext.streamID, Date.now()));
         while (!finish) {
             try {
 
@@ -133,7 +133,7 @@ export class Bot {
             const orderEX = new Order(this.symbol, 'buy', price, amount, candle.closeTime)
             await this.wallet.processOrder(orderEX)
             const report: IReportContext = { order: orderEX, candle: candle, state: 'openLong' }
-            await this.bus.publish2(Messages.openLongMessage(jobContext.streamID, report));
+            await this.bus.publish(Messages.openLongMessage(jobContext.streamID, report));
             // await this.bus.createMessage("Bot/Report", report).publish()
             this.state = 'openLong'
         }
@@ -150,7 +150,7 @@ export class Bot {
             const orderEX = new Order(this.symbol, 'sell', price, amount, candle.closeTime)
             await this.wallet.processOrder(orderEX)
             const report: IReportContext = { order: orderEX, candle: candle, state: 'openShort' }
-            await this.bus.publish2(Messages.openShortMessage(jobContext.streamID, report));
+            await this.bus.publish(Messages.openShortMessage(jobContext.streamID, report));
             // await this.bus.createMessage("Bot/Report", report).publish()
             this.state = 'openShort'
         }
@@ -168,11 +168,11 @@ export class Bot {
             await this.wallet.processOrder(orderEX)
             if (!closingOpenposition) {
                 const report: IReportContext = { order: orderEX, candle: candle, state: "closeLong" }
-                await this.bus.publish2(Messages.closeLongMessage(jobContext.streamID, report));
+                await this.bus.publish(Messages.closeLongMessage(jobContext.streamID, report));
                 // await this.bus.createMessage("Bot/Report", report).publish()
             } else {
                 const report: IReportContext = { order: orderEX, candle: candle, state: "openShort" }
-                await this.bus.publish2(Messages.openShortMessage(jobContext.streamID, report));
+                await this.bus.publish(Messages.openShortMessage(jobContext.streamID, report));
                 // await this.bus.createMessage("Bot/Report", report).publish()
             }
             this.state = 'open'
@@ -188,12 +188,12 @@ export class Bot {
 
             if (!closingOpenposition) {
                 const report: IReportContext = { order: orderEX, candle: candle, state: "closeShort" }
-                await this.bus.publish2(Messages.closeShortMessage(jobContext.streamID, report));
+                await this.bus.publish(Messages.closeShortMessage(jobContext.streamID, report));
                 // await this.bus.createMessage("Bot/Report", report).publish()
             }
             else {
                 const report: IReportContext = { order: orderEX, candle: candle, state: "openLong" }
-                await this.bus.publish2(Messages.openLongMessage(jobContext.streamID, report));
+                await this.bus.publish(Messages.openLongMessage(jobContext.streamID, report));
                 // await this.bus.createMessage("Bot/Report", report).publish()
             }
             this.state = 'open'

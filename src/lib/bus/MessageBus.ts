@@ -62,13 +62,14 @@ export class MessageBus extends BackgroundService implements IMessageBus {
           payload: any;
         };
         const ctx = new MessageContext(_msg.payload, this);
-        ctx.setScope('local');
-        this.publish(ctx);
+        //ctx.setScope('local');
+        ctx.scope = 'local';
+        this.publishMessageContext(ctx);
       });
     }
   }
-  publish2(m: Message): Promise<unknown> {
-    return this.publish(new MessageContext(m, this))
+  publish(m: Message): Promise<unknown> {
+    return this.publishMessageContext(new MessageContext(m, this))
   }
   get endpoint(): string {
     return this._endpoint;
@@ -92,13 +93,6 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     const result = new MessageBusSubscription(topic, channel, handler);
     return this._subscribe(result);
   }
-  // public subscribeEx(
-  //   fn: (subs: IMessageBusSubscription) => void
-  // ): Promise<IMessageBusSubscription> {
-  //   const result = new MessageBusSubscription('');
-  //   fn(result);
-  //   return this._subscribe(result);
-  // }
 
   public createReplyPromise(message: IMessageContext): Promise<unknown> {
     const result = new Promise<unknown>((res, err) => {
@@ -161,7 +155,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     }
     return this._transports[0].pubish(ctx);
   }
-  public publish(context: IMessageContext): Promise<void> {
+  public publishMessageContext(context: IMessageContext): Promise<void> {
     if (
       context &&
       context.message &&
