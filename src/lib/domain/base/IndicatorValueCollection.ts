@@ -13,6 +13,9 @@ export class IndicatorValueCollection {
     setValue(indicator: IIndicator, value: number | boolean) {
         this.values[indicator.id] = value;
     }
+    setValueEX(id: string, value: number | boolean) {
+        this.values[id] = value;
+    }
     getNumberValue(indicator: IIndicator) {
         return this.getValue<number>(indicator);
     }

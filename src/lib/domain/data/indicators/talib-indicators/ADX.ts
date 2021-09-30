@@ -40,8 +40,6 @@ export class ADX extends Indicator implements IIndicator {
 }
 const context = { candles: new CandleStickCollection([]) }
 
-
-
 export const ADXHandler = (period = 14, maxCount = 200) => {
   const handler = async (candle: CandleStickData) => {
     context.candles.push(candle)

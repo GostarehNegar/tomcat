@@ -37,3 +37,4 @@ export class ATR extends Indicator implements IIndicator {
   }
 
 }
+
