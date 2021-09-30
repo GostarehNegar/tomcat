@@ -143,7 +143,7 @@ export class CandleStickCollection {
   populate(expectedStart: Ticks, expectedEnd: Ticks) {
     this.getMissingCandles(expectedStart, expectedEnd).map(x => this.add(x))
   }
-  clone(): CandleStickCollection {
-    return new CandleStickCollection(this.items.map(x => x.clone()), this.exchange, this.symbol, this.interval, this.market, this.sourceName)
+  clone(deep = true): CandleStickCollection {
+    return new CandleStickCollection(this.items.map(x => deep ? x.clone() : x), this.exchange, this.symbol, this.interval, this.market, this.sourceName)
   }
 }

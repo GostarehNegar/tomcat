@@ -75,6 +75,9 @@ export class Utils {
     return res
   }
 
+  public randomName(name: string, numberOfRandoms = 3) {
+    return name + "-" + Math.floor(Math.random() * Math.pow(10, numberOfRandoms))
+  }
 }
 
 export const utils = Utils.instance;

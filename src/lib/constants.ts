@@ -12,6 +12,7 @@ export const Constants = {
     WebSocketHub: 'WebSocketHub',
     Router: 'Router',
     Config: 'Config',
+    IBot: 'IBot'
   },
   DataSources: {
     bainance: 'binance',

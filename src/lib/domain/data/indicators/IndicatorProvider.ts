@@ -23,9 +23,6 @@ export class IndicatorProvider {
       context.pass = pass;
       for (let i = 0; i < this.indicators.length; i++) {
         if (!context.candleSticks.lastCandle.indicators.has(this.indicators[i])) {
-
-
-
           const value = await DB?.getIndicatorValue(context.time, this.indicators[i].id)
           if (value != null) {
             context.candleSticks.lastCandle.indicators.setValue(this.indicators[i], value.value)
@@ -36,7 +33,6 @@ export class IndicatorProvider {
               await DB?.setIndicatorValue(context.time, this.indicators[i].id, context.candleSticks.lastCandle.indicators.getValue(this.indicators[i]))
             }
           }
-
         }
       }
     }

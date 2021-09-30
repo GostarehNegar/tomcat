@@ -8,7 +8,16 @@ export class MessageBusSubscription implements IMessageBusSubscription {
   public handler: IHandler = null;
   private _topic: MessageTopic;
 
+  /**
+   * 
+   * @param topicPattern 
+   * @param channel 
+   * @param handler 
+   */
   constructor(
+    /**
+     * the pattern to be used
+     */
     public topicPattern: string,
     public channel: string,
     handler?: IHandler

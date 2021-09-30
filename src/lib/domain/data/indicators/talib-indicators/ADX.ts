@@ -1,3 +1,4 @@
+import { CandleStickCollection, CandleStickData } from '../../../base';
 import { IIndicator } from '../IIndicator';
 import { IIndicatorCalculationContext } from '../IIndicatorCalculationContext';
 import { Indicator } from '../Indicator';
@@ -36,4 +37,24 @@ export class ADX extends Indicator implements IIndicator {
     return context.lastCandle ? this.calculate2(context) : this.calculate1(context)
   }
 
+}
+const context = { candles: new CandleStickCollection([]) }
+
+
+
+export const ADXHandler = (period = 14, maxCount = 200) => {
+  const handler = async (candle: CandleStickData) => {
+    context.candles.push(candle)
+    const ADXArray = await TalibWrapperEx.execute({
+      name: "ADX",
+      high: context.candles.getLast(maxCount).getSingleOHLCV('high'),
+      low: context.candles.getLast(maxCount).getSingleOHLCV('low'),
+      close: context.candles.getLast(maxCount).getSingleOHLCV('close'),
+      startIdx: 0,
+      endIdx: context.candles.getLast(maxCount).length - 1,
+      optInTimePeriod: period,
+    }) as number[]
+    candle.indicators.setValue({ id: `ADX-${period}-${maxCount}` } as IIndicator, ADXArray[ADXArray.length - 1])
+  }
+  return handler
 }

@@ -2,6 +2,7 @@
 import { IServiceProvider } from '../base';
 import { IMessageBus } from '../bus';
 import { config } from '../config';
+import { BotCollection } from '../domain/bot';
 
 import { CanellationToken } from './CanellationToken';
 import { IHost } from './IHost';
@@ -12,11 +13,13 @@ export class Host implements IHost {
   private _tasks: IHostedService[] = [];
   public started: boolean;
   public config: typeof config;
+  public bots: BotCollection;
   constructor(public name: string, public services: IServiceProvider) {
     this._tasks = this.services.getServices<IHostedService>(
       serviceNames.IHostedService
     );
     this.config = this.services.getService(serviceNames.Config);
+    this.bots = new BotCollection(services)
   }
   get bus(): IMessageBus {
     return this.services.getService(serviceNames.IMessageBus);
