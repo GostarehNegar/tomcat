@@ -37,7 +37,13 @@ export class CandleStickData implements ICandleStickData {
         if (data instanceof CandleStickData) {
             return data;
         }
-        return new CandleStickData(data.openTime, data.open, data.high, data.low, data.close, data.closeTime, data.volume, data.amount, data.V1, data.V2, data.V3, data.V4, "", data.indicators);
+        // return new CandleStickData(data.openTime, data.open, data.high, data.low, data.close, data.closeTime, data.volume, data.amount, data.V1, data.V2, data.V3, data.V4, "", data.indicators);
+        return new CandleStickData(data.openTime, data.open, data.high, data.low, data.close, data.closeTime, data.volume, data.amount, data.V1, data.V2, data.V3, data.V4, "",
+            data.indicators == null ?
+                new IndicatorValueCollection() :
+                data.indicators instanceof IndicatorValueCollection ?
+                    data.indicators :
+                    new IndicatorValueCollection(data.indicators));
     }
     public get isMissing() {
         return this.open == -1

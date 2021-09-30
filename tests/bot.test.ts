@@ -14,7 +14,7 @@ describe('Bot', () => {
         const startTime = new TimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0))
         const endTime = new TimeEx(Date.UTC(2020, 0, 6, 0, 0, 0, 0))
         const jobOrder = new JobOrder(startTime, endTime)
-        const bot = new Bot(host.bus)
+        const bot = new Bot(host.services)
         const jobContext = await bot.start(jobOrder)
         expect(jobContext.startTime).not.toBe(0)
 

@@ -8,5 +8,5 @@ export class IndicatorCalculationContext
   public pass = 0;
   public time = 0;
   constructor(public candleSticks: CandleStickCollection) { }
-  public lastCandle: boolean
+  public lastCandle = true
 }

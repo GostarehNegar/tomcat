@@ -3,7 +3,7 @@ import { IMessageBus } from "../../bus";
 import { CandleStickCollection } from "../base";
 import { IndicatorCalculationContext } from "../data";
 
-import { MessageNames } from "./messages";
+import { MessageNames } from ".";
 
 class Event {
     public payload: string;

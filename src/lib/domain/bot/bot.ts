@@ -1,57 +1,56 @@
 
 
-import { utils } from "../../base";
+import { IServiceProvider, utils } from "../../base";
 import { IMessageBus } from "../../bus";
+import { serviceNames } from "../../hosting";
 import { CandleStickCollection, CandleStickData } from "../base";
 import { States } from "../base/States";
 import { Symbols } from "../base/Symbols";
-import { IIndicator } from "../data";
 import { DataProvider } from "../data/sources/DataProvider";
 import { BaseStrategy } from "../strategy/strategy";
 import { Order, Wallet } from "../wallet/wallet";
 
 import { Messages } from "./messages";
 
-import { JobContext, JobOrder } from ".";
+import { IBot, JobContext, JobOrder } from ".";
 
 
-
-export interface IStrategyContext {
-    startTime: number,
-    endTime: number,
-    adx?: { id: string, period: number },
-    atr?: { id: string, period: number },
-    minusDi?: { id: string, period: number },
-    plusDi?: { id: string, period: number },
-    sar?: { id: string, startIndex: number, acceleration: number, maxAcceleration: number }
-    customIndicators?: IIndicator[],
-}
 
 export interface IReportContext {
     candle: CandleStickData,
     order: Order,
     state: string
 }
-export class Bot {
+export class Bot implements IBot {
     public logger = utils.getLogger("Bot")
     private _stop = false;
     public symbol: Symbols;
     public state: States
     public wallet: Wallet
     public strategy: BaseStrategy
-    constructor(public bus: IMessageBus) {
+    public bus: IMessageBus
+    constructor(public services: IServiceProvider) {
+        this.bus = services.getService<IMessageBus>(serviceNames.IMessageBus)
         this.strategy = new BaseStrategy(this.bus, null)
         this.wallet = new Wallet(10000, this.bus)
         this.symbol = "BTCUSDT"
         this.state = 'open'
 
     }
+    get name(): string {
+        return "Bot"
+    }
     stop() {
         this._stop = true
     }
-    async start(jobOrder: JobOrder) {
+    async start(jobOrder: JobOrder): Promise<JobContext> {
 
         let now = utils.toTimeEx(jobOrder.startTime).roundToMinutes(1)
+        if (now.ticks == 1585756800000) {
+            console.log("hi");
+
+        }
+
         const endTime = utils.ticks(jobOrder.endTime)
         const jobContext = new JobContext(this.bus)
         const candles = new CandleStickCollection([])
@@ -128,12 +127,14 @@ export class Bot {
     async openLong(candle: CandleStickData, jobContext: JobContext) {
         if (this.state == 'open') {
             const price = candle.close
+            //better calculation
+            //stopLoss implementation
             const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue(this.strategy.indicators.stopLossAtr) / candle.close)
             this.wallet.leverage = candle.indicators.getNumberValue(this.strategy.indicators.stopLossAtr)
             const orderEX = new Order(this.symbol, 'buy', price, amount, candle.closeTime)
             await this.wallet.processOrder(orderEX)
             const report: IReportContext = { order: orderEX, candle: candle, state: 'openLong' }
-            await this.bus.publish2(Messages.openLongMessage(jobContext.streamID, report));
+            await this.bus.publish2(Messages.openLongReportMessage(jobContext.streamID, report));
             // await this.bus.createMessage("Bot/Report", report).publish()
             this.state = 'openLong'
         }
@@ -150,7 +151,7 @@ export class Bot {
             const orderEX = new Order(this.symbol, 'sell', price, amount, candle.closeTime)
             await this.wallet.processOrder(orderEX)
             const report: IReportContext = { order: orderEX, candle: candle, state: 'openShort' }
-            await this.bus.publish2(Messages.openShortMessage(jobContext.streamID, report));
+            await this.bus.publish2(Messages.openShortReportMessage(jobContext.streamID, report));
             // await this.bus.createMessage("Bot/Report", report).publish()
             this.state = 'openShort'
         }
@@ -168,11 +169,11 @@ export class Bot {
             await this.wallet.processOrder(orderEX)
             if (!closingOpenposition) {
                 const report: IReportContext = { order: orderEX, candle: candle, state: "closeLong" }
-                await this.bus.publish2(Messages.closeLongMessage(jobContext.streamID, report));
+                await this.bus.publish2(Messages.closeLongReportMessage(jobContext.streamID, report));
                 // await this.bus.createMessage("Bot/Report", report).publish()
             } else {
                 const report: IReportContext = { order: orderEX, candle: candle, state: "openShort" }
-                await this.bus.publish2(Messages.openShortMessage(jobContext.streamID, report));
+                await this.bus.publish2(Messages.openShortReportMessage(jobContext.streamID, report));
                 // await this.bus.createMessage("Bot/Report", report).publish()
             }
             this.state = 'open'
@@ -188,15 +189,20 @@ export class Bot {
 
             if (!closingOpenposition) {
                 const report: IReportContext = { order: orderEX, candle: candle, state: "closeShort" }
-                await this.bus.publish2(Messages.closeShortMessage(jobContext.streamID, report));
+                await this.bus.publish2(Messages.closeShortReportMessage(jobContext.streamID, report));
                 // await this.bus.createMessage("Bot/Report", report).publish()
             }
             else {
                 const report: IReportContext = { order: orderEX, candle: candle, state: "openLong" }
-                await this.bus.publish2(Messages.openLongMessage(jobContext.streamID, report));
+                await this.bus.publish2(Messages.openLongReportMessage(jobContext.streamID, report));
                 // await this.bus.createMessage("Bot/Report", report).publish()
             }
             this.state = 'open'
         }
+    }
+}
+export class Bot2 extends Bot {
+    get name() {
+        return "Bot2"
     }
 }
