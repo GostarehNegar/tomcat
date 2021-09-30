@@ -1,9 +1,9 @@
 import tomcat from "../src"
-import { ADXHandler } from "../src/lib/domain/data/indicators/talib-indicators/ADX"
 
 const BinanceDataSource = tomcat.Index.Domain.Exchange.BinanceDataSource
 const CandleStream = tomcat.Index.Domain.Data.CandleStream
 const Pipeline = tomcat.Index.Domain.Strategy.Pipeline
+const Indicators = tomcat.Index.Domain.Indicators
 
 jest.setTimeout(500000)
 describe("pipeline", () => {
@@ -17,7 +17,7 @@ describe("pipeline", () => {
             .add(async (candle) => {
                 console.log(candle)
             })
-        await pipeline.start(tomcat.utils.toTimeEx().addMinutes(-50))
+        await pipeline.start(tomcat.utils.toTimeEx().addMinutes(-60 * 24))
         await tomcat.utils.delay(50 * 1000)
         const filterStream = new CandleStream(myDataProvider, pipeline.filters[0].name)
         expect(await target.getCount()).toBe(await filterStream.getCount())
@@ -25,9 +25,14 @@ describe("pipeline", () => {
     })
     test('indicator', async () => {
         const pipeline = new Pipeline()
-        pipeline.from('binance', 'spot', 'BTCUSDT', '1m')
-            .add(ADXHandler(), { stream: true })
-        await pipeline.start(tomcat.utils.toTimeEx().addMinutes(-50))
+        pipeline.from('binance', 'spot', 'BTCUSDT', '1m', "paria")
+            .add(Indicators.ATR())
+            .add(Indicators.ADX())
+            .add(Indicators.MDI())
+            .add(Indicators.PDI())
+            .add(Indicators.SAR(), { stream: true, name: "FILTER-8000" })
+
+        await pipeline.start(tomcat.utils.toTimeEx().addMinutes(-60 * 24))
         await tomcat.utils.delay(50 * 1000)
 
     })

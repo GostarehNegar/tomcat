@@ -1,6 +1,7 @@
 import { Ticks, utils } from "../../base";
 import { Exchanges, Intervals, Markets, Symbols } from "../base";
 import { CandleStream, DataSourceFactory } from "../data";
+import { IIndicator } from "../indicators";
 
 import { IFilterCallBack } from "./IFilterCallBack";
 import { Filter } from "./filter";
@@ -11,8 +12,8 @@ import { IFilterOptions } from ".";
 
 
 export interface IPipeline {
-    from(exchange: Exchanges, market: Markets, symbol: Symbols, interval: Intervals): IPipeline
-    add(cb: IFilterCallBack, options?: IFilterOptions): IPipeline
+    from(exchange: Exchanges, market: Markets, symbol: Symbols, interval: Intervals, name?: string): IPipeline
+    add(cb: IFilterCallBack | IIndicator, options?: IFilterOptions): IPipeline
     start(startTime?: Ticks): Promise<unknown>
     stop(): Promise<unknown>
 }
@@ -20,8 +21,8 @@ export interface IPipeline {
 export class Pipeline implements IPipeline {
     public filters: Filter[] = [];
     constructor(public candleStream?: CandleStream) { }
-    from(exchange: Exchanges, market: Markets, symbol: Symbols, interval: Intervals) {
-        this.candleStream = new CandleStream(DataSourceFactory.createDataSource(exchange, market, symbol, interval))
+    from(exchange: Exchanges, market: Markets, symbol: Symbols, interval: Intervals, name?: string) {
+        this.candleStream = new CandleStream(DataSourceFactory.createDataSource(exchange, market, symbol, interval), name)
         return this
     }
     stop(): Promise<unknown> {
@@ -41,9 +42,12 @@ export class Pipeline implements IPipeline {
         this.filters.push(filter)
         return this
     }
-    add(cb: IFilterCallBack, options?: IFilterOptions): IPipeline {
-        const name = options.name || utils.randomName('Filter')
-        this._add(new Filter(name, cb, options))
+    add(cb: IFilterCallBack | IIndicator, options?: IFilterOptions): IPipeline {
+        const name = options ? options.name || utils.randomName('Filter') : utils.randomName('Filter')
+        if ((cb as IIndicator).id) {
+            cb = (cb as IIndicator).handler
+        }
+        this._add(new Filter(name, cb as IFilterCallBack, options))
         return this
     }
     async start(startTime?: Ticks) {
