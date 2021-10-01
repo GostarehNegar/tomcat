@@ -1,10 +1,12 @@
 import fetch from 'node-fetch';
 
+
 import { TimeEx, utils } from '../../base';
 import { IHttpContext } from '../../hosting';
 import { CandleStickCollection, CandleStickData, ICandleStickData, Intervals, Markets, Symbols } from '../base';
 
 import { IExchange } from "./IExchange";
+import HttpsProxyAgent from 'https-proxy-agent/dist/agent';
 const api = (_api: string) => 'https://api.binance.com/api/v3/' + _api;
 
 export class BinanceExchange implements IExchange {
@@ -33,8 +35,12 @@ export class BinanceExchange implements IExchange {
     if (limit) {
       url += `&limit=${limit}`;
     }
-    // const proxyAgent = new HttpsProxyAgent.HttpsProxyAgent("http://172.16.6.158:8118")
-    const result = await fetch(url)
+    const proxyAgent = new HttpsProxyAgent("http://tor:8118")
+  //   const result= await axios.get(url, proxy: {
+  //     host: 'tor',
+  //     port: 8118
+  // })
+  const result = await fetch(url, {agent:proxyAgent})
       .then((res) => res.json())
       .then((json: []) => {
         const result: ICandleStickData[] = [];

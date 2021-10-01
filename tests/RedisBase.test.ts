@@ -33,6 +33,7 @@ jest.setTimeout(100000000)
 describe("redis", () => {
     test('redis entries', async () => {
         const myDataProvider = new BinanceDataSource('spot', 'BTCUSDT', '1m');
+        await myDataProvider.getLatestCandle();
         const target = new CandleStream(myDataProvider, "test-" + Math.floor(Math.random() * 1000))
         const countBeforFetch = await target.getCount()
         target.start(utils.toTimeEx(Date.now()).addMinutes(-60 * 24).roundToMinutes(1))

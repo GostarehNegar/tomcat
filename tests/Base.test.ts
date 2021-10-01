@@ -37,14 +37,16 @@ describe('Logger', () => {
 describe('TimeEx', () => {
 
     test('should construct TimeEx with date or ticks', async () => {
-
         const time = new TimeEx(new Date());
         const time2 = new TimeEx(Date.now());
         const time3 = new TimeEx(time2);
+        const time4 = new TimeEx(time3.asDate.toISOString())
+        const time5 = new TimeEx(time4.ticks.toString())
         expect(time.ticks).toBeGreaterThan(0);
         expect(time2.ticks).toBeGreaterThanOrEqual(time.ticks);
         expect(time3.ticks).toBe(time2.ticks)
-
+        expect(time4.ticks).toBe(time3.ticks)
+        expect(time5.ticks).toBe(time4.ticks)
 
     });
 
