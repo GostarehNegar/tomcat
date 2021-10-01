@@ -49,7 +49,7 @@ export class Filter implements IFilter {
                     console.log(`An error wat catched in filter ${this.name}`, err);
                 })
             return false
-        })
+        },context.startTime)
 
     }
 

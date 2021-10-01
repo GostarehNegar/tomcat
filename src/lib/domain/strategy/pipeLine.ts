@@ -51,12 +51,14 @@ export class Pipeline implements IPipeline {
         return this
     }
     async start(startTime?: Ticks) {
-        const context = new PipelineContext()
+        const context = new PipelineContext();
+        context.startTime = startTime;
         for (let i = 0; i < this.filters.length; i++) {
             await this.filters[i].initialize()
         }
         // await this.filters.reverse().map(async (x) => await x.initialize())
-        this.filters.reverse().map((x) => x.run(context))
-        this.candleStream.start(startTime)
+        this.filters.reverse().map((x) => x.run(context));
+        (startTime)
+        //this.candleStream.start(startTime)
     }
 }

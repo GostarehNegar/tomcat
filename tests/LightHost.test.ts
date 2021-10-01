@@ -108,4 +108,20 @@ describe('LightHost', () => {
 
     });
 
+    test('tor', async () => {
+        //const res = await axios.get(`http://localhost:${port1}/host3`);
+        const res = await axios.get('https://youtube.com', {
+            // `proxy` means the request actually goes to the server listening
+            // on localhost:3000, but the request says it is meant for
+            // 'http://httpbin.org/get?answer=42'
+         proxy: {
+             host: 'tor',
+             port: 8118
+         }
+        });
+        console.log(res);
+
+
+    });
+
 });

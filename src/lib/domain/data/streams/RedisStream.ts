@@ -5,7 +5,7 @@ import { Ticks, utils } from "../../../base";
 export class RedisStream {
     public client: redis.RedisClient;
     constructor(public streamName: string) {
-        this.client = redis.createClient();
+        this.client = redis.createClient({host:'redis'});
         this.streamName = streamName;
     }
     async XADD(time: Ticks, data, ignoreDuplicate = true) {
