@@ -1,18 +1,15 @@
-import { CandleStickCollection, CandleStickData } from "../base"
-import { PipelineContext } from "../strategy"
+import { CandleStickCollection, CandleStickData, Intervals } from "../base"
+import domainUtils from "../base/Domain.Utils"
+import { IFilter } from "../strategy"
 
 import { IIndicator } from "./IIndicator"
 import { TalibWrapperEx } from "./talibWrapper"
 
-export const ADX = (period = 14, maxCount = 200): IIndicator => {
+export const ADX = (period = 14, maxCount = 200, interval: Intervals = '4h'): IIndicator => {
+  const id = `ADX-${period}-${maxCount}-${interval}`
   return {
-    handler: async (candle: CandleStickData, ctx: PipelineContext) => {
-      ctx.myContext.candles = ctx.myContext.candles || new CandleStickCollection([])
-      const candles = ctx.myContext.candles as CandleStickCollection
-      if (candles.length > maxCount) {
-        candles.items.splice(0, 1)
-      }
-      candles.push(candle)
+    handler: async (candle: CandleStickData, THIS: IFilter) => {
+      const candles = THIS.getScaler(interval).push(candle)
       const ADXArray = await TalibWrapperEx.execute({
         name: "ADX",
         high: candles.getLast(maxCount).getSingleOHLCV('high'),
@@ -22,8 +19,32 @@ export const ADX = (period = 14, maxCount = 200): IIndicator => {
         endIdx: candles.getLast(maxCount).length - 1,
         optInTimePeriod: period,
       }) as number[]
-      candle.indicators.setValueEX(`ADX-${period}-${maxCount}`, ADXArray[ADXArray.length - 1])
+      candle.indicators.setValue(id, ADXArray[ADXArray.length - 1])
     },
-    id: `ADX-${period}-${maxCount}`
+    id: id
   }
 }
+export class CandleStickCollectionScaler {
+  public oneMinuteCandles: CandleStickCollection = new CandleStickCollection([])
+  public candles: CandleStickCollection = new CandleStickCollection([])
+  private _interval: number
+  constructor(public interval: Intervals, public maxCount = 200) {
+    this._interval = domainUtils.toMinutes(interval) * 60 * 1000
+  }
+  push(candle: CandleStickData) {
+    if (this.interval != '1m') {
+      if (this.oneMinuteCandles.firstCandle && (candle.openTime - this.oneMinuteCandles.firstCandle.openTime >= this._interval)) {
+        this.oneMinuteCandles.clear()
+      }
+      this.oneMinuteCandles.push(candle)
+      this.candles.push(this.oneMinuteCandles.merge())
+    } else {
+      this.candles.push(candle)
+    }
+    if (this.candles.length > this.maxCount) {
+      this.candles.items.splice(0, 1)
+    }
+    return this.candles
+  }
+}
+

@@ -1,5 +1,6 @@
 import { IndicatorValueCollection } from "./IndicatorValueCollection";
 
+export type ISignalValues = { [index: string]: string };
 
 export interface ICandleStickData {
     openTime: number;
@@ -15,5 +16,6 @@ export interface ICandleStickData {
     V3?: number;
     V4?: number;
     // indicators_deprecated?: { [index: string]: number };
+    signals?: ISignalValues;
     indicators?: IndicatorValueCollection;
 }

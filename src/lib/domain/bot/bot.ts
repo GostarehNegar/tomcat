@@ -129,8 +129,8 @@ export class Bot implements IBot {
             const price = candle.close
             //better calculation
             //stopLoss implementation
-            const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue(this.strategy.indicators.stopLossAtr) / candle.close)
-            this.wallet.leverage = candle.indicators.getNumberValue(this.strategy.indicators.stopLossAtr)
+            const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue_deprecated(this.strategy.indicators.stopLossAtr) / candle.close)
+            this.wallet.leverage = candle.indicators.getNumberValue_deprecated(this.strategy.indicators.stopLossAtr)
             const orderEX = new Order(this.symbol, 'buy', price, amount, candle.closeTime)
             await this.wallet.processOrder(orderEX)
             const report: IReportContext = { order: orderEX, candle: candle, state: 'openLong' }
@@ -146,8 +146,8 @@ export class Bot implements IBot {
     async openShort(candle: CandleStickData, jobContext: JobContext) {
         if (this.state == 'open') {
             const price = candle.close
-            const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue(this.strategy.indicators.stopLossAtr)) / candle.close
-            this.wallet.leverage = candle.indicators.getNumberValue(this.strategy.indicators.stopLossAtr)
+            const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue_deprecated(this.strategy.indicators.stopLossAtr)) / candle.close
+            this.wallet.leverage = candle.indicators.getNumberValue_deprecated(this.strategy.indicators.stopLossAtr)
             const orderEX = new Order(this.symbol, 'sell', price, amount, candle.closeTime)
             await this.wallet.processOrder(orderEX)
             const report: IReportContext = { order: orderEX, candle: candle, state: 'openShort' }

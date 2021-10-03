@@ -1,10 +1,10 @@
-import { IIndicator } from '../IIndicator';
+import { dep_IIndicator } from '../IIndicator';
 import { IIndicatorCalculationContext } from '../IIndicatorCalculationContext';
 import { Indicator } from '../Indicator';
 
 import { TalibWrapperEx } from './talibWrapper';
 
-export class SAREXT extends Indicator implements IIndicator {
+export class SAREXT extends Indicator implements dep_IIndicator {
   constructor(
     public startValue: number,
     public acceleration: number,
@@ -54,7 +54,7 @@ export class SAREXT extends Indicator implements IIndicator {
       optInAccelerationMaxLong: this.maxAcceleration,
     }) as number[]
 
-    context.candleSticks.lastCandle.indicators.setValue(this, Math.abs(SARArray[SARArray.length - 1]));
+    context.candleSticks.lastCandle.indicators.setValue_depricated(this, Math.abs(SARArray[SARArray.length - 1]));
   }
   calculate(context: IIndicatorCalculationContext) {
     return context.lastCandle ? this.calculate2(context) : this.calculate1(context)

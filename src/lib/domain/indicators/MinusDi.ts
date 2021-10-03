@@ -1,18 +1,14 @@
-import { CandleStickCollection, CandleStickData } from "../base"
-import { PipelineContext } from "../strategy"
+import { CandleStickData, Intervals } from "../base"
+import { IFilter } from "../strategy"
 
 import { IIndicator } from "./IIndicator"
 import { TalibWrapperEx } from "./talibWrapper"
 
-export const MDI = (period = 14, maxCount = 200): IIndicator => {
+export const MDI = (period = 14, maxCount = 200, interval: Intervals = '4h'): IIndicator => {
+  const id = `MinusDi-${period}-${maxCount}-${interval}`
   return {
-    handler: async (candle: CandleStickData, ctx: PipelineContext) => {
-      ctx.myContext.candles = ctx.myContext.candles || new CandleStickCollection([])
-      const candles = ctx.myContext.candles as CandleStickCollection
-      if (candles.length > maxCount) {
-        candles.items.splice(0, 1)
-      }
-      candles.push(candle)
+    handler: async (candle: CandleStickData, THIS: IFilter) => {
+      const candles = THIS.getScaler(interval).push(candle)
       const MDIArray = await TalibWrapperEx.execute({
         name: "MINUS_DI",
         high: candles.getLast(maxCount).getSingleOHLCV('high'),
@@ -22,8 +18,8 @@ export const MDI = (period = 14, maxCount = 200): IIndicator => {
         endIdx: candles.getLast(maxCount).length - 1,
         optInTimePeriod: period,
       }) as number[]
-      candle.indicators.setValueEX(`MinusDi-${period}-${maxCount}`, MDIArray[MDIArray.length - 1]);
+      candle.indicators.setValue(id, MDIArray[MDIArray.length - 1]);
     },
-    id: `MinusDi-${period}-${maxCount}`
+    id: id
   }
 }

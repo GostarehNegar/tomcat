@@ -1,19 +1,15 @@
-import { CandleStickCollection, CandleStickData } from "../base"
-import { PipelineContext } from "../strategy"
+import { CandleStickData, Intervals } from "../base"
+import { IFilter } from "../strategy"
 
 import { IIndicator } from "./IIndicator"
 import { TalibWrapperEx } from "./talibWrapper"
 
 
-export const SAR = (startValue = 0.02, acceleration = 0.005, maxAcceleration = 0.2, maxCount = 200): IIndicator => {
+export const SAR = (startValue = 0.02, acceleration = 0.005, maxAcceleration = 0.2, maxCount = 200, interval: Intervals = "4h"): IIndicator => {
+  const id = `SAREXT-${startValue}-${acceleration}-${maxAcceleration}-${maxCount}-${interval}`
   return {
-    handler: async (candle: CandleStickData, ctx: PipelineContext) => {
-      ctx.myContext.candles = ctx.myContext.candles || new CandleStickCollection([])
-      const candles = ctx.myContext.candles as CandleStickCollection
-      if (candles.length > maxCount) {
-        candles.items.splice(0, 1)
-      }
-      candles.push(candle)
+    handler: async (candle: CandleStickData, THIS: IFilter) => {
+      const candles = THIS.getScaler(interval).push(candle)
       const SARArray = await TalibWrapperEx.execute({
         name: "SAREXT",
         high: candles.getLast(maxCount).getSingleOHLCV('high'),
@@ -32,8 +28,8 @@ export const SAR = (startValue = 0.02, acceleration = 0.005, maxAcceleration = 0
         optInAccelerationMaxLong: maxAcceleration,
       }) as number[]
 
-      candle.indicators.setValueEX(`SAREXT-${startValue}-${acceleration}-${maxAcceleration}-${maxCount}`, Math.abs(SARArray[SARArray.length - 1]));
+      candle.indicators.setValue(id, Math.abs(SARArray[SARArray.length - 1]));
     },
-    id: `SAREXT-${startValue}-${acceleration}-${maxAcceleration}-${maxCount}`
+    id: id
   }
 }

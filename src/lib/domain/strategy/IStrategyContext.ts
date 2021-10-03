@@ -1,4 +1,4 @@
-import { IIndicator } from "../data";
+import { dep_IIndicator } from "../data";
 
 
 export interface IStrategyContext {
@@ -9,5 +9,5 @@ export interface IStrategyContext {
     minusDi?: { id: string; period: number; };
     plusDi?: { id: string; period: number; };
     sar?: { id: string; startIndex: number; acceleration: number; maxAcceleration: number; };
-    customIndicators?: IIndicator[];
+    customIndicators?: dep_IIndicator[];
 }

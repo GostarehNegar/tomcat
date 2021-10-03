@@ -1,6 +1,6 @@
 import { Ticks, utils } from "../../base";
 import { Exchanges, Intervals, Markets, Symbols } from "../base";
-import { CandleStream, DataSourceFactory } from "../data";
+import { CandleStream, DataSourceFactory, DataSourceStream, ICandleStream } from "../data";
 import { IIndicator } from "../indicators";
 
 import { IFilterCallBack } from "./IFilterCallBack";
@@ -14,15 +14,21 @@ import { IFilterOptions } from ".";
 export interface IPipeline {
     from(exchange: Exchanges, market: Markets, symbol: Symbols, interval: Intervals, name?: string): IPipeline
     add(cb: IFilterCallBack | IIndicator, options?: IFilterOptions): IPipeline
+    addEX(cb: IFilterCallBack | IIndicator, callback: (filter: Filter) => void): IPipeline
     start(startTime?: Ticks): Promise<unknown>
     stop(): Promise<unknown>
 }
 
 export class Pipeline implements IPipeline {
     public filters: Filter[] = [];
-    constructor(public candleStream?: CandleStream) { }
+
+    constructor(public candleStream?: ICandleStream) { }
     from(exchange: Exchanges, market: Markets, symbol: Symbols, interval: Intervals, name?: string) {
-        this.candleStream = new CandleStream(DataSourceFactory.createDataSource(exchange, market, symbol, interval), name)
+        this.candleStream = new DataSourceStream(DataSourceFactory.createDataSource(exchange, market, symbol, interval), name)
+        return this
+    }
+    fromStream(name: string) {
+        this.candleStream = new CandleStream(name)
         return this
     }
     stop(): Promise<unknown> {
@@ -50,6 +56,15 @@ export class Pipeline implements IPipeline {
         this._add(new Filter(name, cb as IFilterCallBack, options))
         return this
     }
+    addEX(cb: IFilterCallBack | IIndicator, callback: (filter: Filter) => void): IPipeline {
+        const filter = new Filter(null, cb as IFilterCallBack, null)
+        callback(filter)
+        if ((cb as IIndicator).id) {
+            cb = (cb as IIndicator).handler
+        }
+        this._add(filter)
+        return this
+    }
     async start(startTime?: Ticks) {
         const context = new PipelineContext();
         context.startTime = startTime;
@@ -59,6 +74,8 @@ export class Pipeline implements IPipeline {
         // await this.filters.reverse().map(async (x) => await x.initialize())
         this.filters.reverse().map((x) => x.run(context));
         (startTime)
-        //this.candleStream.start(startTime)
+        if (this.candleStream.isWriter) {
+            this.candleStream.start(startTime)
+        }
     }
 }

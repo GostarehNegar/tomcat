@@ -1,11 +1,11 @@
 import { CandleStickCollection, CandleStickData } from '../../../base';
-import { IIndicator } from '../IIndicator';
+import { dep_IIndicator } from '../IIndicator';
 import { IIndicatorCalculationContext } from '../IIndicatorCalculationContext';
 import { Indicator } from '../Indicator';
 
 import { TalibWrapperEx } from './talibWrapper';
 
-export class ADX extends Indicator implements IIndicator {
+export class ADX extends Indicator implements dep_IIndicator {
   constructor(public period: number, public maxCount: number = 200) {
     super("ADX", `ADX-${period}-${maxCount}`);
   }
@@ -31,7 +31,7 @@ export class ADX extends Indicator implements IIndicator {
       endIdx: context.candleSticks.getLast(this.maxCount).length - 1,
       optInTimePeriod: this.period,
     }) as number[]
-    context.candleSticks.lastCandle.indicators.setValue(this, ADXArray[ADXArray.length - 1])
+    context.candleSticks.lastCandle.indicators.setValue_depricated(this, ADXArray[ADXArray.length - 1])
   }
   calculate(context: IIndicatorCalculationContext) {
     return context.lastCandle ? this.calculate2(context) : this.calculate1(context)
@@ -52,7 +52,7 @@ export const ADXHandler = (period = 14, maxCount = 200) => {
       endIdx: context.candles.getLast(maxCount).length - 1,
       optInTimePeriod: period,
     }) as number[]
-    candle.indicators.setValue({ id: `ADX-${period}-${maxCount}` } as IIndicator, ADXArray[ADXArray.length - 1])
+    candle.indicators.setValue_depricated({ id: `ADX-${period}-${maxCount}` } as dep_IIndicator, ADXArray[ADXArray.length - 1])
   }
   return handler
 }

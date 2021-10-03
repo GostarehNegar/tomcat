@@ -2,7 +2,7 @@ import { IMessageBus } from '../../bus';
 import { CandleStickCollection, IStrategySignal } from '../base';
 import { JobContext } from '../bot';
 import { MessageNames } from "../bot";
-import { IDataProvider, IIndicator, IIndicatorCalculationContext, IndicatorProvider, Indicators } from '../data';
+import { dep_IIndicator, IDataProvider, IIndicatorCalculationContext, IndicatorProvider, Indicators } from '../data';
 import { DataProvider } from '../data/sources/DataProvider';
 
 import { IStrategy } from './IStrategy';
@@ -26,8 +26,8 @@ export class Strategy {
       const candle = candleSticks.items[i];
       if (
         candle.indicators &&
-        candle.indicators.has(this.indicators.ema) &&
-        candle.indicators.getValue(this.indicators.ema) > 0.5
+        candle.indicators.has_deprecated(this.indicators.ema) &&
+        candle.indicators.getValue_deprecated(this.indicators.ema) > 0.5
       ) {
         await this.bus.createMessage('signals/myStrategy/buy', {}).publish();
       }
@@ -68,40 +68,40 @@ export class BaseStrategy implements IStrategy {
     }
     if (
       indicator &&
-      indicator.has(this.indicators.plusDi, this.indicators.minusDi, this.indicators.adxSlope, this.indicators.isSarAbove)
+      indicator.has_deprecated(this.indicators.plusDi, this.indicators.minusDi, this.indicators.adxSlope, this.indicators.isSarAbove)
     ) {
       if (
-        indicator.getBoolValue(this.indicators.isSarAbove) == false &&
-        indicator.getValue(this.indicators.plusDi) > (indicator.getNumberValue(this.indicators.minusDi) + 5) &&
-        indicator.getValue(this.indicators.adxSlope) > 1
+        indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == false &&
+        indicator.getValue_deprecated(this.indicators.plusDi) > (indicator.getNumberValue_deprecated(this.indicators.minusDi) + 5) &&
+        indicator.getValue_deprecated(this.indicators.adxSlope) > 1
       ) {
         const buyOrder: IStrategySignal = { candle: candle }
         result = "openLong"
         await this.bus.createMessage(`${jobContext.streamID}/${MessageNames.openLongSignal}`, buyOrder).publish();
       } else if (
-        indicator.getBoolValue(this.indicators.isSarAbove) == true &&
-        indicator.getValue(this.indicators.plusDi) < (indicator.getNumberValue(this.indicators.minusDi) - 5) &&
-        indicator.getValue(this.indicators.adxSlope) > 1
+        indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == true &&
+        indicator.getValue_deprecated(this.indicators.plusDi) < (indicator.getNumberValue_deprecated(this.indicators.minusDi) - 5) &&
+        indicator.getValue_deprecated(this.indicators.adxSlope) > 1
       ) {
         const sellOrder: IStrategySignal = { candle: candle }
         result = 'openShort'
         await this.bus.createMessage(`${jobContext.streamID}/${MessageNames.openShortSignal}`, sellOrder).publish();
       }
       else if (
-        indicator.getBoolValue(this.indicators.isSarAbove) == true ||
-        indicator.getValue(this.indicators.plusDi) < (indicator.getNumberValue(this.indicators.minusDi) - 5) ||
+        indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == true ||
+        indicator.getValue_deprecated(this.indicators.plusDi) < (indicator.getNumberValue_deprecated(this.indicators.minusDi) - 5) ||
         // > -5
-        indicator.getValue(this.indicators.adxSlope) < -5
+        indicator.getValue_deprecated(this.indicators.adxSlope) < -5
       ) {
         const sellOrder: IStrategySignal = { candle: candle }
         result = 'closeLong'
         await this.bus.createMessage(`${jobContext.streamID}/${MessageNames.closeLongSignal}`, sellOrder).publish();
       }
       else if (
-        indicator.getBoolValue(this.indicators.isSarAbove) == false ||
-        indicator.getValue(this.indicators.plusDi) > (indicator.getNumberValue(this.indicators.minusDi) + 5) ||
+        indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == false ||
+        indicator.getValue_deprecated(this.indicators.plusDi) > (indicator.getNumberValue_deprecated(this.indicators.minusDi) + 5) ||
         // > -5
-        indicator.getValue(this.indicators.adxSlope) < -5
+        indicator.getValue_deprecated(this.indicators.adxSlope) < -5
       ) {
         const sellOrder: IStrategySignal = { candle: candle }
         result = 'closeShort'
@@ -124,35 +124,35 @@ export class BaseStrategy implements IStrategy {
     throw 'not implemented'
     await provider.calculate(null);
     for (let i = 0; i < candleSticks.items.length; i++) {
-      if (candleSticks.items[i].indicators && candleSticks.items[i].indicators.has(this.indicators.plusDi, this.indicators.minusDi, this.indicators.isSarAbove, this.indicators.adxSlope)) {
+      if (candleSticks.items[i].indicators && candleSticks.items[i].indicators.has_deprecated(this.indicators.plusDi, this.indicators.minusDi, this.indicators.isSarAbove, this.indicators.adxSlope)) {
         const indicator = candleSticks.items[i].indicators;
         if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == true &&
-          indicator.getValue(this.indicators.plusDi) > indicator.getValue(this.indicators.minusDi) &&
-          indicator.getValue(this.indicators.adxSlope) > 1
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == true &&
+          indicator.getValue_deprecated(this.indicators.plusDi) > indicator.getValue_deprecated(this.indicators.minusDi) &&
+          indicator.getValue_deprecated(this.indicators.adxSlope) > 1
         ) {
           const buyOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/openLong`, buyOrder).publish();
         } else if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == false &&
-          indicator.getValue(this.indicators.plusDi) < indicator.getValue(this.indicators.minusDi) &&
-          indicator.getValue(this.indicators.adxSlope) > 1
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == false &&
+          indicator.getValue_deprecated(this.indicators.plusDi) < indicator.getValue_deprecated(this.indicators.minusDi) &&
+          indicator.getValue_deprecated(this.indicators.adxSlope) > 1
         ) {
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/openShort`, sellOrder).publish();
         }
         else if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == false ||
-          indicator.getValue(this.indicators.plusDi) < indicator.getValue(this.indicators.minusDi) ||
-          indicator.getValue(this.indicators.adxSlope) < -5
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == false ||
+          indicator.getValue_deprecated(this.indicators.plusDi) < indicator.getValue_deprecated(this.indicators.minusDi) ||
+          indicator.getValue_deprecated(this.indicators.adxSlope) < -5
         ) {
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/closeLong`, sellOrder).publish();
         }
         else if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == true ||
-          indicator.getValue(this.indicators.plusDi) > indicator.getValue(this.indicators.minusDi) ||
-          indicator.getValue(this.indicators.adxSlope) < -5
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == true ||
+          indicator.getValue_deprecated(this.indicators.plusDi) > indicator.getValue_deprecated(this.indicators.minusDi) ||
+          indicator.getValue_deprecated(this.indicators.adxSlope) < -5
         ) {
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/closeShort`, sellOrder).publish();
@@ -209,34 +209,34 @@ export class BaseStrategyEX implements IStrategy {
     for (let i = 0; i < candleSticks.items.length; i++) {
       if (
         candleSticks.items[i].indicators &&
-        candleSticks.items[i].indicators.has(this.indicators.plusDi, this.indicators.minusDi, this.indicators.adxSlope, this.indicators.isSarAbove)
+        candleSticks.items[i].indicators.has_deprecated(this.indicators.plusDi, this.indicators.minusDi, this.indicators.adxSlope, this.indicators.isSarAbove)
       ) {
         const indicator = candleSticks.items[i].indicators;
         if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == false &&
-          indicator.getValue(this.indicators.plusDi) > (indicator.getNumberValue(this.indicators.minusDi) + 5) &&
-          indicator.getValue(this.indicators.adxSlope) >= 5
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == false &&
+          indicator.getValue_deprecated(this.indicators.plusDi) > (indicator.getNumberValue_deprecated(this.indicators.minusDi) + 5) &&
+          indicator.getValue_deprecated(this.indicators.adxSlope) >= 5
         ) {
           const buyOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/openLong`, buyOrder).publish();
         } else if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == true &&
-          indicator.getValue(this.indicators.plusDi) < (indicator.getNumberValue(this.indicators.minusDi) - 5) &&
-          indicator.getValue(this.indicators.adxSlope) >= 5
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == true &&
+          indicator.getValue_deprecated(this.indicators.plusDi) < (indicator.getNumberValue_deprecated(this.indicators.minusDi) - 5) &&
+          indicator.getValue_deprecated(this.indicators.adxSlope) >= 5
         ) {
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/openShort`, sellOrder).publish();
         }
         else if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == true ||
-          indicator.getValue(this.indicators.plusDi) < (indicator.getNumberValue(this.indicators.minusDi) - 5)
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == true ||
+          indicator.getValue_deprecated(this.indicators.plusDi) < (indicator.getNumberValue_deprecated(this.indicators.minusDi) - 5)
         ) {
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/closeLong`, sellOrder).publish();
         }
         else if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == false ||
-          indicator.getValue(this.indicators.plusDi) > (indicator.getNumberValue(this.indicators.minusDi) + 5)
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == false ||
+          indicator.getValue_deprecated(this.indicators.plusDi) > (indicator.getNumberValue_deprecated(this.indicators.minusDi) + 5)
         ) {
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/closeShort`, sellOrder).publish();
@@ -275,36 +275,36 @@ export class BaseStrategyExtended implements IStrategy {
       }
       if (
         candleSticks.items[i].indicators &&
-        candleSticks.items[i].indicators.has(this.indicators.plusDi, this.indicators.minusDi, this.indicators.adxSlope, this.indicators.isSarAbove)
+        candleSticks.items[i].indicators.has_deprecated(this.indicators.plusDi, this.indicators.minusDi, this.indicators.adxSlope, this.indicators.isSarAbove)
       ) {
         const indicator = candleSticks.items[i].indicators;
         if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == false &&
-          indicator.getValue(this.indicators.plusDi) > (indicator.getNumberValue(this.indicators.minusDi) + 5) &&
-          indicator.getValue(this.indicators.adxSlope) > 1
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == false &&
+          indicator.getValue_deprecated(this.indicators.plusDi) > (indicator.getNumberValue_deprecated(this.indicators.minusDi) + 5) &&
+          indicator.getValue_deprecated(this.indicators.adxSlope) > 1
         ) {
           const buyOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/openLong`, buyOrder).publish();
         } else if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == true &&
-          indicator.getValue(this.indicators.plusDi) < (indicator.getNumberValue(this.indicators.minusDi) - 5) &&
-          indicator.getValue(this.indicators.adxSlope) > 1
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == true &&
+          indicator.getValue_deprecated(this.indicators.plusDi) < (indicator.getNumberValue_deprecated(this.indicators.minusDi) - 5) &&
+          indicator.getValue_deprecated(this.indicators.adxSlope) > 1
         ) {
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/openShort`, sellOrder).publish();
         }
         else if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == true ||
-          indicator.getValue(this.indicators.plusDi) < (indicator.getNumberValue(this.indicators.minusDi) - 5) ||
-          indicator.getValue(this.indicators.adxSlope) < -5
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == true ||
+          indicator.getValue_deprecated(this.indicators.plusDi) < (indicator.getNumberValue_deprecated(this.indicators.minusDi) - 5) ||
+          indicator.getValue_deprecated(this.indicators.adxSlope) < -5
         ) {
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/closeLong`, sellOrder).publish();
         }
         else if (
-          indicator.getBoolValue(this.indicators.isSarAbove) == false ||
-          indicator.getValue(this.indicators.plusDi) > (indicator.getNumberValue(this.indicators.minusDi) + 5) ||
-          indicator.getValue(this.indicators.adxSlope) < -5
+          indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == false ||
+          indicator.getValue_deprecated(this.indicators.plusDi) > (indicator.getNumberValue_deprecated(this.indicators.minusDi) + 5) ||
+          indicator.getValue_deprecated(this.indicators.adxSlope) < -5
         ) {
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/closeShort`, sellOrder).publish();
@@ -335,14 +335,14 @@ export class TestStrategy extends BaseStrategy {
       .add(this.indicators.adxSlope)
     await provider.calculate(null);
     for (let i = 0; i < candleSticks.items.length; i++) {
-      if (candleSticks.items[i].indicators && candleSticks.items[i].indicators.has(this.indicators.plusDi, this.indicators.minusDi, this.indicators.adxSlope, this.indicators.isSarAbove)) {
+      if (candleSticks.items[i].indicators && candleSticks.items[i].indicators.has_deprecated(this.indicators.plusDi, this.indicators.minusDi, this.indicators.adxSlope, this.indicators.isSarAbove)) {
         const indicator = candleSticks.items[i].indicators;
-        if (indicator.getBoolValue(this.indicators.isSarAbove) == false && indicator.getValue(this.indicators.plusDi) > (indicator.getNumberValue(this.indicators.minusDi) + 5) && indicator.getValue(this.indicators.adxSlope) > 1) {
+        if (indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == false && indicator.getValue_deprecated(this.indicators.plusDi) > (indicator.getNumberValue_deprecated(this.indicators.minusDi) + 5) && indicator.getValue_deprecated(this.indicators.adxSlope) > 1) {
 
           const buyOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/openLong`, buyOrder).publish();
         }
-        else if (indicator.getBoolValue(this.indicators.isSarAbove) == true || indicator.getValue(this.indicators.plusDi) < (indicator.getNumberValue(this.indicators.minusDi) - 5) || indicator.getValue(this.indicators.adxSlope) < -5) {
+        else if (indicator.getBoolValue_deprecated(this.indicators.isSarAbove) == true || indicator.getValue_deprecated(this.indicators.plusDi) < (indicator.getNumberValue_deprecated(this.indicators.minusDi) - 5) || indicator.getValue_deprecated(this.indicators.adxSlope) < -5) {
 
           const sellOrder: IStrategySignal = { candle: candleSticks.items[i] }
           await this.bus.createMessage(`${this.stream}/openShort`, sellOrder).publish();
@@ -353,7 +353,7 @@ export class TestStrategy extends BaseStrategy {
   }
 }
 const isSarAboveName = "isSarAbove"
-const isSarAbove: IIndicator = {
+const isSarAbove: dep_IIndicator = {
   pass: 1,
   name: isSarAboveName,
   id: isSarAboveName,
@@ -362,35 +362,35 @@ const isSarAbove: IIndicator = {
       const median = (candle.high + candle.low) / 2;
       if (
         candle.indicators &&
-        candle.indicators.has(Indicators.SAREXT(0.02, 0.005, 0.2)) &&
-        candle.indicators.getValue(Indicators.SAREXT(0.02, 0.005, 0.2)) < median
+        candle.indicators.has_deprecated(Indicators.SAREXT(0.02, 0.005, 0.2)) &&
+        candle.indicators.getValue_deprecated(Indicators.SAREXT(0.02, 0.005, 0.2)) < median
       ) {
-        candle.indicators.setValue(isSarAbove, false)
+        candle.indicators.setValue_depricated(isSarAbove, false)
       } else if (
         candle.indicators &&
-        candle.indicators.has(Indicators.SAREXT(0.02, 0.005, 0.2)) &&
-        candle.indicators.getValue(Indicators.SAREXT(0.02, 0.005, 0.2)) > median
+        candle.indicators.has_deprecated(Indicators.SAREXT(0.02, 0.005, 0.2)) &&
+        candle.indicators.getValue_deprecated(Indicators.SAREXT(0.02, 0.005, 0.2)) > median
       ) {
-        candle.indicators.setValue(isSarAbove, true)
+        candle.indicators.setValue_depricated(isSarAbove, true)
       }
     });
   },
 };
 const stopLossAtrName = "stopLossAtr"
-export const stopLossAtr: IIndicator = {
+export const stopLossAtr: dep_IIndicator = {
   pass: 1,
   name: stopLossAtrName,
   id: stopLossAtrName,
   calculate: async (context: IIndicatorCalculationContext) => {
     context.candleSticks.items.map((candle) => {
-      if (candle.indicators && candle.indicators.has(Indicators.ATR(14))) {
-        candle.indicators.setValue(stopLossAtr, 1.25 * candle.indicators.getNumberValue(Indicators.ATR(14)))
+      if (candle.indicators && candle.indicators.has_deprecated(Indicators.ATR(14))) {
+        candle.indicators.setValue_depricated(stopLossAtr, 1.25 * candle.indicators.getNumberValue_deprecated(Indicators.ATR(14)))
       }
     });
   },
 };
 const adxSlopeName = "adxSlope"
-const adxSlope: IIndicator = {
+const adxSlope: dep_IIndicator = {
   pass: 1,
   name: adxSlopeName,
   id: adxSlopeName,
@@ -400,12 +400,12 @@ const adxSlope: IIndicator = {
       const previousCandle = context.candleSticks.items[i - 1];
       if (previousCandle &&
         candle.indicators &&
-        candle.indicators.has(Indicators.ADX(14)) &&
+        candle.indicators.has_deprecated(Indicators.ADX(14)) &&
         previousCandle.indicators &&
-        previousCandle.indicators.has(Indicators.ADX(14))
+        previousCandle.indicators.has_deprecated(Indicators.ADX(14))
       ) {
-        const res = ((candle.indicators.getNumberValue(Indicators.ADX(14)) - previousCandle.indicators.getNumberValue(Indicators.ADX(14))) / previousCandle.indicators.getNumberValue(Indicators.ADX(14))) * 100
-        candle.indicators.setValue(adxSlope, res)
+        const res = ((candle.indicators.getNumberValue_deprecated(Indicators.ADX(14)) - previousCandle.indicators.getNumberValue_deprecated(Indicators.ADX(14))) / previousCandle.indicators.getNumberValue_deprecated(Indicators.ADX(14))) * 100
+        candle.indicators.setValue_depricated(adxSlope, res)
 
       }
     }
