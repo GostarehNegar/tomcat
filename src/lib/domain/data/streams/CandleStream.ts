@@ -6,6 +6,7 @@ import { IDataSource } from "../base";
 
 import { RedisStream } from "./RedisStream";
 
+
 export interface ICandleStream {
     get isWriter(): boolean;
     play(cb: (candle: CandleStickData, err) => boolean, startTime?: Ticks, timeOut?, count?, generateMissingCandles?): Promise<void>
@@ -70,7 +71,7 @@ export class CandleStream extends EventEmitter implements ICandleStream {
         const stream = new RedisStream(this._streamName)
         await stream.XREADBLOCK((res, err) => {
             // return cb && cb(res ? JSON.parse(res) as CandleStickData : null, err)
-            if (res && res.candle === '"null"') {
+            if (res && res.data === "null") {
                 if (generateMissingCandles) {
                     const mCandle = CandleStickData.fromMissing(res.id, res.id + 60000 - 1)
                     return cb && cb(mCandle, err)
@@ -78,7 +79,7 @@ export class CandleStream extends EventEmitter implements ICandleStream {
                 }
                 return false
             }
-            return cb && cb(res ? CandleStickData.from(JSON.parse(res.candle)) : null, err)
+            return cb && cb(res ? CandleStickData.from(JSON.parse(res.data)) : null, err)
             // return cb && cb(res ? CandleStickData.from(JSON.parse(res)) : null, err)
         }, utils.ticks(startTime).toString(), timeOut, count)
     }
@@ -188,3 +189,4 @@ export class DataSourceStream extends CandleStream implements ICandleStream {
         }, 1000)
     }
 }
+

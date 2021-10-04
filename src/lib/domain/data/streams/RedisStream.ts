@@ -32,7 +32,7 @@ export class RedisStream {
     }
     async _XADD(time: number, data, ignoreDuplicate = true) {
         return new Promise((resolve, reject) => {
-            this.client.sendCommand("XADD", [this.streamName, utils.ticks(time), utils.toTimeEx(time).asUTCDate, JSON.stringify(data)], (err, res) => {
+            this.client.sendCommand("XADD", [this.streamName, utils.ticks(time), utils.toTimeEx(time).asUTCDate, typeof data === 'string' ? data : JSON.stringify(data)], (err, res) => {
                 if (err) {
                     if (((err.message as string).indexOf('is equal or smaller than the target') < 0) || !ignoreDuplicate) {
                         reject(err)
@@ -136,7 +136,7 @@ export class RedisStream {
             });
         })
     }
-    XREADBLOCK(cb: (res: { id: number, candle: string }, err) => boolean, lastId = '$', timeOut = 5000000, count = 1) {
+    XREADBLOCK(cb: (res: { id: number, data: string }, err) => boolean, lastId = '$', timeOut = 5000000, count = 1) {
         let shouldCall = true;
         const handle = setInterval(() => {
             if (shouldCall) {
@@ -148,7 +148,7 @@ export class RedisStream {
                         if (res && Array.isArray(res) && res.length > 0 && res[0] && Array.isArray(res[0]) && res[0].length > 1 && res[0][1] && Array.isArray(res[0][1])) {
                             for (let i = 0; i < res[0][1].length; i++) {
                                 lastId = res[0][1][i][0]
-                                const stop = cb({ id: parseInt(lastId), candle: res[0][1][i][1][1] }, err)
+                                const stop = cb({ id: parseInt(lastId), data: res[0][1][i][1][1] }, err)
                                 if (stop) {
                                     clearInterval(handle)
                                     return

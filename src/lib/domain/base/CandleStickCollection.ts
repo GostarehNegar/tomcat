@@ -83,7 +83,7 @@ export class CandleStickCollection {
     const last = this.items.reverse().find(x => !x.isMissing)
     this.items.reverse()
     return first != null
-      ? new CandleStickData(this.firstCandle.openTime, first.open, high, low, last.close, this.lastCandle.closeTime)
+      ? new CandleStickData(this.firstCandle.openTime, first.open, high, low, last.close, this.lastCandle.closeTime, last.volume, last.amount, last.V1, last.V2, last.V3, last.V4, '', last.indicators)
       : null
 
 

@@ -9,7 +9,7 @@
   "license": "MIT",
   "keywords": [],
   "scripts": {
-    "run": "run-s build && node ./build/main/fetchData.js",
+    "run": "run-s build && node ./build/main/runMyBot.js",
     "data": "run-s build && node ./build/main/dataFetch.js",
     "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",

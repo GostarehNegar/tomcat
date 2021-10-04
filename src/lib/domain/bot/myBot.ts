@@ -1,5 +1,6 @@
-import { utils } from "../../base";
+import { Ticks, utils } from "../../base";
 import { CandleStickData, States, Symbols } from "../base";
+import { Stream } from "../data";
 import * as Indicators from "../indicators";
 import { IFilter, Pipeline } from "../strategy";
 import { Order, Wallet } from "../wallet";
@@ -37,7 +38,8 @@ const stopLossAtr: Indicators.IIndicator = {
 const adxSlope: Indicators.IIndicator = {
     id: "adxSlope",
     handler: async (candle: CandleStickData, THIS: IFilter) => {
-        const previousCandle = THIS.context.prevCandle as CandleStickData
+        const candles = THIS.getScaler('4h').push(candle)
+        const previousCandle = candles.length > 1 ? candles.items[candles.length - 2] : null
         if (previousCandle &&
             candle.indicators &&
             candle.indicators.has(Indicators.ADX()) &&
@@ -47,7 +49,6 @@ const adxSlope: Indicators.IIndicator = {
             const res = ((candle.indicators.getNumberValue(Indicators.ADX()) - previousCandle.indicators.getNumberValue(Indicators.ADX())) / previousCandle.indicators.getNumberValue(Indicators.ADX())) * 100
             candle.indicators.setValue(adxSlope, res)
         }
-        THIS.context.prevCandle = candle
     },
 };
 
@@ -101,6 +102,10 @@ const strategy = async (candle: CandleStickData) => {
     return result
 }
 
+export type Strategy = {
+    name: string;
+    candle: CandleStickData
+}
 
 
 export class MyBot {
@@ -115,10 +120,11 @@ export class MyBot {
     public get indicators() {
         return { ADX: Indicators.ADX(), ATR: Indicators.ATR(), SAR: Indicators.SAR(), minusDi: Indicators.MDI(), plusDi: Indicators.PDI(), isSarAbove: isSarAbove, adxSlope: adxSlope, stopLossAtr: stopLossAtr }
     }
-    run() {
+    run(startTime: Ticks, endTime: Ticks) {
         const pipeline = new Pipeline()
         // const time = 1633174260000
-        pipeline.from('binance', 'spot', 'BTCUSDT', '1m', utils.randomName('Bot'))
+
+        pipeline.from('binance', 'spot', 'BTCUSDT', '1m', 'Bot-184')
             .add(this.indicators.ADX)
             .add(this.indicators.minusDi)
             .add(this.indicators.ATR)
@@ -126,15 +132,22 @@ export class MyBot {
             .add(this.indicators.plusDi)
             .add(isSarAbove)
             .add(adxSlope)
-            .add(stopLossAtr)
-            .add(async (candle) => {
+            .add(stopLossAtr, { stream: true, name: "Indicators" })
+            .add(async (candle, THIS) => {
+                THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy")
+                const stream = THIS.context.stream as Stream<Strategy>
                 const res = await strategy(candle)
+                await stream.write(utils.toTimeEx(candle.openTime), { name: res, candle: candle })
                 if (res) {
-                    candle.getSignals()["signal"] = res
-                    this.onData(res, candle)
+                    await this.onData(res, candle)
                 }
-            }, { stream: true, name: utils.randomName("Signal") })
-        pipeline.start(utils.toTimeEx().addMinutes(-1 * 400 * 4 * 60 * 2))
+            })
+            .add(async (candle) => {
+                if (candle.openTime == endTime) {
+                    pipeline.stop()
+                }
+            })
+        pipeline.start(startTime)
     }
     async onData(res: string, targetCandle: CandleStickData) {
         // const res = await this.strategy.exec(jobContext)

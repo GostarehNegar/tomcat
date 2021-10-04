@@ -1,6 +1,7 @@
 import tomcat from "../src"
 import { utils } from "../src/lib/base"
 import { MyBot } from "../src/lib/domain/bot"
+import { Pipeline } from "../src/lib/domain/strategy"
 
 const JobOrder = tomcat.Index.Domain.Bot.JobOrder
 const TimeEx = tomcat.Index.Base.TimeEx
@@ -28,5 +29,6 @@ describe('Bot', () => {
         bot.run()
         await utils.delay(6000 * 1000)
     })
+
 
 })

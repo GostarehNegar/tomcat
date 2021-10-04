@@ -2,6 +2,7 @@ import { utils } from "../../base"
 import { IMessageBus } from "../../bus"
 import { Sides } from "../base/Sides"
 import { Symbols } from "../base/Symbols"
+import { Stream } from "../data"
 
 export class Trade {
     constructor(symbol: Symbols, side: Sides, price: number, quantity: number, time: number) {
@@ -73,7 +74,10 @@ export class Wallet {
     public leverage: number;
     public logger = utils.getLogger("Wallet")
     public tradeList: Trade[] = []
-    constructor(public balance: number, public bus: IMessageBus) { }
+    public stream: Stream<Trade>
+    constructor(public balance: number, public bus: IMessageBus) {
+        this.stream = new Stream<Trade>(utils.randomName("Wallet"))
+    }
     async processOrder(order: Order) {
         if (order == null) {
             throw "order cannot be null"
@@ -88,7 +92,9 @@ export class Wallet {
             trade.recalculate(latestTrade)
             this.balance += trade.realizedProfit
             this.tradeList.push(trade)
-            this.bus.createMessage("Wallet/tradesRegistered", trade).publish()
+            //const stream = new Stream<Trade>()
+            this.stream.write(utils.toTimeEx(trade.time), trade)
+            // this.bus.createMessage("Wallet/tradesRegistered", trade).publish()
             const date = new Date(trade.time)
             const count = this.tradeList.length
             const formattedDate = `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()},${date.getUTCHours()}:${date.getUTCMinutes()}`
