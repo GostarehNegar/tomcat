@@ -1,18 +1,10 @@
 import tomcat from ".";
 
-const host = tomcat
-    .hosts
-    .getHostBuilder("bot")
-    .addMessageBus((cfg) => { cfg.transports.websocket.diabled = true })
-    .buildWebHost();
-host.use(async (ctx) => {
-    if (ctx.request.url == "/ping") {
-        ctx.response.write("hello world!")
-        ctx.response.end()
+const MyBot = tomcat.Index.Domain.Bot.MyBot
 
-    }
-    console.log(ctx.request);
-})
-console.log("listening.....");
+const bot = new MyBot();
 
-host.listen(8080);
+const startTime = tomcat.utils.toTimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0))
+const endTime = tomcat.utils.toTimeEx(Date.UTC(2021, 0, 1, 0, 0, 0, 0))
+
+bot.runEX(startTime, endTime)

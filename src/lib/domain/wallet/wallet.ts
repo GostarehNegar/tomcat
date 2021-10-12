@@ -76,9 +76,10 @@ export class Wallet {
     public tradeList: Trade[] = []
     public stream: Stream<Trade>
     constructor(public balance: number, public bus: IMessageBus) {
-        this.stream = new Stream<Trade>(utils.randomName("Wallet"))
+        this.stream = new Stream<Trade>("wallet-BT-21")
     }
-    async processOrder(order: Order) {
+    processOrder(order: Order) {
+        // await utils.delay(100)
         if (order == null) {
             throw "order cannot be null"
         }
@@ -98,7 +99,7 @@ export class Wallet {
             const date = new Date(trade.time)
             const count = this.tradeList.length
             const formattedDate = `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()},${date.getUTCHours()}:${date.getUTCMinutes()}`
-            this.logger.info(`\n${count}\t${formattedDate}\t${trade.side}\t${trade.quantity}\t${trade.price}\t\t${trade.realizedProfit}`);
+            this.logger.info(`\n${count}\t${formattedDate}\t${trade.side}\t${trade.quantity}\t${trade.price}\t\t${trade.realizedProfit}\t${this.balance}`);
         } else {
             console.log('mano nabayad bebini')
         }

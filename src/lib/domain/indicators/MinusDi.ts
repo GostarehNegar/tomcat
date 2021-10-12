@@ -8,7 +8,7 @@ export const MDI = (period = 14, maxCount = 200, interval: Intervals = '4h'): II
   const id = `MinusDi-${period}-${maxCount}-${interval}`
   return {
     handler: async (candle: CandleStickData, THIS: IFilter) => {
-      const candles = THIS.getScaler(interval).push(candle)
+      const candles = THIS.getScaler(interval, maxCount).push(candle)
       const MDIArray = await TalibWrapperEx.execute({
         name: "MINUS_DI",
         high: candles.getLast(maxCount).getSingleOHLCV('high'),

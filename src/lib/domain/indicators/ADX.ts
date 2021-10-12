@@ -9,7 +9,7 @@ export const ADX = (period = 14, maxCount = 200, interval: Intervals = '4h'): II
   const id = `ADX-${period}-${maxCount}-${interval}`
   return {
     handler: async (candle: CandleStickData, THIS: IFilter) => {
-      const candles = THIS.getScaler(interval).push(candle)
+      const candles = THIS.getScaler(interval, maxCount).push(candle)
       const ADXArray = await TalibWrapperEx.execute({
         name: "ADX",
         high: candles.getLast(maxCount).getSingleOHLCV('high'),

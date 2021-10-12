@@ -38,7 +38,7 @@ describe('indicators', () => {
         let sCandle: CandleStickData = null
 
         const a = []
-        pipeline.from('binance', 'spot', 'BTCUSDT', '1m', tomcat.utils.randomName('source'))
+        pipeline.from('binance', 'spot', 'BTCUSDT', '1m')
             .add(Indicators.ADX())
             .add(Indicators.MDI())
             .add(Indicators.PDI(), { stream: true })
@@ -52,8 +52,8 @@ describe('indicators', () => {
                     pipeline.stop()
                 }
             })
-        pipeline.start(tomcat.utils.toTimeEx(stime).addMinutes(-50 * 1440))
-        await tomcat.utils.delay(1000 * 1000)
+        pipeline.start(tomcat.utils.toTimeEx(stime).addMinutes(-5 * 1440))
+        await tomcat.utils.delay(100 * 1000)
         expect(fCandle.indicators.getNumberValue(Indicators.ADX())).toBeCloseTo(39.9510, 4)
         expect(fCandle.indicators.getNumberValue(Indicators.MDI())).toBeCloseTo(11.2145, 4)
         expect(fCandle.indicators.getNumberValue(Indicators.PDI())).toBeCloseTo(33.6062, 4)
@@ -61,5 +61,48 @@ describe('indicators', () => {
         expect(sCandle.indicators.getNumberValue(Indicators.ADX())).toBeCloseTo(24.8837, 4)
         expect(sCandle.indicators.getNumberValue(Indicators.MDI())).toBeCloseTo(11.4337, 4)
         expect(sCandle.indicators.getNumberValue(Indicators.PDI())).toBeCloseTo(39.0525, 4)
+    })
+    test("indicatorsTEST", async () => {
+        const pipeline = new Pipeline()
+        const ftime = tomcat.utils.toTimeEx(Date.UTC(2021, 8, 1, 0, 0, 0, 0))
+        let fCandle: CandleStickData = null
+
+        const a = []
+        pipeline.from('binance', 'spot', 'BTCUSDT', '1m')
+            .add(Indicators.ADX(14, 200, '4h'))
+            .add(Indicators.MDI(14, 200, '4h'))
+            .add(Indicators.PDI(14, 200, '4h'), { stream: true, name: "testIndicators11" })
+            .add(async (candle) => {
+                a.push(candle)
+
+                if (candle.openTime == ftime.addMinutes(4 * 60).ticks) {
+                    fCandle = candle
+                    pipeline.stop()
+                }
+            })
+        pipeline.start(tomcat.utils.toTimeEx(ftime).addMinutes(-50 * 1440))
+        await tomcat.utils.delay(3000 * 1000)
+        expect(fCandle.indicators.getNumberValue(Indicators.ADX(14, 200, '4h'))).toBeCloseTo(39.9510, 4)
+        expect(fCandle.indicators.getNumberValue(Indicators.MDI(14, 200, '4h'))).toBeCloseTo(11.2145, 4)
+        expect(fCandle.indicators.getNumberValue(Indicators.PDI(14, 200, '4h'))).toBeCloseTo(33.6062, 4)
+    })
+    test("scalar", async () => {
+        const pipeline = new Pipeline()
+        const sTime = tomcat.utils.toTimeEx(Date.UTC(2021, 9, 1, 0, 0, 0, 0))
+        const eTime = tomcat.utils.toTimeEx(Date.UTC(2021, 9, 1, 4, 0, 0, 0))
+        let resCandle = null
+        const oneMinute = []
+        pipeline.from('binance', 'spot', 'BTCUSDT', '1m', tomcat.utils.randomName("source"))
+            .add(async (candle, THIS) => {
+                oneMinute.push(candle)
+                resCandle = THIS.getScaler('4h').push(candle)
+                if (candle.openTime > eTime.ticks) {
+                    console.log("hi");
+                }
+
+            })
+        pipeline.start(sTime);
+        await tomcat.utils.delay(5000 * 1000);
+        (resCandle)
     })
 })

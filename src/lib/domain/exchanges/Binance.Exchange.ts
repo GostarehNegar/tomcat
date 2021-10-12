@@ -36,13 +36,13 @@ export class BinanceExchange implements IExchange {
       url += `&limit=${limit}`;
     }
     // const proxyAgent = new HttpsProxyAgent("http://tor:8118")
-    const proxyAgent = null
+    // const proxyAgent = null
 
     //   const result= await axios.get(url, proxy: {
     //     host: 'tor',
     //     port: 8118
     // })
-    const result = await fetch(url, { agent: proxyAgent })
+    const result = await fetch(url, { timeout: 30 * 1000 })
       .then((res) => res.json())
       .then((json: []) => {
         const result: ICandleStickData[] = [];
@@ -110,7 +110,7 @@ export class BinanceExchange implements IExchange {
     endTime
   ): Promise<CandleStickCollection> {
     const result = (
-      await this.fetchData(market, symbol, interval, 500, startTime, endTime)
+      await this.fetchData(market, symbol, interval, 1500, startTime, endTime)
     ).filter((x) => x.openTime >= startTime && x.openTime <= endTime);
     return new CandleStickCollection(result, 'binance', symbol, interval);
   }

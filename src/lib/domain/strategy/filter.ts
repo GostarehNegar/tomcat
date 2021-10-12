@@ -22,7 +22,7 @@ export interface IFilterOptions {
 
 export interface IFilter {
     context: { [key: string]: unknown }
-    getScaler(interval: Intervals): CandleStickCollectionScaler;
+    getScaler(interval: Intervals, maxCount?: number): CandleStickCollectionScaler;
 }
 
 export class Filter implements IFilter {
@@ -57,12 +57,12 @@ export class Filter implements IFilter {
                     console.log(`An error wat catched in filter ${this.name}`, err);
                 })
             return false
-        }, context.startTime)
+        }, context.startTime, undefined, 100)
 
     }
-    getScaler(inteval: Intervals): CandleStickCollectionScaler {
+    getScaler(inteval: Intervals, maxCount = 200): CandleStickCollectionScaler {
         if (!this._scaller) {
-            this._scaller = new CandleStickCollectionScaler(inteval)
+            this._scaller = new CandleStickCollectionScaler(inteval, maxCount)
         }
         return this._scaller
     }

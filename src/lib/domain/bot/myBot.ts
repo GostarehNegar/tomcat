@@ -54,10 +54,11 @@ const adxSlope: Indicators.IIndicator = {
 
 const indicators = { ADX: Indicators.ADX(), ATR: Indicators.ATR(), SAR: Indicators.SAR(), minusDi: Indicators.MDI(), plusDi: Indicators.PDI(), isSarAbove: isSarAbove, adxSlope: adxSlope, stopLossAtr: stopLossAtr }
 
-const strategy = async (candle: CandleStickData) => {
+const strategy = (candle: CandleStickData) => {
     const indicator = candle.indicators
     let result = ''
     if (
+        candle && !candle.isMissing &&
         indicator &&
         indicator.has(indicators.plusDi, indicators.minusDi, indicators.adxSlope, indicators.isSarAbove)
     ) {
@@ -124,7 +125,7 @@ export class MyBot {
         const pipeline = new Pipeline()
         // const time = 1633174260000
 
-        pipeline.from('binance', 'spot', 'BTCUSDT', '1m', 'Bot-184')
+        pipeline.from('binance', 'spot', 'BTCUSDT', '1m')
             .add(this.indicators.ADX)
             .add(this.indicators.minusDi)
             .add(this.indicators.ATR)
@@ -132,15 +133,45 @@ export class MyBot {
             .add(this.indicators.plusDi)
             .add(isSarAbove)
             .add(adxSlope)
-            .add(stopLossAtr, { stream: true, name: "Indicators" })
+            .add(stopLossAtr, { stream: true, name: "myIndicators" })
             .add(async (candle, THIS) => {
-                THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy")
+                THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy-BT-01")
                 const stream = THIS.context.stream as Stream<Strategy>
                 const res = await strategy(candle)
                 await stream.write(utils.toTimeEx(candle.openTime), { name: res, candle: candle })
-                if (res) {
+                if (res && candle.openTime >= utils.toTimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0)).ticks) {
                     await this.onData(res, candle)
                 }
+            })
+            .add(async (candle) => {
+                if (candle.openTime == endTime) {
+                    pipeline.stop()
+                }
+            })
+        pipeline.start(startTime)
+    }
+    runEX(startTime: Ticks, endTime: Ticks) {
+        // let total = 0
+        const pipeline = new Pipeline()
+        // const time = 1633174260000
+        // const time = Date.now()
+        pipeline.fromStream("myIndicators")
+            .add(async (candle) => {
+                // total += 1
+                // console.log("started");
+                // strategy(candle).then((x) => {
+                //     this.onData(x, candle)
+                // })
+                const res = strategy(candle)
+                if (res && candle.openTime >= utils.toTimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0)).ticks) {
+                    this.onData(res, candle)
+                }
+                // const totalTime = Date.now() - time
+                // if (total % 100 == 0) {
+                //     console.log(`total process : ${total} , elapsed : ${totalTime}, avg : ${(total * 1000) / totalTime}`);
+                // }
+                // console.log("hi");
+
             })
             .add(async (candle) => {
                 if (candle.openTime == endTime) {
@@ -169,49 +200,57 @@ export class MyBot {
                 break;
         }
     }
-    async openLong(candle: CandleStickData) {
+    openLong(candle: CandleStickData) {
         if (this.state == 'open') {
             const price = candle.close
-            //better calculation
-            //stopLoss implementation
+            //DIVISION
             const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue(this.indicators.stopLossAtr) / candle.close)
             this.wallet.leverage = candle.indicators.getNumberValue(this.indicators.stopLossAtr)
+            // if (1 == 1 || (amount > 0 && this.wallet.balance > 0)) {
             const orderEX = new Order(this.symbol, 'buy', price, amount, candle.closeTime)
-            await this.wallet.processOrder(orderEX)
+            this.wallet.processOrder(orderEX)
             // const report: IReportContext = { order: orderEX, candle: candle, state: 'openLong' }
             // await this.bus.publish(Messages.openLongReportMessage(jobContext.streamID, report));
             // await this.bus.createMessage("Bot/Report", report).publish()
             this.state = 'openLong'
+            // } else {
+            //     console.log(`insufficient balance detected.balance : ${this.wallet.balance} , amount : ${amount} , leverage:${this.wallet.leverage}`)
+
+            // }
         }
         else if (this.state == 'openShort') {
-            await this.closeShort(candle, true)
+            this.closeShort(candle, true)
             this.state = 'open'
         }
     }
-    async openShort(candle: CandleStickData) {
+    openShort(candle: CandleStickData) {
         if (this.state == 'open') {
             const price = candle.close
             const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue(this.indicators.stopLossAtr)) / candle.close
             this.wallet.leverage = candle.indicators.getNumberValue(this.indicators.stopLossAtr)
+            // if (1 == 1 || (amount > 0 && this.wallet.balance > 0)) {
             const orderEX = new Order(this.symbol, 'sell', price, amount, candle.closeTime)
-            await this.wallet.processOrder(orderEX)
+            this.wallet.processOrder(orderEX)
             // const report: IReportContext = { order: orderEX, candle: candle, state: 'openShort' }
             // await this.bus.publish(Messages.openShortReportMessage(jobContext.streamID, report));
             // await this.bus.createMessage("Bot/Report", report).publish()
             this.state = 'openShort'
+            // } else {
+            //     console.log(`insufficient balance detected.balance : ${this.wallet.balance} , amount : ${amount} , leverage:${this.wallet.leverage}`)
+            // }
         }
         else if (this.state == 'openLong') {
-            await this.closeLong(candle, true)
+            this.closeLong(candle, true)
             this.state = 'open'
         }
     }
-    async closeLong(candle: CandleStickData, closingOpenposition = false) {
+    closeLong(candle: CandleStickData, closingOpenposition = false) {
         if (this.state == 'openLong') {
             const price = candle.close
             const latestTrade = this.wallet.getLatestOpenTrade()
             const amount = latestTrade.quantity
             const orderEX = new Order(this.symbol, 'sell', price, amount, candle.closeTime)
-            await this.wallet.processOrder(orderEX)
+            this.wallet.processOrder(orderEX)
             if (!closingOpenposition) {
                 // const report: IReportContext = { order: orderEX, candle: candle, state: "closeLong" }
                 // await this.bus.publish(Messages.closeLongReportMessage(jobContext.streamID, report));
@@ -224,13 +263,13 @@ export class MyBot {
             this.state = 'open'
         }
     }
-    async closeShort(candle: CandleStickData, closingOpenposition = false) {
+    closeShort(candle: CandleStickData, closingOpenposition = false) {
         if (this.state == 'openShort') {
             const price = candle.close
             const latestTrade = this.wallet.getLatestOpenTrade()
             const amount = latestTrade.quantity
             const orderEX = new Order(this.symbol, 'buy', price, amount, candle.closeTime)
-            await this.wallet.processOrder(orderEX)
+            this.wallet.processOrder(orderEX)
 
             if (!closingOpenposition) {
                 // const report: IReportContext = { order: orderEX, candle: candle, state: "closeShort" }

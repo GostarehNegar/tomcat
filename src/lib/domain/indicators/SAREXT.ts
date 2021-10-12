@@ -9,7 +9,7 @@ export const SAR = (startValue = 0.02, acceleration = 0.005, maxAcceleration = 0
   const id = `SAREXT-${startValue}-${acceleration}-${maxAcceleration}-${maxCount}-${interval}`
   return {
     handler: async (candle: CandleStickData, THIS: IFilter) => {
-      const candles = THIS.getScaler(interval).push(candle)
+      const candles = THIS.getScaler(interval, maxCount).push(candle)
       const SARArray = await TalibWrapperEx.execute({
         name: "SAREXT",
         high: candles.getLast(maxCount).getSingleOHLCV('high'),

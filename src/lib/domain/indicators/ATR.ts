@@ -8,7 +8,7 @@ export const ATR = (period = 14, maxCount = 200, interval: Intervals = '4h'): II
   const id = `ATR-${period}-${maxCount}-${interval}`
   return {
     handler: async (candle: CandleStickData, THIS: IFilter) => {
-      const candles = THIS.getScaler(interval).push(candle)
+      const candles = THIS.getScaler(interval, maxCount).push(candle)
       const ATRArray = await TalibWrapperEx.execute({
         name: "ATR",
         high: candles.getLast(maxCount).getSingleOHLCV('high'),

@@ -105,7 +105,24 @@ export class RedisStream {
             })
         })
     }
-
+    async getAll() {
+        return new Promise<string[]>((resolve, reject) => {
+            this.client.sendCommand("XRANGE", [this.streamName, "-", "+"], (err, res) => {
+                if (err) {
+                    reject(err)
+                }
+                if (res.length > 0) {
+                    const result = []
+                    for (let i = 0; i < res.length; i++) {
+                        result.push(res[i][1][1])
+                    }
+                    resolve(result)
+                } else {
+                    resolve(null)
+                }
+            });
+        })
+    }
     async XRANGE(time: Ticks) {
         return new Promise<string>((resolve, reject) => {
             this.client.sendCommand("XRANGE", [this.streamName, utils.ticks(time), "+", "COUNT", "1"], (err, res) => {

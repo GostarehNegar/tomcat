@@ -81,10 +81,13 @@ export class CandleStream extends EventEmitter implements ICandleStream {
             }
             return cb && cb(res ? CandleStickData.from(JSON.parse(res.data)) : null, err)
             // return cb && cb(res ? CandleStickData.from(JSON.parse(res)) : null, err)
-        }, utils.ticks(startTime).toString(), timeOut, count)
+        }, ((utils.ticks(startTime) - 1) > 0 ? utils.ticks(startTime) - 1 : 0).toString(), timeOut, count)
+        // })
     }
 
-
+    async getAll() {
+        return await this.redisStream.getAll()
+    }
     async quit() {
         this._isStop = true;
         if (this._redisStream) {
@@ -127,53 +130,47 @@ export class DataSourceStream extends CandleStream implements ICandleStream {
         let fin = false
         while (!fin) {
             let binanceLastCandle = null;
-            let endtime = utils.toTimeEx(startTime).addMinutes(1 * 24 * 60).floorToMinutes(1);
-            if (endtime.ticks > utils.toTimeEx().ticks) {
+            lastCandle = null;
+            let endTime = utils.toTimeEx(startTime).addMinutes(1 * 24 * 60).floorToMinutes(1);
+            if (endTime.ticks > utils.toTimeEx().ticks) {
                 // endtime = utils.toTimeEx()
-                binanceLastCandle = CandleStickData.from(await this.dataSource.getLatestCandle())
-                endtime = utils.toTimeEx(binanceLastCandle.openTime)
+                binanceLastCandle = CandleStickData.from(await this.doGetLastCandle())
+                endTime = utils.toTimeEx(binanceLastCandle.openTime)
             }
-            const candles = await this.dataSource.getData(startTime, endtime)
-            candles.populate(utils.toTimeEx(startTime).ceilToMinutes(1), endtime)
+            const candles = await this.doGetData(startTime, endTime)
+            candles.populate(utils.toTimeEx(startTime).ceilToMinutes(1), endTime)
             for (let i = 0; i < candles.length; i++) {
+                // console.log(`i : ${i}`);
                 if (this._isStop) {
                     return
                 }
                 this.emit('data', candles.items[i])
                 if ((await this.redisStream.XADD(candles.items[i].openTime, candles.items[i])) && cb && cb(candles.items[i])) {
+                    console.log("unexpected return!");
                     return
                 }
             }
             startTime = utils.toTimeEx(startTime).addMinutes(1 * 24 * 60 + 1).ticks
-            // fin = startTime > utils.toTimeEx(Date.now()).ticks
-            lastCandle = await this.getLastCandle()
+            // this point on checks if we have arrived to present
             if (binanceLastCandle != null) {
+                lastCandle = await this.getLastCandle()
                 if (!lastCandle) {
                     startTime = utils.toTimeEx(startTime).addMinutes(-1 * 24 * 60).ticks
                     console.log("this is unexpected , no candles were added to redis, moving the start time to one day ago");
                 } else {
                     startTime = lastCandle.openTime
                 }
+                binanceLastCandle = CandleStickData.from(await this.doGetLastCandle())
+                fin = lastCandle && binanceLastCandle && (binanceLastCandle.openTime == lastCandle.openTime)
             }
-            binanceLastCandle = CandleStickData.from(await this.dataSource.getLatestCandle())
-            fin = lastCandle && (binanceLastCandle.openTime == lastCandle.openTime)
 
         }
-        // lastCandle = await this.getLastCandle()
-        // const binanceLastCandle = CandleStickData.from(await this.dataSource.getLatestCandle())
-        // if (lastCandle.openTime < binanceLastCandle.openTime) {
-        //     await this.dataSource.getData(lastCandle.openTime, binanceLastCandle.openTime)
-        // }
-        //if(time< getLastCandle().opentime){
-        // const candles = await this.dataSource.getData(entime, binancetime)
-        //
-        // }
         const handle = setInterval(async () => {
             if (this._isStop) {
                 clearInterval(handle)
                 return
             }
-            const lastCandle = CandleStickData.from(await this.dataSource.getLatestCandle());
+            const lastCandle = CandleStickData.from(await this.doGetLastCandle());
             if (lastCandle) {
                 if ((await this.redisStream.XADD(lastCandle.openTime, lastCandle)) && cb && cb(lastCandle)) {
                     clearInterval(handle)
@@ -187,6 +184,36 @@ export class DataSourceStream extends CandleStream implements ICandleStream {
                 clearInterval(timer)
             }
         }, 1000)
+    }
+    async doGetData(startTime: Ticks, endTime: Ticks) {
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            try {
+                return await this.dataSource.getData(startTime, endTime)
+            } catch (err) {
+                console.log("an error was occurred while fetching for data, waiting 10 second for retrying ...");
+                if (err.code == "internetConnection") {
+                    console.warn("internet connection or vpn has been disconnected, Waiting 10 seconds for retrying ...");
+                    // await utils.waitForInternetConnection()
+                }
+                await utils.delay(10 * 1000)
+            }
+        }
+    }
+    async doGetLastCandle() {
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            try {
+                return await this.dataSource.getLatestCandle()
+            } catch (err) {
+                console.log("an error was occurred while fetching last candle, waiting 10 second for retrying ...");
+                if (err.code == "internetConnection") {
+                    console.warn("internet connection or vpn has been disconnected, Waiting 10 seconds for retrying ...");
+                    // await utils.waitForInternetConnection()
+                }
+                await utils.delay(10 * 1000)
+            }
+        }
     }
 }
 
