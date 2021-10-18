@@ -1,9 +1,9 @@
-import './hosting/extensions';
-import { IServiceProvider, ServiceProvider } from './base/ServiceProvider';
+import './infrastructure/hosting/extensions';
 import config from './config';
 import Constants from './constants';
+import { IServiceProvider, ServiceProvider } from './infrastructure/base/ServiceProvider';
 
-declare module './base/ServiceProvider' {
+declare module './infrastructure/base/ServiceProvider' {
   interface ServiceProvider {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getMessageBus(elseValue: any): any;

@@ -1,7 +1,7 @@
 import tomcat from "../src"
 
-const BinanceExchange = tomcat.Index.Domain.Exchange.BinanceExchange
-const TimeEx = tomcat.Index.Base.TimeEx
+const BinanceExchange = tomcat.Domain.Exchange.BinanceExchange
+const TimeEx = tomcat.Infrastructure.Base.TimeEx
 
 jest.setTimeout(20000000)
 describe('BinanceExchange', () => {

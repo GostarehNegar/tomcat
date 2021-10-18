@@ -1,9 +1,10 @@
 import tomcat from '../src'
-import { CandleStickData } from '../src/lib/domain/base'
+
 // import { utils } from '../src/lib/base'
 
-const Pipeline = tomcat.Index.Domain.Strategy.Pipeline
-const Indicators = tomcat.Index.Domain.Indicators
+const Pipeline = tomcat.Domain.Pipes.Pipeline
+const Indicators = tomcat.Domain.Indicators
+type CandleStickData = tomcat.Domain.Base.CandleStickData
 jest.setTimeout(60000000)
 describe('indicators', () => {
 
