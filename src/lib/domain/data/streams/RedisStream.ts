@@ -1,6 +1,6 @@
 import redis from "redis";
 
-import { Ticks, utils } from "../../../base";
+import { SequentialPromise, Ticks, utils } from "../../../base";
 
 export class RedisStream {
     public client: redis.RedisClient;
@@ -153,7 +153,7 @@ export class RedisStream {
             });
         })
     }
-    XREADBLOCK(cb: (res: { id: number, data: string }, err) => boolean, lastId = '$', timeOut = 5000000, count = 1) {
+    XREADBLOCK(cb: (res: { id: number, data: string }, err) => Promise<boolean>, lastId = '$', timeOut = 5000000, count = 1) {
         let shouldCall = true;
         const handle = setInterval(() => {
             if (shouldCall) {
@@ -163,23 +163,33 @@ export class RedisStream {
                         cb(null, err)
                     } else {
                         if (res && Array.isArray(res) && res.length > 0 && res[0] && Array.isArray(res[0]) && res[0].length > 1 && res[0][1] && Array.isArray(res[0][1])) {
+                            const seq = new SequentialPromise<boolean>()
                             for (let i = 0; i < res[0][1].length; i++) {
                                 lastId = res[0][1][i][0]
-                                const stop = cb({ id: parseInt(lastId), data: res[0][1][i][1][1] }, err)
-                                if (stop) {
+                                seq.push(() => { return cb({ id: parseInt(lastId), data: res[0][1][i][1][1] }, err) })
+                                // const stop = cb({ id: parseInt(lastId), data: res[0][1][i][1][1] }, err)
+                                // if (stop) {
+                                //     clearInterval(handle)
+                                //     return
+                                // }
+                            }
+                            seq.execute(false, (data) => {
+                                if (data) {
                                     clearInterval(handle)
                                     return
                                 }
-                            }
+                            }).then(() => {
+                                shouldCall = true
+                            })
                         } else {
                             throw "unexpected condition"
                         }
                     }
-                    shouldCall = true;
+                    // shouldCall = true;
                 });
                 shouldCall = false
             }
-        }, 10)
+        }, 1)
     }
     async XINFO() {
         return new Promise<{ length: number, lastGeneratedId: string }>((resolve, reject) => {

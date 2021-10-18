@@ -9,7 +9,7 @@ import { RedisStream } from "./RedisStream";
 
 export interface ICandleStream {
     get isWriter(): boolean;
-    play(cb: (candle: CandleStickData, err) => boolean, startTime?: Ticks, timeOut?, count?, generateMissingCandles?): Promise<void>
+    play(cb: (candle: CandleStickData, err) => Promise<boolean>, startTime?: Ticks, timeOut?, count?, generateMissingCandles?): Promise<void>
     start(startTime?: Ticks, cb?: (candle: CandleStickData) => boolean): Promise<void>
 }
 
@@ -67,7 +67,7 @@ export class CandleStream extends EventEmitter implements ICandleStream {
     async creatStream() {
         return await this.redisStream.XCREATE()
     }
-    async play(cb: (candle: CandleStickData, err) => boolean, startTime: Ticks = 0, timeOut = 500000, count = 1, generateMissingCandles = true) {
+    async play(cb: (candle: CandleStickData, err) => Promise<boolean>, startTime: Ticks = 0, timeOut = 500000, count = 1, generateMissingCandles = true) {
         const stream = new RedisStream(this._streamName)
         await stream.XREADBLOCK((res, err) => {
             // return cb && cb(res ? JSON.parse(res) as CandleStickData : null, err)
@@ -77,7 +77,7 @@ export class CandleStream extends EventEmitter implements ICandleStream {
                     return cb && cb(mCandle, err)
 
                 }
-                return false
+                return Promise.resolve(false)
             }
             return cb && cb(res ? CandleStickData.from(JSON.parse(res.data)) : null, err)
             // return cb && cb(res ? CandleStickData.from(JSON.parse(res)) : null, err)

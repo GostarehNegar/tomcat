@@ -74,8 +74,8 @@ export class Pipeline implements IPipeline {
         // await this.filters.reverse().map(async (x) => await x.initialize())
         this.filters.reverse().map((x) => x.run(context));
         (startTime)
-        if (this.candleStream.isWriter) {
-            this.candleStream.start(startTime)
-        }
+        // if (this.candleStream.isWriter) {
+        //     this.candleStream.start(startTime)
+        // }
     }
 }

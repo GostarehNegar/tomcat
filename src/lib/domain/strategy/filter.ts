@@ -8,10 +8,11 @@ import { PipelineContext } from "./pipelineContext";
 
 
 interface IPlay {
-    (candle: CandleStickData, err): boolean
+    (candle: CandleStickData, err): Promise<boolean>
 }
+
 interface IStreamPlayer {
-    (cb: IPlay, startTime?: Ticks, timeOut?, count?)
+    (cb: IPlay, startTime?: Ticks, timeOut?, count?, generateMissingCandles?)
 }
 
 export interface IFilterOptions {
@@ -41,9 +42,35 @@ export class Filter implements IFilter {
         this.options = options || {}
     }
     async run(context: PipelineContext) {
+        this._playSourceStream(async (candle, err) => {
+            if (this._stop) {
+                return Promise.resolve(true)
+            }
+            // context.myContext = this.context
+            await this.callback(candle, this)
+            if (this.stream) {
+                await this.stream.write(candle.openTime, candle)
+            } else {
+                (this._playBackHandler && await this._playBackHandler(candle, err))
+            }
+            // this.callback(candle, this)
+            //     .then(() => {
+            //         if (this.stream) {
+            //             this.stream.write(candle.openTime, candle)
+            //         } else {
+            //             (this._playBackHandler && this._playBackHandler(candle, err))
+            //         }
+            //     }).catch((err) => {
+            //         console.log(`An error wat catched in filter ${this.name}`, err);
+            //     })
+            return Promise.resolve(false)
+        }, context.startTime, undefined, 1000)
+
+    }
+    async runEX(context: PipelineContext) {
         this._playSourceStream((candle, err) => {
             if (this._stop) {
-                return true
+                return Promise.resolve(true)
             }
             // context.myContext = this.context
             this.callback(candle, this)
@@ -56,8 +83,8 @@ export class Filter implements IFilter {
                 }).catch((err) => {
                     console.log(`An error wat catched in filter ${this.name}`, err);
                 })
-            return false
-        }, context.startTime, undefined, 100)
+            return Promise.resolve(false)
+        }, context.startTime, undefined, 4)
 
     }
     getScaler(inteval: Intervals, maxCount = 200): CandleStickCollectionScaler {
@@ -67,7 +94,7 @@ export class Filter implements IFilter {
         return this._scaller
     }
 
-    play(cb: IPlay, generateMissingCandles = true, startTime: Ticks = 0, timeOut = 500000, count = 1) {
+    play(cb: IPlay, startTime: Ticks = 0, timeOut = 500000, count = 1, generateMissingCandles = true) {
         (generateMissingCandles);
         if (this.stream) {
             this.stream.play((candle, err) => {

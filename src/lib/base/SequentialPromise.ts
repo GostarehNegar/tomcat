@@ -12,16 +12,17 @@ export class SequentialPromise<T> {
         })
         return this
     }
-    private _execute(id = 0, rejectMode = true) {
+    private _execute(id = 0, rejectMode = true, cb?: (data: T) => void) {
         return new Promise<T[]>((resolve, reject) => {
             if (id === 0) {
                 this.myPromise.resolve = resolve
                 this.myPromise.reject = reject
             }
             this.promiseItems[id]().then((data) => {
-                this.promiseResults.push(data)
+                this.promiseResults.push(data);
+                (cb && cb(data));
                 if (id < this.promiseItems.length - 1) {
-                    this._execute(id + 1, rejectMode)
+                    this._execute(id + 1, rejectMode, cb)
                 } else {
                     this.myPromise.resolve(this.promiseResults)
                 }
@@ -29,9 +30,10 @@ export class SequentialPromise<T> {
                 if (rejectMode) {
                     this.myPromise.reject(err)
                 } else {
-                    this.promiseResults.push(err)
+                    this.promiseResults.push(err);
+                    // (cb && cb(data));
                     if (id < this.promiseItems.length - 1) {
-                        this._execute(id + 1, rejectMode)
+                        this._execute(id + 1, rejectMode, cb)
                     } else {
                         this.myPromise.resolve(this.promiseResults)
                     }
@@ -39,7 +41,7 @@ export class SequentialPromise<T> {
             })
         })
     }
-    execute(rejectMode = true) {
-        return this._execute(0, rejectMode)
+    execute(rejectMode = true, cb?: (data: T) => void) {
+        return this._execute(0, rejectMode, cb)
     }
 }

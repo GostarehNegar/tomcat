@@ -1,6 +1,6 @@
 import { Ticks, utils } from "../../base";
 import { CandleStickData, States, Symbols } from "../base";
-import { Stream } from "../data";
+import { Stream } from "../data/streams";
 import * as Indicators from "../indicators";
 import { IFilter, Pipeline } from "../strategy";
 import { Order, Wallet } from "../wallet";
@@ -122,6 +122,7 @@ export class MyBot {
         return { ADX: Indicators.ADX(), ATR: Indicators.ATR(), SAR: Indicators.SAR(), minusDi: Indicators.MDI(), plusDi: Indicators.PDI(), isSarAbove: isSarAbove, adxSlope: adxSlope, stopLossAtr: stopLossAtr }
     }
     run(startTime: Ticks, endTime: Ticks) {
+        (endTime);
         const pipeline = new Pipeline()
         // const time = 1633174260000
 
@@ -133,9 +134,9 @@ export class MyBot {
             .add(this.indicators.plusDi)
             .add(isSarAbove)
             .add(adxSlope)
-            .add(stopLossAtr, { stream: true, name: "myIndicators" })
+            .add(stopLossAtr, { stream: true, name: "myIndicatorsEX28" })
             .add(async (candle, THIS) => {
-                THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy-BT-01")
+                THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy-BT-20")
                 const stream = THIS.context.stream as Stream<Strategy>
                 const res = await strategy(candle)
                 await stream.write(utils.toTimeEx(candle.openTime), { name: res, candle: candle })

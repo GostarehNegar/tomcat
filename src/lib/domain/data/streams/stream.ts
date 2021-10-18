@@ -4,7 +4,7 @@ import { Ticks, utils } from "../../../base"
 import { RedisStream } from ".";
 
 export interface IStream<T> {
-    play(cb: (OBJECT: T, err) => boolean, startTime?: Ticks): Promise<void>
+    play(cb: (OBJECT: T, err) => Promise<boolean>, startTime?: Ticks): Promise<void>
     write(id: Ticks, data: T): Promise<unknown>
 }
 
@@ -23,7 +23,7 @@ export class Stream<T> implements IStream<T> {
     get streamName() {
         return this._streamName
     }
-    async play(cb: (OBJECT: T, err) => boolean, startTime: Ticks = 0) {
+    async play(cb: (OBJECT: T, err) => Promise<boolean>, startTime: Ticks = 0) {
         const stream = new RedisStream(this._streamName)
         await stream.XREADBLOCK((res, err) => {
             // return cb && cb(res ? JSON.parse(res) as CandleStickData : null, err)

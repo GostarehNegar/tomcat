@@ -76,7 +76,7 @@ export class Wallet {
     public tradeList: Trade[] = []
     public stream: Stream<Trade>
     constructor(public balance: number, public bus: IMessageBus) {
-        this.stream = new Stream<Trade>("wallet-BT-21")
+        this.stream = new Stream<Trade>("wallet-BT-6")
     }
     processOrder(order: Order) {
         // await utils.delay(100)
