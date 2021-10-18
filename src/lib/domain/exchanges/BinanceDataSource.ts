@@ -1,12 +1,13 @@
 
 
 import { Ticks, utils } from '../../base';
-import { CandleStickCollection, ICandleStickData, Intervals, Markets, Symbols } from '../base';
+import { CandleStickCollection, Exchanges, ICandleStickData, Intervals, Markets, Symbols } from '../base';
 import { IDataSource } from '../data/base';
 
 import { BinanceExchange } from './Binance.Exchange';
 
 export class BinanceDataSource implements IDataSource {
+  public exchange: Exchanges = 'binance';
   constructor(
     public market: Markets,
     public symbol: Symbols,

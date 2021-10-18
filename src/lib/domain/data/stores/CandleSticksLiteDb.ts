@@ -1,7 +1,7 @@
 import { Database } from 'sqlite';
 import sqlite3 from 'sqlite3';
 
-import { CandleStickCollection, CandleStickData, ICandleStickData } from '../../base';
+import { CandleStickCollection, CandleStickData, Exchanges, ICandleStickData, Intervals, Markets, Symbols } from '../../base';
 
 import { IDataStore } from './IDataStore';
 import { CandleStick } from './Models';
@@ -83,13 +83,13 @@ export class CandleStickLiteDb implements IDataStore {
   private config: { filename: string };
 
   constructor(
-    public exhange: string,
-    public market: string,
-    public symbol: string,
-    public interval: string
+    public exchange: Exchanges,
+    public market: Markets,
+    public symbol: Symbols,
+    public interval: Intervals
   ) {
     this.config = {
-      filename: `./db/ ${exhange}.db`,
+      filename: `./db/ ${exchange}.db`,
     };
 
   }
@@ -116,7 +116,7 @@ export class CandleStickLiteDb implements IDataStore {
   public async open(): Promise<Database> {
     if (this.db != null) return this.db;
     this.db = new Database({
-      filename: './db/' + this.exhange + '.db',
+      filename: './db/' + this.exchange + '.db',
       driver: sqlite3.Database,
     });
     await this.db.open();

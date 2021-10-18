@@ -2,6 +2,7 @@ import { utils } from "../../base"
 import { IMessageBus } from "../../bus"
 import { Sides } from "../base/Sides"
 import { Symbols } from "../base/Symbols"
+import { Stream } from "../data"
 
 export class Trade {
     constructor(symbol: Symbols, side: Sides, price: number, quantity: number, time: number) {
@@ -73,8 +74,12 @@ export class Wallet {
     public leverage: number;
     public logger = utils.getLogger("Wallet")
     public tradeList: Trade[] = []
-    constructor(public balance: number, public bus: IMessageBus) { }
-    async processOrder(order: Order) {
+    public stream: Stream<Trade>
+    constructor(public balance: number, public bus: IMessageBus) {
+        this.stream = new Stream<Trade>("wallet-BT-6")
+    }
+    processOrder(order: Order) {
+        // await utils.delay(100)
         if (order == null) {
             throw "order cannot be null"
         }
@@ -88,11 +93,13 @@ export class Wallet {
             trade.recalculate(latestTrade)
             this.balance += trade.realizedProfit
             this.tradeList.push(trade)
-            this.bus.createMessage("Wallet/tradesRegistered", trade).publish()
+            //const stream = new Stream<Trade>()
+            this.stream.write(utils.toTimeEx(trade.time), trade)
+            // this.bus.createMessage("Wallet/tradesRegistered", trade).publish()
             const date = new Date(trade.time)
             const count = this.tradeList.length
             const formattedDate = `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()},${date.getUTCHours()}:${date.getUTCMinutes()}`
-            this.logger.info(`\n${count}\t${formattedDate}\t${trade.side}\t${trade.quantity}\t${trade.price}\t\t${trade.realizedProfit}`);
+            this.logger.info(`\n${count}\t${formattedDate}\t${trade.side}\t${trade.quantity}\t${trade.price}\t\t${trade.realizedProfit}\t${this.balance}`);
         } else {
             console.log('mano nabayad bebini')
         }

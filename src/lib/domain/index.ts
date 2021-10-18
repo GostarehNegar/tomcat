@@ -4,3 +4,4 @@ export * as Bot from "./bot"
 export * as Wallet from "./wallet"
 export * as Strategy from "./strategy"
 export * as Exchange from "./exchanges"
+export * as Indicators from './indicators'

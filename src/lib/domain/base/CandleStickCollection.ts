@@ -1,5 +1,5 @@
 import { Ticks, utils } from "../../base";
-import { IIndicator } from "../data";
+import { dep_IIndicator } from "../data";
 
 import { CandleStickData } from "./CandleStickData";
 import domainUtils from "./Domain.Utils";
@@ -83,7 +83,7 @@ export class CandleStickCollection {
     const last = this.items.reverse().find(x => !x.isMissing)
     this.items.reverse()
     return first != null
-      ? new CandleStickData(first.openTime, first.open, high, low, last.close, last.closeTime)
+      ? new CandleStickData(this.firstCandle.openTime, first.open, high, low, last.close, this.lastCandle.closeTime, last.volume, last.amount, last.V1, last.V2, last.V3, last.V4, '', last.indicators)
       : null
 
 
@@ -102,11 +102,11 @@ export class CandleStickCollection {
   clear() {
     this.items = []
   }
-  addIndicator(indicator: IIndicator, data) {
+  addIndicator(indicator: dep_IIndicator, data) {
     const items = this.items.filter(x => !x.isMissing)
     let idx = 1;
     data.reverse().map((x) => {
-      items[items.length - idx].indicators.setValue(indicator, x)
+      items[items.length - idx].indicators.setValue_depricated(indicator, x)
       idx++;
     });
   }
@@ -114,7 +114,7 @@ export class CandleStickCollection {
     return this.items.find((x) => x.openTime == openTime)
   }
   getMissingCandles(expectedStart: Ticks, expectedEnd: Ticks) {
-    expectedStart = utils.toTimeEx(expectedStart).floorToMinutes(this.minutesInInterval).ticks
+    expectedStart = utils.toTimeEx(expectedStart).ceilToMinutes(this.minutesInInterval).ticks
     expectedEnd = utils.toTimeEx(expectedEnd).floorToMinutes(this.minutesInInterval).ticks
     const miliInterval = this.minutesInInterval * 60 * 1000
     const res: CandleStickData[] = []
@@ -143,7 +143,7 @@ export class CandleStickCollection {
   populate(expectedStart: Ticks, expectedEnd: Ticks) {
     this.getMissingCandles(expectedStart, expectedEnd).map(x => this.add(x))
   }
-  clone(): CandleStickCollection {
-    return new CandleStickCollection(this.items.map(x => x.clone()), this.exchange, this.symbol, this.interval, this.market, this.sourceName)
+  clone(deep = true): CandleStickCollection {
+    return new CandleStickCollection(this.items.map(x => deep ? x.clone() : x), this.exchange, this.symbol, this.interval, this.market, this.sourceName)
   }
 }

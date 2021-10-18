@@ -1,10 +1,10 @@
-import { IIndicator } from '../IIndicator';
+import { dep_IIndicator } from '../IIndicator';
 import { IIndicatorCalculationContext } from '../IIndicatorCalculationContext';
 import { Indicator } from '../Indicator';
 
 import { TalibWrapperEx } from './talibWrapper';
 
-export class ATR extends Indicator implements IIndicator {
+export class ATR extends Indicator implements dep_IIndicator {
   constructor(public period: number, public maxCount = 200) {
     super("ATR", `ATR-${period}-${maxCount}`);
   }
@@ -30,10 +30,11 @@ export class ATR extends Indicator implements IIndicator {
       endIdx: context.candleSticks.getLast(this.maxCount).length - 1,
       optInTimePeriod: this.period,
     }) as number[]
-    context.candleSticks.lastCandle.indicators.setValue(this, ATRArray[ATRArray.length - 1]);
+    context.candleSticks.lastCandle.indicators.setValue_depricated(this, ATRArray[ATRArray.length - 1]);
   }
   calculate(context: IIndicatorCalculationContext) {
     return context.lastCandle ? this.calculate2(context) : this.calculate1(context)
   }
 
 }
+

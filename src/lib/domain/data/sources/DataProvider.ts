@@ -20,8 +20,12 @@ import { CandleStickLiteDb } from '../stores/CandleSticksLiteDb';
 export class DataProvider implements IDataProvider {
   public logger = utils.getLogger("DataProvider")
   public db: CandleStickLiteDb;
-  public exchange: IDataSource;
+  public exchangeDataSource: IDataSource;
+  public exchange: Exchanges;
   public interval: Intervals;
+  public symbol: Symbols;
+  public market: Markets;
+  private cacheDisabled = false;
   constructor(
     exchange: Exchanges,
     market: Markets,
@@ -29,41 +33,47 @@ export class DataProvider implements IDataProvider {
     interval: Intervals,
   ) {
     this.db = new CandleStickLiteDb(exchange, market, symbol, interval);
-    this.exchange = new BinanceDataSource(market, symbol, interval);
+    this.exchangeDataSource = new BinanceDataSource(market, symbol, interval);
+    this.exchange = exchange;
     this.interval = interval;
+    this.market = market;
+    this.symbol = symbol;
   }
   temp() {
     throw new Error('Method not implemented.');
   }
-
+  disableCache() {
+    this.cacheDisabled = true;
+  }
   async getData(
     startTime: Ticks,
     endTime: Ticks
   ): Promise<CandleStickCollection> {
     startTime = utils.ticks(startTime)
     endTime = utils.ticks(endTime)
-    let result = await this.db.getData(startTime, endTime);
+
+    let result = this.cacheDisabled ? new CandleStickCollection([]) : await this.db.getData(startTime, endTime);
 
     if (
       result.length === 0 ||
       result.endTime != endTime ||
       result.startTime != startTime
     ) {
-      result = await this.exchange.getData(startTime, endTime);
-      result.populate(startTime, endTime)
+      result = await this.exchangeDataSource.getData(startTime, endTime);
+      // result.populate(startTime, endTime)
       await this.db.push(result.items);
     }
     return result;
   }
   async getExactCandle(time: Ticks): Promise<ICandleStickData> {
     time = utils.ticks(time)
-    let result = await this.db.getExactCandle(time);
+    let result = this.cacheDisabled ? null : await this.db.getExactCandle(time);
 
     if (result) {
       this.logger.info(`Candlestick data from ${time} was fetched from Database`)
     }
     if (result == null) {
-      result = await this.exchange.getExactCandle(time);
+      result = await this.exchangeDataSource.getExactCandle(time);
       if (result) {
         this.logger.info(`Candlestick data from ${time} was fetched from Binance`)
       } else {
@@ -76,9 +86,9 @@ export class DataProvider implements IDataProvider {
     return result;
   }
   async getLatestCandle(): Promise<ICandleStickData> {
-    let result = await this.db.getLatestCandle();
+    let result = this.cacheDisabled ? null : await this.db.getLatestCandle();
     if (result == null) {
-      result = await this.exchange.getLatestCandle();
+      result = await this.exchangeDataSource.getLatestCandle();
       if (result) await this.db.push(result);
     }
     return result;

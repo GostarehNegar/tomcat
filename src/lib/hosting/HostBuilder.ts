@@ -3,6 +3,7 @@ import http from 'http';
 import { IServiceProvider, ServiceProvider } from '../base';
 import { MessageBus } from '../bus';
 import { config } from '../config';
+import { Bot } from '../domain/bot';
 
 
 
@@ -28,6 +29,7 @@ export class HostBuilder implements IHostBuilder {
   constructor(private _name?: string, private _collection?: IHostCollection) {
     this._name = _name || `host-${Math.random()}`;
     this.services = new ServiceProvider();
+    this.services.register("IBot", s => { new Bot(s) })
     /// Add a dummy host that will be eventually
     /// replaced with the actual one, so that there is
     /// a current host

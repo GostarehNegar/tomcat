@@ -1,13 +1,13 @@
 
 import { CandleStickCollection } from '../../base';
 
-import { IIndicator } from './IIndicator';
+import { dep_IIndicator } from './IIndicator';
 import { IndicatorCalculationContext } from './IndicatorCalculationContext';
 import { IndicatorDB } from './indicatorsDB';
 (CandleStickCollection)
 export class IndicatorProvider {
   public isCacheEnabled: boolean;
-  constructor(public indicators?: IIndicator[], cacheEnable?: boolean) {
+  constructor(public indicators?: dep_IIndicator[], cacheEnable?: boolean) {
     this.indicators = indicators || [];
     this.isCacheEnabled = cacheEnable
   }
@@ -22,21 +22,17 @@ export class IndicatorProvider {
     for (let pass = 0; pass < 5; pass++) {
       context.pass = pass;
       for (let i = 0; i < this.indicators.length; i++) {
-        if (!context.candleSticks.lastCandle.indicators.has(this.indicators[i])) {
-
-
-
+        if (!context.candleSticks.lastCandle.indicators.has_deprecated(this.indicators[i])) {
           const value = await DB?.getIndicatorValue(context.time, this.indicators[i].id)
           if (value != null) {
-            context.candleSticks.lastCandle.indicators.setValue(this.indicators[i], value.value)
+            context.candleSticks.lastCandle.indicators.setValue_depricated(this.indicators[i], value.value)
 
           } else {
             if ((this.indicators[i].pass || 0) == context.pass) {
               await this.indicators[i].calculate(context);
-              await DB?.setIndicatorValue(context.time, this.indicators[i].id, context.candleSticks.lastCandle.indicators.getValue(this.indicators[i]))
+              await DB?.setIndicatorValue(context.time, this.indicators[i].id, context.candleSticks.lastCandle.indicators.getValue_deprecated(this.indicators[i]))
             }
           }
-
         }
       }
     }
@@ -80,7 +76,7 @@ export class IndicatorProvider {
   //   );
   //   return this;
   // }
-  add(indicator: IIndicator) {
+  add(indicator: dep_IIndicator) {
     this.indicators.push(indicator)
     return this
   }

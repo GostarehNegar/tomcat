@@ -1,0 +1,14 @@
+FROM node:16
+
+WORKDIR /usr/src/app
+
+# RUN apk-get update && apk add --update alpine-sdk
+# RUN apk add --update --no-cache python3
+# RUN apk add --no-cache --upgrade bash
+COPY package*.json ./
+RUN yarn install
+COPY ./build/main .
+
+EXPOSE 8080
+
+CMD [ "node", "run.js" ]

@@ -1,4 +1,4 @@
-import { IIndicator } from "./IIndicator";
+import { dep_IIndicator } from "./IIndicator";
 import { ADX, ATR, EMA, MinusDi, PlusDi, SAREXT } from "./talib-indicators";
 // import { IIndicator } from "./IIndicator";
 
@@ -17,22 +17,22 @@ import { ADX, ATR, EMA, MinusDi, PlusDi, SAREXT } from "./talib-indicators";
 //     }
 // }
 export class Indicators {
-    public static ADX(period: number, maxCount = 200): IIndicator {
+    public static ADX(period: number, maxCount = 200): dep_IIndicator {
         return new ADX(period, maxCount)
     }
-    public static ATR(period: number, maxCount = 200): IIndicator {
+    public static ATR(period: number, maxCount = 200): dep_IIndicator {
         return new ATR(period, maxCount)
     }
-    public static MinusDi(period: number, maxCount = 200): IIndicator {
+    public static MinusDi(period: number, maxCount = 200): dep_IIndicator {
         return new MinusDi(period, maxCount)
     }
-    public static PlusDi(period: number, maxCount = 200): IIndicator {
+    public static PlusDi(period: number, maxCount = 200): dep_IIndicator {
         return new PlusDi(period, maxCount)
     }
-    public static SAREXT(startIndex: number, acceleration: number, maxAcceleration: number, maxCount = 400): IIndicator {
+    public static SAREXT(startIndex: number, acceleration: number, maxAcceleration: number, maxCount = 400): dep_IIndicator {
         return new SAREXT(startIndex, acceleration, maxAcceleration, maxCount)
     }
-    public static EMA(period: number): IIndicator {
+    public static EMA(period: number): dep_IIndicator {
         return new EMA(period)
     }
 }

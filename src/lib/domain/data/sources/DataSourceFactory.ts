@@ -5,7 +5,7 @@ import { CandleStickLiteDb } from '../stores/CandleSticksLiteDb';
 
 
 export class DataSourceFactory {
-  creatDataSource(
+  deprecated_creatDataSource(
     exchange: Exchanges,
     market: Markets,
     symbol: Symbols,
@@ -19,6 +19,19 @@ export class DataSourceFactory {
         return new CandleStickLiteDb(exchange, market, symbol, interval);
       default:
         return null;
+    }
+  }
+  static createDataSource(
+    exchange: Exchanges,
+    market: Markets,
+    symbol: Symbols,
+    interval: Intervals
+  ): IDataSource {
+    switch (exchange) {
+      case 'binance':
+        return new BinanceDataSource(market, symbol, interval);
+      default:
+        return new BinanceDataSource(market, symbol, interval);
     }
   }
 }

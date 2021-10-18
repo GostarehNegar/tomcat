@@ -5,6 +5,12 @@ const to2Digits = (n) => {
   if (n < 10) return '0' + n;
   return n;
 };
+// function parseIsoDate(v:string){
+//   const d= new Date(v)
+
+//   if (d.toISOString()==v)
+//       return d.getTime();
+// }
 
 const msecPerSecond = 1000,
   msecPerMinute = 60000,
@@ -13,14 +19,15 @@ const msecPerSecond = 1000,
 export type Ticks = number | Date | TimeEx
 export class TimeEx {
   public ticks: number;
-  constructor(_ticks?: Ticks) {
-    _ticks = _ticks || Date.now();
-    this.ticks =
-      typeof _ticks == 'number'
-        ? _ticks
-        : _ticks instanceof TimeEx
-          ? (_ticks as TimeEx).ticks
-          : (_ticks as Date).getTime();
+  constructor(_ticks?: Ticks | string) {
+    this.ticks = TimeEx.toticks(_ticks)
+    // _ticks = _ticks || Date.now();
+    // this.ticks =
+    //   typeof _ticks == 'number'
+    //     ? _ticks
+    //     : _ticks instanceof TimeEx
+    //       ? (_ticks as TimeEx).ticks
+    //       : (_ticks as Date).getTime();
   }
   public roundToMinutes(n: number): TimeEx {
     const coeff = 1000 * 60 * n;
@@ -29,6 +36,10 @@ export class TimeEx {
   public floorToMinutes(n: number): TimeEx {
     const coeff = 1000 * 60 * n;
     return new TimeEx(Math.floor(this.ticks / coeff) * coeff);
+  }
+  public ceilToMinutes(n: number): TimeEx {
+    const coeff = 1000 * 60 * n;
+    return new TimeEx(Math.ceil(this.ticks / coeff) * coeff);
   }
   public toString() {
     return this.asDate.toUTCString();
@@ -49,6 +60,32 @@ export class TimeEx {
   addMinutes(n: number) {
     return new TimeEx(this.ticks + n * 1000 * 60);
   }
+  static parseIsoDate(input?: string) {
+    if (!input)
+      return new Date();
+    const result = new Date(input)
+    return !isNaN(result.getTime()) && result.toISOString() == input
+      ? result
+      : null;
+  }
+  static toticks(input?: Date | number | TimeEx | string): number {
+    if (!input)
+      return new Date().getTime();
+    if (input instanceof TimeEx) {
+      return input.ticks
+    }
+    if (input instanceof Date) {
+      return input.getTime()
+    }
+    if (typeof input == "string") {
+      const d = new Date(input)
+      if (!isNaN(d.getTime()) && d.toISOString() == input)
+        return d.getTime();
+      return parseInt(input)
+    }
+    return input
+  }
+
 }
 export class TimeSpan {
   private msecs: number;
