@@ -11,6 +11,7 @@ import { IStreamPlayer } from "./IStreamPlayer";
 import { PipelineContext } from "./pipelineContext";
 
 
+
 export class Filter implements IFilter {
     public context = {}
     public _scaller: CandleStickCollectionScaler;

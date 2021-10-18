@@ -21,7 +21,6 @@ export interface IPipeline {
 
 export class Pipeline implements IPipeline {
     public filters: Filter[] = [];
-
     constructor(public candleStream?: ICandleStream) { }
     from(exchange: Exchanges, market: Markets, symbol: Symbols, interval: Intervals, name?: string) {
         this.candleStream = new DataSourceStream(DataSourceFactory.createDataSource(exchange, market, symbol, interval), name)
@@ -74,8 +73,8 @@ export class Pipeline implements IPipeline {
         // await this.filters.reverse().map(async (x) => await x.initialize())
         this.filters.reverse().map((x) => x.run(context));
         (startTime)
-        // if (this.candleStream.isWriter) {
-        //     this.candleStream.start(startTime)
-        // }
+        if (this.candleStream.isWriter) {
+            this.candleStream.start(startTime)
+        }
     }
 }

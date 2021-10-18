@@ -1,9 +1,10 @@
-import { CandleStickData, States, Symbols } from "../common";
+import { CandleStickData, Signals } from "../common";
+import { Signal } from "../common/Signal";
 import * as Indicators from "../indicators";
 import { baseUtils, Ticks } from "../infrastructure/base";
 import { IFilter, Pipeline } from "../pipes";
 import { Stream } from "../streams";
-import { Order, Wallet } from "../wallet";
+import { Wallet } from "../wallet";
 
 const isSarAbove: Indicators.IIndicator = {
     id: "isSARAbove",
@@ -52,11 +53,13 @@ const adxSlope: Indicators.IIndicator = {
     },
 };
 
+
 const indicators = { ADX: Indicators.ADX(), ATR: Indicators.ATR(), SAR: Indicators.SAR(), minusDi: Indicators.MDI(), plusDi: Indicators.PDI(), isSarAbove: isSarAbove, adxSlope: adxSlope, stopLossAtr: stopLossAtr }
 
-const strategy = (candle: CandleStickData) => {
+const strategy = (candle: CandleStickData): Signal => {
     const indicator = candle.indicators
-    let result = ''
+    let result: Signals = ''
+    let reason = ''
     if (
         candle && !candle.isMissing &&
         indicator &&
@@ -87,6 +90,13 @@ const strategy = (candle: CandleStickData) => {
         ) {
             // const sellOrder: IStrategySignal = { candle: candle }
             result = 'closeLong'
+            reason = indicator.getBoolValue(indicators.isSarAbove) == true
+                ? 'sarAbove' :
+                indicator.getNumberValue(indicators.plusDi) < (indicator.getNumberValue(indicators.minusDi) - 5)
+                    ? 'plusDi in greater than minusDi' :
+                    indicator.getNumberValue(indicators.adxSlope) < -5
+                        ? 'adxSlope less than -5' :
+                        ''
             // await this.bus.createMessage(`${jobContext.streamID}/${MessageNames.closeLongSignal}`, sellOrder).publish();
         }
         else if (
@@ -97,26 +107,29 @@ const strategy = (candle: CandleStickData) => {
         ) {
             // const sellOrder: IStrategySignal = { candle: candle }
             result = 'closeShort'
+            reason = indicator.getBoolValue(indicators.isSarAbove) == false
+                ? 'sarBelow'
+                : indicator.getNumberValue(indicators.plusDi) > (indicator.getNumberValue(indicators.minusDi) + 5)
+                    ? "plusDi in greater than minusDi"
+                    : indicator.getNumberValue(indicators.adxSlope) < -5
+                        ? 'adxSlope is less than -5'
+                        : ''
             // await this.bus.createMessage(`${jobContext.streamID}/${MessageNames.closeShortSignal}`, sellOrder).publish();
         }
     }
-    return result
+    const signal = new Signal(result, candle, candle.indicators.getNumberValue(indicators.stopLossAtr))
+    signal.reason = reason
+    return signal
 }
-
-export type Strategy = {
-    name: string;
+export class Strategy {
+    name: string
     candle: CandleStickData
 }
 
-
 export class Bot {
-    public state: States
     public wallet: Wallet
-    public symbol: Symbols;
     constructor() {
-        this.wallet = new Wallet(1000, null)
-        this.state = 'open'
-        this.symbol = 'BTCUSDT'
+        this.wallet = new Wallet(1000, null, 'BTCUSDT')
     }
     public get indicators() {
         return { ADX: Indicators.ADX(), ATR: Indicators.ATR(), SAR: Indicators.SAR(), minusDi: Indicators.MDI(), plusDi: Indicators.PDI(), isSarAbove: isSarAbove, adxSlope: adxSlope, stopLossAtr: stopLossAtr }
@@ -134,14 +147,14 @@ export class Bot {
             .add(this.indicators.plusDi)
             .add(isSarAbove)
             .add(adxSlope)
-            .add(stopLossAtr, { stream: true, name: "myIndicatorsEX28" })
+            .add(stopLossAtr, { stream: true, name: "Indicators" })
             .add(async (candle, THIS) => {
-                THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy-BT-20")
+                THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy-BT-01")
                 const stream = THIS.context.stream as Stream<Strategy>
                 const res = await strategy(candle)
-                await stream.write(baseUtils.toTimeEx(candle.openTime), { name: res, candle: candle })
-                if (res && candle.openTime >= baseUtils.toTimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0)).ticks) {
-                    await this.onData(res, candle)
+                await stream.write(baseUtils.toTimeEx(candle.openTime), { name: res.signal, candle: candle })
+                if (res.signal && candle.openTime >= baseUtils.toTimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0)).ticks) {
+                    await this.wallet.onSignal(res)
                 }
             })
             .add(async (candle) => {
@@ -150,139 +163,5 @@ export class Bot {
                 }
             })
         pipeline.start(startTime)
-    }
-    runEX(startTime: Ticks, endTime: Ticks) {
-        // let total = 0
-        const pipeline = new Pipeline()
-        // const time = 1633174260000
-        // const time = Date.now()
-        pipeline.fromStream("myIndicators")
-            .add(async (candle) => {
-                // total += 1
-                // console.log("started");
-                // strategy(candle).then((x) => {
-                //     this.onData(x, candle)
-                // })
-                const res = strategy(candle)
-                if (res && candle.openTime >= baseUtils.toTimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0)).ticks) {
-                    this.onData(res, candle)
-                }
-                // const totalTime = Date.now() - time
-                // if (total % 100 == 0) {
-                //     console.log(`total process : ${total} , elapsed : ${totalTime}, avg : ${(total * 1000) / totalTime}`);
-                // }
-                // console.log("hi");
-
-            })
-            .add(async (candle) => {
-                if (candle.openTime == endTime) {
-                    pipeline.stop()
-                }
-            })
-        pipeline.start(startTime)
-    }
-    async onData(res: string, targetCandle: CandleStickData) {
-        // const res = await this.strategy.exec(jobContext)
-        // const targetCandle = jobContext.candles.lastCandle
-        switch (res) {
-            case "openShort":
-                this.openShort(targetCandle)
-                break;
-            case "openLong":
-                this.openLong(targetCandle)
-                break;
-            case "closeShort":
-                this.closeShort(targetCandle)
-                break;
-            case "closeLong":
-                this.closeLong(targetCandle)
-                break;
-            default:
-                break;
-        }
-    }
-    openLong(candle: CandleStickData) {
-        if (this.state == 'open') {
-            const price = candle.close
-            //DIVISION
-            const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue(this.indicators.stopLossAtr) / candle.close)
-            this.wallet.leverage = candle.indicators.getNumberValue(this.indicators.stopLossAtr)
-            // if (1 == 1 || (amount > 0 && this.wallet.balance > 0)) {
-            const orderEX = new Order(this.symbol, 'buy', price, amount, candle.closeTime)
-            this.wallet.processOrder(orderEX)
-            // const report: IReportContext = { order: orderEX, candle: candle, state: 'openLong' }
-            // await this.bus.publish(Messages.openLongReportMessage(jobContext.streamID, report));
-            // await this.bus.createMessage("Bot/Report", report).publish()
-            this.state = 'openLong'
-            // } else {
-            //     console.log(`insufficient balance detected.balance : ${this.wallet.balance} , amount : ${amount} , leverage:${this.wallet.leverage}`)
-
-            // }
-        }
-        else if (this.state == 'openShort') {
-            this.closeShort(candle, true)
-            this.state = 'open'
-        }
-    }
-    openShort(candle: CandleStickData) {
-        if (this.state == 'open') {
-            const price = candle.close
-            const amount = ((0.03 * this.wallet.balance) * candle.indicators.getNumberValue(this.indicators.stopLossAtr)) / candle.close
-            this.wallet.leverage = candle.indicators.getNumberValue(this.indicators.stopLossAtr)
-            // if (1 == 1 || (amount > 0 && this.wallet.balance > 0)) {
-            const orderEX = new Order(this.symbol, 'sell', price, amount, candle.closeTime)
-            this.wallet.processOrder(orderEX)
-            // const report: IReportContext = { order: orderEX, candle: candle, state: 'openShort' }
-            // await this.bus.publish(Messages.openShortReportMessage(jobContext.streamID, report));
-            // await this.bus.createMessage("Bot/Report", report).publish()
-            this.state = 'openShort'
-            // } else {
-            //     console.log(`insufficient balance detected.balance : ${this.wallet.balance} , amount : ${amount} , leverage:${this.wallet.leverage}`)
-            // }
-        }
-        else if (this.state == 'openLong') {
-            this.closeLong(candle, true)
-            this.state = 'open'
-        }
-    }
-    closeLong(candle: CandleStickData, closingOpenposition = false) {
-        if (this.state == 'openLong') {
-            const price = candle.close
-            const latestTrade = this.wallet.getLatestOpenTrade()
-            const amount = latestTrade.quantity
-            const orderEX = new Order(this.symbol, 'sell', price, amount, candle.closeTime)
-            this.wallet.processOrder(orderEX)
-            if (!closingOpenposition) {
-                // const report: IReportContext = { order: orderEX, candle: candle, state: "closeLong" }
-                // await this.bus.publish(Messages.closeLongReportMessage(jobContext.streamID, report));
-                // await this.bus.createMessage("Bot/Report", report).publish()
-            } else {
-                // const report: IReportContext = { order: orderEX, candle: candle, state: "openShort" }
-                // await this.bus.publish(Messages.openShortReportMessage(jobContext.streamID, report));
-                // await this.bus.createMessage("Bot/Report", report).publish()
-            }
-            this.state = 'open'
-        }
-    }
-    closeShort(candle: CandleStickData, closingOpenposition = false) {
-        if (this.state == 'openShort') {
-            const price = candle.close
-            const latestTrade = this.wallet.getLatestOpenTrade()
-            const amount = latestTrade.quantity
-            const orderEX = new Order(this.symbol, 'buy', price, amount, candle.closeTime)
-            this.wallet.processOrder(orderEX)
-
-            if (!closingOpenposition) {
-                // const report: IReportContext = { order: orderEX, candle: candle, state: "closeShort" }
-                // await this.bus.publish(Messages.closeShortReportMessage(jobContext.streamID, report));
-                // await this.bus.createMessage("Bot/Report", report).publish()
-            }
-            else {
-                // const report: IReportContext = { order: orderEX, candle: candle, state: "openLong" }
-                // await this.bus.publish(Messages.openLongReportMessage(jobContext.streamID, report));
-                // await this.bus.createMessage("Bot/Report", report).publish()
-            }
-            this.state = 'open'
-        }
     }
 }
