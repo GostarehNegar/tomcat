@@ -1,8 +1,9 @@
 
-import { Utils } from './base';
+import { Utils } from './common';
+import * as _Domain from './domain'
+import * as _Infrastructure from "./infrastructure"
 
 import * as _all from './';
-
 
 namespace TomCat {
   export const utils = Utils.instance
@@ -10,11 +11,13 @@ namespace TomCat {
   export const config = _all.Config.config;
   //export const builder: _Interfaces.Hosting.IHostBuilder = new _Implementaions.Hosting.HostBuilder(null);
 
-  export const hosts = _all.Hosting.hosts;
+  export const hosts = _Infrastructure.Hosting.hosts;
   // export const Bot = _all.Bot;
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  export import Index = _all;
+  export import Infrastructure = _Infrastructure
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  export import Domain = _Domain
+  // export import Index = _all;
 
 }
 //const tomcat = TomCat

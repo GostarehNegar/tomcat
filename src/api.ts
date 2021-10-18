@@ -1,6 +1,6 @@
 import tomcat from ".";
 
-const CandleStream = tomcat.Index.Domain.Data.CandleStream
+const CandleStream = tomcat.Domain.Streams.CandleStream
 const PORT = 8000;
 const app = tomcat
     .hosts

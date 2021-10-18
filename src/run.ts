@@ -1,6 +1,6 @@
 import tomcat from ".";
 
-const MyBot = tomcat.Index.Domain.Bot.MyBot
+const MyBot = tomcat.Domain.Bot.Bot
 
 const bot = new MyBot();
 

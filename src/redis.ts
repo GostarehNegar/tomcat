@@ -1,9 +1,7 @@
-
-// import { IDataProvider } from "./lib/domain/data";
-
-import { DataSourceStream } from "./lib/domain/data";
-
 import tomcat from ".";
+// import { IDataProvider } from "./lib/domain/data";
+const DataSourceFactory = tomcat.Domain.Data.DataSourceFactory
+const DataSourceStream = tomcat.Domain.Streams.DataSourceStream
 // import { CandleStream } from "./lib/domain/data/streams/CandleStream";
 
 // const asyncRedis = require("async-redis");
@@ -11,9 +9,7 @@ import tomcat from ".";
 // client.SET("paria", "mahmoudi")
 // const client = redis.createClient();
 // (AsyncRedis as any).default.createClient() as AsyncRedis
-export type IDataProvider = tomcat.Index.Domain.Data.IDataProvider
-const DataProvider = tomcat.Index.Domain.Data.DataProvider
-const myDataProvider = new DataProvider('binance', 'spot', 'BTCUSDT', '1m');
+const myDataProvider = DataSourceFactory.createDataSource('binance', 'spot', 'BTCUSDT', '1m');
 (async () => {
     // const candles = await exchange.getData(now.addMinutes(-40).ticks, now.ticks);
     // for (let i = 0; i < candles.length; i++) {

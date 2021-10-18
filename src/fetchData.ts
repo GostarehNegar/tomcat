@@ -1,15 +1,10 @@
-// import { exit } from "process";
-import { utils } from "./lib/base";
-
 import tomcat from "."
 
-
-
-const Pipeline = tomcat.Index.Domain.Strategy.Pipeline
-const Indicators = tomcat.Index.Domain.Indicators;
+const Pipeline = tomcat.Domain.Pipes.Pipeline
+const Indicators = tomcat.Domain.Indicators;
 
 (async () => {
-    await utils.getProxy(undefined, 3, undefined, 5000);
+    await tomcat.utils.getProxy(undefined, 3, undefined, 5000);
     const pipeline = new Pipeline()
     pipeline.from('binance', 'spot', 'BTCUSDT', '1m')
         .add(Indicators.ATR())
