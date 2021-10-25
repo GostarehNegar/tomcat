@@ -13,6 +13,7 @@ export class BotHost extends WebHost implements IBotHost {
     public pipeline: Pipeline
     constructor(public name: string, public services: IServiceProvider) {
         super(name, services)
+        // this.services.register("dataSourceFactory", () =>)
         this.pipeline = new Pipeline(null, services)
     }
     addFilter(cb: IFilterCallBack | IIndicator, options?: IFilterOptions): IBotHost {
@@ -27,6 +28,4 @@ export class BotHost extends WebHost implements IBotHost {
         this.services.register(name, ctor)
         return this
     }
-
-
 }
