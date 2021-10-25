@@ -136,6 +136,7 @@ export class Bot {
             .add(adxSlope)
             .add(stopLossAtr, { stream: true, name: "myIndicatorsEX28" })
             .add(async (candle, THIS) => {
+                THIS.services.getService("gdyuf")
                 THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy-BT-20")
                 const stream = THIS.context.stream as Stream<Strategy>
                 const res = await strategy(candle)
