@@ -22,7 +22,7 @@ export interface IPipeline {
 export class Pipeline implements IPipeline {
     public filters: Filter[] = [];
 
-    constructor(public candleStream?: ICandleStream) { }
+    // constructor(public candleStream?: ICandleStream) { }
 
 
     constructor(public candleStream?: ICandleStream, public services?: IServiceProvider) { }

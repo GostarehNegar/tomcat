@@ -7,14 +7,14 @@ import { IFilter, Pipeline } from "../pipes";
 import { Stream } from "../streams";
 import { Wallet } from "../wallet";
 
-const isSarAbove: Indicators.IIndicator = {
+// const isSarAbove: Indicators.IIndicator = {
 
-import { CandleStickData, States, Symbols } from "../common";
+// import { CandleStickData, States, Symbols } from "../common";
 import * as _Indicators from "../indicators";
-import { baseUtils, Ticks } from "../infrastructure/base";
-import { IFilter, Pipeline } from "../pipes";
-import { Stream } from "../streams";
-import { Order, Wallet } from "../wallet";
+// import { baseUtils, Ticks } from "../infrastructure/base";
+// import { IFilter, Pipeline } from "../pipes";
+// import { Stream } from "../streams";
+// import { Order, Wallet } from "../wallet";
 // _Indicators.ADX()
 const isSarAbove: _Indicators.IIndicator = {
 
@@ -70,8 +70,8 @@ const indicators = { ADX: Indicators.ADX(), ATR: Indicators.ATR(), SAR: Indicato
 
 const strategy = (candle: CandleStickData): Signal => {
 
-const indicatorsEX = { ADX: _Indicators.ADX(), ATR: _Indicators.ATR(), SAR: _Indicators.SAR(), minusDi: _Indicators.MDI(), plusDi: _Indicators.PDI(), isSarAbove: isSarAbove, adxSlope: adxSlope, stopLossAtr: stopLossAtr }
-const strategy = (candle: CandleStickData) => {
+    const indicatorsEX = { ADX: _Indicators.ADX(), ATR: _Indicators.ATR(), SAR: _Indicators.SAR(), minusDi: _Indicators.MDI(), plusDi: _Indicators.PDI(), isSarAbove: isSarAbove, adxSlope: adxSlope, stopLossAtr: stopLossAtr }
+    // const strategy = (candle: CandleStickData) => {
 
     const indicator = candle.indicators
     let result: Signals = ''
