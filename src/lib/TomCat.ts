@@ -1,7 +1,9 @@
 
+import { BotHost, IBotHost } from './bot/botHost';
 import { Utils } from './common';
 import * as _Domain from './domain'
 import * as _Infrastructure from "./infrastructure"
+import { ServiceProvider } from './infrastructure/base';
 
 import * as _all from './';
 
@@ -13,6 +15,7 @@ namespace TomCat {
 
   export const hosts = _Infrastructure.Hosting.hosts;
   // export const Bot = _all.Bot;
+  export const createBot = (name: string): IBotHost => { return new BotHost(name, new ServiceProvider()) }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export import Infrastructure = _Infrastructure
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

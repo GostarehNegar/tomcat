@@ -1,6 +1,5 @@
 
 import { config } from '../../config';
-import { Pipeline } from '../../pipes';
 import { IServiceProvider } from '../base';
 import { IMessageBus } from '../bus';
 
@@ -13,13 +12,13 @@ export class Host implements IHost {
   private _tasks: IHostedService[] = [];
   public started: boolean;
   public config: typeof config;
-  public pipeline: Pipeline
+  // public pipeline: Pipeline
   // public bots: BotCollection;
   constructor(public name: string, public services: IServiceProvider) {
     this._tasks = this.services.getServices<IHostedService>(
       serviceNames.IHostedService
     );
-    this.pipeline = new Pipeline()
+    // this.pipeline = new Pipeline()
     this.config = this.services.getService(serviceNames.Config);
     // this.bots = new BotCollection(services)
   }

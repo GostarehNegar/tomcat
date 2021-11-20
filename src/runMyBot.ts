@@ -46,3 +46,8 @@ const startTime = tomcat.utils.toTimeEx(Date.UTC(2020, 0, 1, 0, 0, 0, 0)).addMin
 const endTime = tomcat.utils.toTimeEx(Date.UTC(2021, 0, 1, 0, 0, 0, 0));
 const bot = new MyBot()
 bot.run(startTime, endTime)
+
+// tomcat.createBot("test").addService("ctx", "paria").addFilter(async (candle, THIS) => {
+//     (candle);
+//     THIS.services.getService<string>("ctx")
+// })
