@@ -10,8 +10,8 @@
   "keywords": [],
   "scripts": {
     "run": "run-s build && node ./build/main/runMyBot.js",
-    "api" : "run-s build && node ./build/main/api.js",
-    "wallet" : "run-s build && node ./build/main/run.js",
+    "api": "run-s build && node ./build/main/api.js",
+    "wallet": "run-s build && node ./build/main/run.js",
     "data": "run-s build && node ./build/main/dataFetch.js",
     "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",

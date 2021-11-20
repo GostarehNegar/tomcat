@@ -48,6 +48,7 @@ const bot = new MyBot()
 bot.run(startTime, endTime)
 
 
+
 const CandleStream = tomcat.Domain.Streams.CandleStream
 const PORT = 8000;
 const app = tomcat
@@ -97,3 +98,9 @@ app.listen(PORT, () => {
 //     .add(strategy)
 //     .add(atr)
 //     .add(wallet)
+
+// tomcat.createBot("test").addService("ctx", "paria").addFilter(async (candle, THIS) => {
+//     (candle);
+//     THIS.services.getService<string>("ctx")
+// })
+

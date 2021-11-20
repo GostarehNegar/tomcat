@@ -18,4 +18,17 @@ export class DataSourceFactory {
         return new BinanceDataSource(market, symbol, interval);
     }
   }
+  createdataSourceEx(
+    exchange: Exchanges,
+    market: Markets,
+    symbol: Symbols,
+    interval: Intervals
+  ): IDataSource {
+    switch (exchange) {
+      case 'binance':
+        return new BinanceDataSource(market, symbol, interval);
+      default:
+        return new BinanceDataSource(market, symbol, interval);
+    }
+  }
 }

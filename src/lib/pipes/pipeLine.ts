@@ -1,7 +1,7 @@
 import { Exchanges, Intervals, Markets, Symbols } from "../common";
 import { DataSourceFactory } from "../data";
 import { IIndicator } from "../indicators";
-import { baseUtils, Ticks } from "../infrastructure/base";
+import { baseUtils, IServiceProvider, Ticks } from "../infrastructure/base";
 import { CandleStream, DataSourceStream, ICandleStream } from "../streams";
 
 import { IFilterCallBack } from "./IFilterCallBack";
@@ -21,7 +21,12 @@ export interface IPipeline {
 
 export class Pipeline implements IPipeline {
     public filters: Filter[] = [];
+
     constructor(public candleStream?: ICandleStream) { }
+
+
+    constructor(public candleStream?: ICandleStream, public services?: IServiceProvider) { }
+
     from(exchange: Exchanges, market: Markets, symbol: Symbols, interval: Intervals, name?: string) {
         this.candleStream = new DataSourceStream(DataSourceFactory.createDataSource(exchange, market, symbol, interval), name)
         return this
@@ -52,11 +57,11 @@ export class Pipeline implements IPipeline {
         if ((cb as IIndicator).id) {
             cb = (cb as IIndicator).handler
         }
-        this._add(new Filter(name, cb as IFilterCallBack, options))
+        this._add(new Filter(name, cb as IFilterCallBack, options, this.services))
         return this
     }
     addEX(cb: IFilterCallBack | IIndicator, callback: (filter: Filter) => void): IPipeline {
-        const filter = new Filter(null, cb as IFilterCallBack, null)
+        const filter = new Filter(null, cb as IFilterCallBack, null, this.services)
         callback(filter)
         if ((cb as IIndicator).id) {
             cb = (cb as IIndicator).handler

@@ -1,6 +1,6 @@
 import { Intervals } from "../common";
 import { CandleStickCollectionScaler } from "../indicators";
-import { baseUtils, Ticks } from "../infrastructure/base";
+import { baseUtils, IServiceProvider, ServiceProvider, Ticks } from "../infrastructure/base";
 import { CandleStream } from "../streams";
 
 import { IFilter } from "./IFilter";
@@ -22,10 +22,12 @@ export class Filter implements IFilter {
     public _stop = false
     // private _redisStream: RedisStream;
     public isStreamSupported: boolean;
-    constructor(public name: string, private callback: IFilterCallBack, public options?: IFilterOptions) {
+    public services: IServiceProvider
+    constructor(public name: string, private callback: IFilterCallBack, public options?: IFilterOptions, services?: IServiceProvider) {
         this.name = name ? name : baseUtils.randomName("Filter", 1000)
         this.callback = this.callback || (() => { return Promise.resolve() })
         this.options = options || {}
+        this.services = services || ServiceProvider.instance
     }
     async run(context: PipelineContext) {
         this._playSourceStream(async (candle, err) => {
