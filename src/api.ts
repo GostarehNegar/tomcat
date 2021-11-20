@@ -8,7 +8,7 @@ const app = tomcat
     .buildWebHost('express')
     .expressApp;
 const strategyStream = new CandleStream("strategy-BT-01")
-const walletStream = new CandleStream("wallet-BT-21")
+const walletStream = new CandleStream("wallet-BT-01")
 
 
 

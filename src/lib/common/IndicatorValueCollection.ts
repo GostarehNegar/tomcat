@@ -38,7 +38,7 @@ export class IndicatorValueCollection {
     // getNumberValue_deprecated(indicator: dep_IIndicator) {
     //     return this.getValue_deprecated<number>(indicator);
     // }
-    getNumberValue(indicator: IIndicator) {
+    getNumberValue(indicator: IIndicator | string) {
         return this.getValue<number>(indicator);
     }
     // getBoolValue_deprecated(indicator: dep_IIndicator) {
