@@ -31,9 +31,12 @@ export class CandleStickCollectionScaler {
   constructor(public interval: Intervals, public maxCount = 200) {
     this._interval = utils.toMinutes(interval) * 60 * 1000
   }
-  push(candle: CandleStickData) {
+  push(candle: CandleStickData, cb: (onMinutes: CandleStickCollection, lastCandle: CandleStickData) => void = null) {
     if (this.interval != '1m') {
       if (this.oneMinuteCandles.firstCandle && (candle.openTime - this.oneMinuteCandles.firstCandle.openTime >= this._interval)) {
+        if (cb) {
+          cb(this.oneMinuteCandles, this.candles.items[this.candles.length - 1])
+        }
         this.oneMinuteCandles.clear()
       }
       this.oneMinuteCandles.push(candle)

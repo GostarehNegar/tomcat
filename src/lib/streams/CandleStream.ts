@@ -145,7 +145,7 @@ export class DataSourceStream extends CandleStream implements ICandleStream {
                     return
                 }
                 this.emit('data', candles.items[i])
-                if ((await this.redisStream.XADD(candles.items[i].openTime, candles.items[i])) && cb && cb(candles.items[i])) {
+                if ((await this.redisStream.XADD(candles.items[i].openTime, candles.items[i], true)) && cb && cb(candles.items[i])) {
                     console.log("unexpected return!");
                     return
                 }

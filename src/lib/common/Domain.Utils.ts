@@ -1,6 +1,6 @@
 import { BaseUtils } from '../infrastructure/base';
 
-import { Intervals } from '.';
+import { Intervals, Symbols } from '.';
 
 export class Utils extends BaseUtils {
     roundTime(time: number, minutes: number): number {
@@ -25,6 +25,9 @@ export class Utils extends BaseUtils {
         if (_interval.endsWith('d'))
             return Number.parseInt(_interval) * 60 * 24;
         return null;
+    }
+    parseSymbol(sym: string): Symbols {
+        return sym as Symbols
     }
 }
 const utils = new Utils();

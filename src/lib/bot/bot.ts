@@ -1,7 +1,7 @@
 
 import { CandleStickData, Signals } from "../common";
 import { Signal } from "../common/Signal";
-import * as Indicators from "../indicators";
+// import * as Indicators from "../indicators";
 import { baseUtils, Ticks } from "../infrastructure/base";
 import { IFilter, Pipeline } from "../pipes";
 import { Stream } from "../streams";
@@ -65,8 +65,8 @@ const adxSlope: _Indicators.IIndicator = {
 };
 
 
-
-const indicators = { ADX: Indicators.ADX(), ATR: Indicators.ATR(), SAR: Indicators.SAR(), minusDi: Indicators.MDI(), plusDi: Indicators.PDI(), isSarAbove: isSarAbove, adxSlope: adxSlope, stopLossAtr: stopLossAtr }
+// Indicators.ADX()
+// const indicators = { ADX: Indicators.ADX(), ATR: Indicators.ATR(), SAR: Indicators.SAR(), minusDi: Indicators.MDI(), plusDi: Indicators.PDI(), isSarAbove: isSarAbove, adxSlope: adxSlope, stopLossAtr: stopLossAtr }
 
 const strategy = (candle: CandleStickData): Signal => {
 
@@ -106,11 +106,11 @@ const strategy = (candle: CandleStickData): Signal => {
         ) {
             // const sellOrder: IStrategySignal = { candle: candle }
             result = 'closeLong'
-            reason = indicator.getBoolValue(indicators.isSarAbove) == true
+            reason = indicator.getBoolValue(indicatorsEX.isSarAbove) == true
                 ? 'sarAbove' :
-                indicator.getNumberValue(indicators.plusDi) < (indicator.getNumberValue(indicators.minusDi) - 5)
+                indicator.getNumberValue(indicatorsEX.plusDi) < (indicator.getNumberValue(indicatorsEX.minusDi) - 5)
                     ? 'plusDi in greater than minusDi' :
-                    indicator.getNumberValue(indicators.adxSlope) < -5
+                    indicator.getNumberValue(indicatorsEX.adxSlope) < -5
                         ? 'adxSlope less than -5' :
                         ''
             // await this.bus.createMessage(`${jobContext.streamID}/${MessageNames.closeLongSignal}`, sellOrder).publish();
@@ -123,17 +123,17 @@ const strategy = (candle: CandleStickData): Signal => {
         ) {
             // const sellOrder: IStrategySignal = { candle: candle }
             result = 'closeShort'
-            reason = indicator.getBoolValue(indicators.isSarAbove) == false
+            reason = indicator.getBoolValue(indicatorsEX.isSarAbove) == false
                 ? 'sarBelow'
-                : indicator.getNumberValue(indicators.plusDi) > (indicator.getNumberValue(indicators.minusDi) + 5)
+                : indicator.getNumberValue(indicatorsEX.plusDi) > (indicator.getNumberValue(indicatorsEX.minusDi) + 5)
                     ? "plusDi in greater than minusDi"
-                    : indicator.getNumberValue(indicators.adxSlope) < -5
+                    : indicator.getNumberValue(indicatorsEX.adxSlope) < -5
                         ? 'adxSlope is less than -5'
                         : ''
             // await this.bus.createMessage(`${jobContext.streamID}/${MessageNames.closeShortSignal}`, sellOrder).publish();
         }
     }
-    const signal = new Signal(result, candle, candle.indicators.getNumberValue(indicators.stopLossAtr))
+    const signal = new Signal(result, candle, candle.indicators.getNumberValue(indicatorsEX.stopLossAtr))
     signal.reason = reason
     return signal
 }

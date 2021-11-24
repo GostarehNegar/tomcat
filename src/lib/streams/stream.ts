@@ -40,7 +40,7 @@ export class Stream<T> implements IStream<T> {
         }, baseUtils.ticks(startTime).toString())
     }
     async write(id: Ticks, data: T): Promise<unknown> {
-        return await this.redisStream.XADD(id, data, true, false)
+        return await this.redisStream.XADD(id, data, true)
     }
     protected get redisStream() {
         this._redisStream = this._redisStream || new RedisStream(this._streamName);

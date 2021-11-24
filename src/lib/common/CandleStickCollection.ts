@@ -15,9 +15,9 @@ export class CandleStickCollection {
   public items: CandleStickData[]
   constructor(
     items: ICandleStickData[] | CandleStickData[],
+    public interval?: Intervals,
     public exchange?: Exchanges,
     public symbol?: Symbols,
-    public interval?: Intervals,
     public market?: Markets,
     public sourceName?: string
   ) {
@@ -29,6 +29,15 @@ export class CandleStickCollection {
     })
   }
   get minutesInInterval(): number {
+    if (!this.interval) {
+      if (this.items.length > 0) {
+        const first = this.items.find(x => !x.isMissing)
+        if (first) {
+          return (first.closeTime - first.openTime + 1) / (1000 * 60)
+        }
+      }
+      throw "could not figure out interval automatically, add it to your candlestick collection"
+    }
     return utils.toMinutes(this.interval)
   }
   get startTime(): number {
@@ -143,6 +152,6 @@ export class CandleStickCollection {
     this.getMissingCandles(expectedStart, expectedEnd).map(x => this.add(x))
   }
   clone(deep = true): CandleStickCollection {
-    return new CandleStickCollection(this.items.map(x => deep ? x.clone() : x), this.exchange, this.symbol, this.interval, this.market, this.sourceName)
+    return new CandleStickCollection(this.items.map(x => deep ? x.clone() : x), this.interval, this.exchange, this.symbol, this.market, this.sourceName)
   }
 }

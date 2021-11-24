@@ -43,14 +43,15 @@ export class RedisStream {
             })
         })
     }
-    async XADD(time: Ticks, data, ignoreDuplicate = true, enforceOneMinut = true, missingCallBack?: (time: number) => unknown) {
-        const lastId = await this.getLastGeneratedID()
-        time = enforceOneMinut ? baseUtils.toTimeEx(time).roundToMinutes(1).ticks : baseUtils.ticks(time)
-        if (enforceOneMinut && lastId != 0) {
-            for (let i = lastId + 60000; i < time; i += 60000) {
-                await this._XADD(i, missingCallBack ? missingCallBack(i) : "null", true)
-            }
-        }
+    async XADD(time: Ticks, data, ignoreDuplicate = true) {
+        // const lastId = await this.getLastGeneratedID()
+        time = baseUtils.ticks(time)
+        // time = enforceOneMinut ? baseUtils.toTimeEx(time).roundToMinutes(1).ticks : baseUtils.ticks(time)
+        // if (enforceOneMinut && lastId != 0) {
+        //     for (let i = lastId + 60000; i < time; i += 60000) {
+        //         await this._XADD(i, missingCallBack ? missingCallBack(i) : "null", true)
+        //     }
+        // }
         return await this._XADD(time, data, ignoreDuplicate)
     }
 
