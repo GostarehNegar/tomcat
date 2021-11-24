@@ -112,7 +112,7 @@ export class BinanceExchange implements IExchange {
     const result = (
       await this.fetchData(market, symbol, interval, 1500, startTime, endTime)
     ).filter((x) => x.openTime >= startTime && x.openTime <= endTime);
-    return new CandleStickCollection(result, 'binance', symbol, interval);
+    return new CandleStickCollection(result, interval, 'binance', symbol,);
   }
   async getExactCandle(
     market: Markets,

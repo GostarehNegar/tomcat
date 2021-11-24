@@ -127,6 +127,4 @@ export class Filter implements IFilter {
         }
         return this._stream
     }
-
-
 }

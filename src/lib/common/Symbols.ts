@@ -1,1 +1,1 @@
-export type Symbols = 'BTCUSDT' | 'ETHUSDT';
+export type Symbols = 'BTCUSDT' | 'ETHUSDT' | "SHIBUSDT";

@@ -1,6 +1,6 @@
 import { IIndicator } from "../indicators";
 
-type indicatorValues = { [index: string]: number | boolean; };
+type indicatorValues = { [index: string]: number | boolean | string; };
 
 export class IndicatorValueCollection {
     // [key: string]: number | boolean;
@@ -32,7 +32,7 @@ export class IndicatorValueCollection {
     // setValue_depricated(indicator: dep_IIndicator, value: number | boolean) {
     //     this.values[indicator.id] = value;
     // }
-    setValue(indicator: IIndicator | string, value: number | boolean) {
+    setValue(indicator: IIndicator | string, value: number | boolean | string) {
         this.values[this._getID(indicator)] = value;
     }
     // getNumberValue_deprecated(indicator: dep_IIndicator) {
