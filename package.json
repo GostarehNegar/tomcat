@@ -1,6 +1,6 @@
 {
   "name": "@gostarehnegar/tomcat",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "shared",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -69,7 +69,6 @@
     "set-interval-async": "^2.0.3",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
-    "talib": "^1.1.4",
     "ts-jest": "^27.0.5"
   },
   "devDependencies": {
