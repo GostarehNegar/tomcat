@@ -1,4 +1,9 @@
+import { redisConfig } from "./infrastructure/data";
+
 export const config = {
+  data:{
+    redis: redisConfig
+  },
   messaging: {
     channel: `smaple-${Math.random()}` as string | undefined,
     transports: {

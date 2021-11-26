@@ -1,12 +1,12 @@
 import redis from "redis";
-
+import {createRedistClient} from './../infrastructure/data/redisclient'
 import { baseUtils, SequentialPromise, Ticks } from "../infrastructure/base";
 
 export class RedisStream {
     public client: redis.RedisClient;
     constructor(public streamName: string) {
         // this.client = redis.createClient({ host: 'redis' });
-        this.client = redis.createClient();
+        this.client = createRedistClient();
 
         this.streamName = streamName;
     }
