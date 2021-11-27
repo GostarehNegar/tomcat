@@ -6,6 +6,8 @@ import { baseUtils, TimeEx } from '../infrastructure/base';
 import { IHttpContext } from '../infrastructure/hosting';
 
 import { IExchange } from "./IExchange";
+import config from '../config';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 // import HttpsProxyAgent from 'https-proxy-agent/dist/agent';
 const api = (_api: string) => 'https://api.binance.com/api/v3/' + _api;
 
@@ -35,14 +37,15 @@ export class BinanceExchange implements IExchange {
     if (limit) {
       url += `&limit=${limit}`;
     }
-    // const proxyAgent = new HttpsProxyAgent("http://tor:8118")
+    const proxyAgent = config.proxy.url ? new HttpsProxyAgent(config.proxy.url) : null;
     // const proxyAgent = null
 
     //   const result= await axios.get(url, proxy: {
     //     host: 'tor',
     //     port: 8118
     // })
-    const result = await fetch(url, { timeout: 30 * 1000 })
+
+    const result = await fetch(url, proxyAgent ? { timeout: 30 * 1000, agent: proxyAgent } : { timeout: 30 * 1000 })
       .then((res) => res.json())
       .then((json: []) => {
         const result: ICandleStickData[] = [];

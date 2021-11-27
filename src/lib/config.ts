@@ -1,8 +1,15 @@
-import { redisConfig } from "./infrastructure/data";
+
 
 export const config = {
-  data:{
-    redis: redisConfig
+  data: {
+    redis: { /**
+    * The url to redis server.
+    * null: localhost.
+    * 'redis://redis:6379': connect to redis in this container.
+    */
+      url: null,
+      publicUrl: null,
+    }
   },
   messaging: {
     channel: `smaple-${Math.random()}` as string | undefined,
@@ -13,6 +20,9 @@ export const config = {
       },
     },
   },
+  proxy: {
+    url: ''
+  }
 };
 
 export default config;
