@@ -13,4 +13,5 @@ export * from './MessageBusSubscription';
 export * from './MessageBusSubscriptions';
 export * from './MessageContext';
 export * from './Topics';
-export * from './WebSocketTranstport'
+export * from './WebSocketTranstport';
+export * from './RedisBus'

@@ -29,7 +29,9 @@ export class HttpRequest extends IncomingMessage implements IHttpRequest {
     super(socket);
   }
   get uri() {
+    
     return new URL('http://localhost' + this.url);
+    // return null
   }
   params(key: string) {
     return this.uri.searchParams.get(key);
