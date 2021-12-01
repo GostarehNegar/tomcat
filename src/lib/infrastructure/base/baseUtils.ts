@@ -1,11 +1,13 @@
 
 import HttpsProxyAgent from 'https-proxy-agent/dist/agent';
+import httpsAgent, { Agent } from 'node:https';
 import fetch from 'node-fetch';
 import ping from 'ping'
 
 import { ILogger } from './ILogger';
 import { Ticks, TimeEx, TimeSpan } from './TimeEx';
 import { Logger } from './logger';
+import config from '../../config';
 
 
 export class BaseUtils {
@@ -37,7 +39,19 @@ export class BaseUtils {
   public toDate() {
     return new Date();
   }
-  SubtractDates(first: Date, second: Date): TimeSpan {
+  SubtractDates(first: Date | TimeEx, second: Date | TimeEx): TimeSpan {
+    if (first instanceof TimeEx) {
+      if (second instanceof TimeEx) {
+        return TimeSpan.FromDates(new Date(first.ticks), new Date(second.ticks), true);
+      }
+      else {
+        return TimeSpan.FromDates(new Date(first.ticks), second, true);
+      }
+
+    }
+    else if (second instanceof TimeEx) {
+      return TimeSpan.FromDates(first, new Date(second.ticks), true);
+    }
     return TimeSpan.FromDates(first, second, true);
   }
   public static get instance() {
@@ -91,22 +105,26 @@ export class BaseUtils {
   public randomName(name: string, numberOfRandoms = 3) {
     return name + "-" + Math.floor(Math.random() * Math.pow(10, numberOfRandoms))
   }
-  public getProxy(url = "https://youtube.com", max_trials = 10, dont_reject = true, interval = 5000): Promise<HttpsProxyAgent> {
+
+
+  public getProxy(url = "https://youtube.com", max_trials = 10, dont_reject = true, interval = 5000): Promise<Agent> {
     return new Promise((resolve, reject) => {
       const logger = this.getLogger('utils');
-      const host = process.env.tor_host || 'tor'
-      const port = 8118;
-      const proxyAgent = new HttpsProxyAgent(`http://${host}:${port}`);
+      const proxyUrl = config.proxy.url;
+      const agent = proxyUrl && proxyUrl.length > 0
+        ? new HttpsProxyAgent(proxyUrl)
+        : new httpsAgent.Agent();
+
       let count = 0;
       const handle = setInterval(() => {
         count++;
-        logger.debug(`Trying to fetch ${url} using proxy:${host}:${port}. Trial:${count} of ${max_trials}}`)
-        fetch(url, { agent: proxyAgent })
+        logger.debug(`Trying to fetch ${url} using proxy:'${proxyUrl}'. Trial:${count} of ${max_trials}}`)
+        fetch(url, { agent: agent })
           .then(res => {
             (res)
-            logger.info(`Successfully connected to proxy:'${host}:${port}' after ${count} trials`)
+            logger.info(`Successfully connected to proxy:'${proxyUrl}:' after ${count} trials`)
             clearInterval(handle)
-            resolve(proxyAgent)
+            resolve(agent)
           })
           .catch((err) => {
             (err)
@@ -115,11 +133,12 @@ export class BaseUtils {
           clearInterval(handle);
           if (dont_reject) {
             logger.warn(
-              `*** WARNING *** Failed to connect to proxy server at ${host}:${port}. Proxy will be disabled.`);
+              `*** WARNING *** Failed to connect to proxy server at ${proxyUrl}:. Proxy will be disabled.`);
             resolve(null);
           }
           else {
-            reject(`Failed to connect to tor Proxy at ${host}:${port} `);
+            clearInterval(handle);
+            reject(`Failed to connect to tor Proxy at '${proxyUrl}' `);
 
           }
         }

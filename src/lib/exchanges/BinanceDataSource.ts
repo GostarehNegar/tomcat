@@ -5,6 +5,7 @@ import { IDataSource } from '../data';
 import { baseUtils, Ticks } from '../infrastructure/base';
 
 import { BinanceExchange } from './Binance.Exchange';
+import { IStopCallBack } from '../common/IStopCallBack';
 
 export class BinanceDataSource implements IDataSource {
   public exchange: Exchanges = 'binance';
@@ -13,6 +14,12 @@ export class BinanceDataSource implements IDataSource {
     public symbol: Symbols,
     public interval: Intervals
   ) { }
+  playEx(cb: (candles: CandleStickCollection) => Promise<void>, start?: Ticks, stop?: IStopCallBack): Promise<void> {
+    (cb);
+    (start);
+    (stop);
+    throw new Error('Method not implemented.');
+  }
   async getData(
     startTime: Ticks,
     endTime: Ticks

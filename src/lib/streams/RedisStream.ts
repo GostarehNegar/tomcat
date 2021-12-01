@@ -1,14 +1,44 @@
 import redis from "redis";
-import {createRedistClient} from './../infrastructure/data/redisclient'
+import { createRedistClient } from './../infrastructure/data/redisclient'
 import { baseUtils, SequentialPromise, Ticks } from "../infrastructure/base";
+import { IStopCallBack } from "../common/IStopCallBack";
+
 
 export class RedisStream {
     public client: redis.RedisClient;
-    constructor(public streamName: string) {
-        // this.client = redis.createClient({ host: 'redis' });
-        this.client = createRedistClient();
+    private factory = null;
 
+    constructor(public streamName: string, factory?: () => redis.RedisClient, private stop?: IStopCallBack) {
+        // this.client = redis.createClient({ host: 'redis' });
+
+        this.factory = factory || createRedistClient;
+        this.client = factory ? factory() : createRedistClient();
+        this.client.on('error', () => {
+
+        });
         this.streamName = streamName;
+    }
+    async tryConnect(stop?: IStopCallBack): Promise<redis.RedisClient> {
+        stop = stop || this.stop;
+        return new Promise((resole, reject) => {
+            if (!this.client.connected) {
+                const handle = setInterval(() => {
+                    if (this.client.connected) {
+                        clearInterval(handle);
+                        resole(this.client);
+                    }
+                    if (stop && stop({ err: 'redis connection lost.' })) {
+                        clearInterval(handle);
+                        reject('redis connection lost');
+                    }
+                    this.client = this.factory();
+                    this.client.ping();
+                }, 2000);
+            }
+            else {
+                resole(this.client);
+            }
+        });
     }
     async dep_XADD(time: Ticks, data, ignoreDuplicate = true) {
         return new Promise((resolve, reject) => {
@@ -154,9 +184,28 @@ export class RedisStream {
             });
         })
     }
-    XREADBLOCK(cb: (res: { id: number, data: string }, err) => Promise<boolean>, lastId = '$', timeOut = 5000000, count = 1) {
+
+
+
+
+
+
+    XREADBLOCK(cb: (res: { id: number, data: string }, err) => Promise<boolean>,
+        lastId = '$', timeOut = 5000000, count = 1, stop?: IStopCallBack) {
+        stop = stop || this.stop;
         let shouldCall = true;
         const handle = setInterval(() => {
+            if (stop && stop({})) {
+                clearInterval(handle);
+                return;
+            }
+            if (!this.client.connected) {
+                shouldCall = false;
+                this.tryConnect(stop)
+                    .then(() => {
+                        shouldCall = true;
+                    })
+            }
             if (shouldCall) {
                 this.client.sendCommand("XREAD", ["COUNT", count, "BLOCK", timeOut, "STREAMS", this.streamName, lastId], (err, res) => {
                     if (err) {
@@ -168,14 +217,10 @@ export class RedisStream {
                             for (let i = 0; i < res[0][1].length; i++) {
                                 lastId = res[0][1][i][0]
                                 seq.push(() => { return cb({ id: parseInt(lastId), data: res[0][1][i][1][1] }, err) })
-                                // const stop = cb({ id: parseInt(lastId), data: res[0][1][i][1][1] }, err)
-                                // if (stop) {
-                                //     clearInterval(handle)
-                                //     return
-                                // }
                             }
                             seq.execute(false, (data) => {
                                 if (data) {
+                                    seq.stop();
                                     clearInterval(handle)
                                     return
                                 }
@@ -183,7 +228,8 @@ export class RedisStream {
                                 shouldCall = true
                             })
                         } else {
-                            throw "unexpected condition"
+                            shouldCall = true;
+                            //throw "unexpected condition"
                         }
                     }
                     // shouldCall = true;

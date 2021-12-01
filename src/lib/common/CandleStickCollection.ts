@@ -134,6 +134,9 @@ export class CandleStickCollection {
     }
     return res
   }
+  filter(predicate: (candel: CandleStickData) => boolean) {
+    this.items = this.items.filter(predicate);
+  }
   add(candle: CandleStickData) {
     const index = this.items.findIndex((x) => x.openTime >= candle.openTime)
     if (index < 0) {

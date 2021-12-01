@@ -34,27 +34,58 @@ export class Filter implements IFilter {
             if (this._stop) {
                 return Promise.resolve(true)
             }
+            if (err) {
+                console.log(err);
+            }
             // context.myContext = this.context
+            if (context.shouldStop(candle)) {
+                return Promise.resolve(true);
+            }
+            context.currentCandle = candle;
             await this.callback(candle, this)
+
             if (this.stream) {
                 await this.stream.write(candle.openTime, candle)
             } else {
                 (this._playBackHandler && await this._playBackHandler(candle, err))
             }
-            // this.callback(candle, this)
-            //     .then(() => {
-            //         if (this.stream) {
-            //             this.stream.write(candle.openTime, candle)
-            //         } else {
-            //             (this._playBackHandler && this._playBackHandler(candle, err))
-            //         }
-            //     }).catch((err) => {
-            //         console.log(`An error wat catched in filter ${this.name}`, err);
-            //     })
             return Promise.resolve(false)
-        }, context.startTime, undefined, 1000)
+        }, context.startTime, context.timeOut, 1000)
 
     }
+    async runExEx(context: PipelineContext): Promise<void> {
+        return new Promise((resolve, reject) => {
+            (resolve);
+            (reject);
+            this._playSourceStream(async (candle, err) => {
+                if (this._stop) {
+                    resolve();
+                    return Promise.resolve(true)
+                }
+                if (err) {
+                    console.log(err);
+                }
+                // context.myContext = this.context
+                if (context.shouldStop(candle)) {
+                    resolve();
+                    return Promise.resolve(true);
+
+                }
+                context.currentCandle = candle;
+                await this.callback(candle, this)
+
+                if (this.stream) {
+                    await this.stream.write(candle.openTime, candle)
+                } else {
+                    (this._playBackHandler && await this._playBackHandler(candle, err))
+                }
+                return Promise.resolve(false)
+            }, context.startTime, context.timeOut, 1000)
+
+        });
+
+    }
+
     async runEX(context: PipelineContext) {
         this._playSourceStream((candle, err) => {
             if (this._stop) {

@@ -1,4 +1,5 @@
 import { CandleStickCollection, Exchanges, ICandleStickData, Intervals, Markets, Symbols } from '../common';
+import { IStopCallBack } from '../common/IStopCallBack';
 import { Ticks } from '../infrastructure/base';
 
 export interface IDataSource {
@@ -9,4 +10,7 @@ export interface IDataSource {
   get interval(): Intervals;
   get market(): Markets;
   get symbol(): Symbols;
+  playEx(cb: (candles: CandleStickCollection) => Promise<void>,
+    start?: Ticks,
+    stop?: IStopCallBack): Promise<void>
 }

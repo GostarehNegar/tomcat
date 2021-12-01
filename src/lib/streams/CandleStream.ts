@@ -1,7 +1,11 @@
 import EventEmitter from "events";
+import redis from 'redis'
 
 import { CandleStickData } from "../common";
+import utils from "../common/Domain.Utils";
 import { IDataSource } from "../data";
+
+import { IStopCallBack } from "../common/IStopCallBack";
 import { baseUtils, Ticks } from "../infrastructure/base";
 
 import { RedisStream } from "./RedisStream";
@@ -9,18 +13,26 @@ import { RedisStream } from "./RedisStream";
 
 export interface ICandleStream {
     get isWriter(): boolean;
-    play(cb: (candle: CandleStickData, err) => Promise<boolean>, startTime?: Ticks, timeOut?, count?, generateMissingCandles?): Promise<void>
-    start(startTime?: Ticks, cb?: (candle: CandleStickData) => boolean): Promise<void>
+    //play(cb: (candle: CandleStickData, err) => Promise<boolean>, startTime?: Ticks, timeOut?, count?, generateMissingCandles?): Promise<void>
+    play(cb: (candle: CandleStickData, err) => Promise<boolean>, startTime?: Ticks, timeOut?, count?, generateMissingCandles?);
+    start(startTime?: Ticks, cb?: (candle: CandleStickData) => boolean): Promise<void>;
+    startEx(startTime?: Ticks, stop?: IStopCallBack);
 }
 
 export class CandleStream extends EventEmitter implements ICandleStream {
     public _redisStream: RedisStream;
     protected _isStop = false;
     protected _myPromise: Promise<void>;
-    constructor(private _streamName: string) {
+    private factory: (n: string) => RedisStream;
+    constructor(private _streamName: string, factory?: () => redis.RedisClient, private _stop?: IStopCallBack) {
         super()
-        // this._streamName = _streamName || `candles-${this.dataSource.exchange}-${this.dataSource.market}-${this.dataSource.symbol}-${this.dataSource.interval}`
-
+        this.factory = (n: string) => new RedisStream(n, factory, _stop);
+        (this._stop);
+    }
+    startEx(startTime?: Ticks, stop?: IStopCallBack) {
+        (startTime);
+        (stop);
+        throw new Error("Method not implemented.");
     }
     start(startTime?: Ticks, cb?: (candle: CandleStickData) => boolean): Promise<void> {
         (startTime);
@@ -60,17 +72,58 @@ export class CandleStream extends EventEmitter implements ICandleStream {
     async write(id: Ticks, data: CandleStickData): Promise<unknown> {
         return await this.redisStream.XADD(id, data)
     }
+    async writeAsync(id: Ticks, data: CandleStickData, timeOut = 5000): Promise<unknown> {
+        return new Promise<unknown>((resolve, reject) => {
+            const handle = setTimeout(() => {
+                reject();
+            }, timeOut)
+            this.write(id, data)
+                .then(res => {
+                    clearTimeout(handle);
+                    resolve(res);
+                }).catch(err => reject(err));
+
+        });
+
+    }
 
     async exists() {
+        await this.redisStream.tryConnect();
         return await this.redisStream.exists()
     }
     async creatStream() {
         return await this.redisStream.XCREATE()
     }
-    async play(cb: (candle: CandleStickData, err) => Promise<boolean>, startTime: Ticks = 0, timeOut = 500000, count = 1, generateMissingCandles = true) {
-        const stream = new RedisStream(this._streamName)
-        await stream.XREADBLOCK((res, err) => {
-            // return cb && cb(res ? JSON.parse(res) as CandleStickData : null, err)
+
+
+    play(cb: (candle: CandleStickData, err) => Promise<boolean>, startTime: Ticks = 0, timeOut = 500000, count = 1, generateMissingCandles = true) {
+        const stream = this.factory(this.streamName);// new RedisStream(this._streamName)
+        stream.tryConnect()
+            .then(() => {
+                stream.XREADBLOCK((res, err) => {
+                    // return cb && cb(res ? JSON.parse(res) as CandleStickData : null, err)
+                    if (res && res.data === "null") {
+                        if (generateMissingCandles) {
+                            const mCandle = CandleStickData.fromMissing(res.id, res.id + 60000 - 1)
+                            return cb && cb(mCandle, err)
+
+                        }
+                        return Promise.resolve(false)
+                    }
+                    return cb && cb(res ? CandleStickData.from(JSON.parse(res.data)) : null, err)
+                    // return cb && cb(res ? CandleStickData.from(JSON.parse(res)) : null, err)
+                }, ((baseUtils.ticks(startTime) - 1) > 0 ? baseUtils.ticks(startTime) - 1 : 0).toString(), timeOut, count)
+            });
+        // })
+    }
+    async playEx(cb: (candle: CandleStickData, err) => Promise<boolean>,
+        startTime: Ticks = 0,
+        timeOut = 500000,
+        count = 1,
+        generateMissingCandles = true, stop?: IStopCallBack) {
+        const stream = this.factory(this.streamName);// new RedisStream(this._streamName)
+
+        stream.XREADBLOCK((res, err) => {
             if (res && res.data === "null") {
                 if (generateMissingCandles) {
                     const mCandle = CandleStickData.fromMissing(res.id, res.id + 60000 - 1)
@@ -80,10 +133,10 @@ export class CandleStream extends EventEmitter implements ICandleStream {
                 return Promise.resolve(false)
             }
             return cb && cb(res ? CandleStickData.from(JSON.parse(res.data)) : null, err)
-            // return cb && cb(res ? CandleStickData.from(JSON.parse(res)) : null, err)
-        }, ((baseUtils.ticks(startTime) - 1) > 0 ? baseUtils.ticks(startTime) - 1 : 0).toString(), timeOut, count)
-        // })
+        }, ((baseUtils.ticks(startTime) - 1) > 0 ? baseUtils.ticks(startTime) - 1 : 0).toString(), timeOut, count, stop);
+
     }
+
 
     async getAll() {
         return await this.redisStream.getAll()
@@ -97,7 +150,7 @@ export class CandleStream extends EventEmitter implements ICandleStream {
         return this._myPromise;
     }
     protected get redisStream() {
-        this._redisStream = this._redisStream || new RedisStream(this._streamName);
+        this._redisStream = this._redisStream || this.factory(this.streamName);
         return this._redisStream
     }
 }
@@ -213,6 +266,92 @@ export class DataSourceStream extends CandleStream implements ICandleStream {
                 }
                 await baseUtils.delay(10 * 1000)
             }
+        }
+    }
+}
+
+export class DataSourceStreamEx extends CandleStream implements ICandleStream {
+    constructor(public dataSource: IDataSource, name?: string) {
+        super(name || `candles-${dataSource.exchange}-${dataSource.market}-${dataSource.symbol}-${dataSource.interval}`)
+    }
+
+    get isWriter(): boolean {
+        return true
+    }
+    private async _startPlay(startTime?: Ticks, stop?: IStopCallBack) {
+        let lastCandle = await this.getLastCandle();
+        startTime = utils.ticks(startTime);
+        startTime = startTime || lastCandle?.openTime;
+        const interval = utils.toMinutes(this.dataSource.interval) * 60 * 1000;
+        await this.dataSource.playEx(async candles => {
+            let populate_start = 0;
+            if (candles.length > 0) {
+                populate_start = lastCandle
+                    ? lastCandle.openTime + interval
+                    : candles.items[0].openTime;
+                candles.populate(utils.ticks(populate_start), utils.ticks(candles.endTime))
+                lastCandle = candles.lastCandle;
+                for (var i = 0; i < candles.length; i++) {
+                    while (true) {
+                        let failures = 0;
+                        try {
+                            if (!this.redisStream.client.connected) {
+                                throw "redis disconnected";
+                            }
+                            await this.writeAsync(candles.items[i].openTime, candles.items[i]);
+                            break;
+                        }
+                        catch (err) {
+                            failures++;
+                            if (stop && stop({
+                                err: err,
+                                time: utils.toTimeEx(lastCandle?.openTime),
+                                failures: failures
+                            })) {
+                                break;
+                            }
+                            if (err == "redis disconnected") {
+                                this._redisStream = null;
+                                (this.redisStream.client.connected);
+                                await utils.delay(200);
+                            }
+                        }
+                    }
+                }
+            }
+        }, startTime, stop);
+
+    }
+    public async startEx(startTime?: Ticks, stop?: IStopCallBack) {
+        let _stop = false
+        while (!_stop) {
+            try {
+                if (!this.redisStream.client.connected)
+                    throw "redis disconnected";
+
+                if (!await this.exists()) {
+                    await this.creatStream();
+
+                }
+                await this._startPlay(startTime, stop);
+                break;
+            }
+            catch (err) {
+                if (stop && stop({
+                    err: err,
+                    failures: 0
+                })) {
+                    _stop = true;
+                    break;
+                }
+                if (err == "redis disconnected") {
+                    this._redisStream = null;
+                    (this.redisStream.client.connected)
+                    await utils.delay(1000);
+                }
+
+            }
+            await utils.delay(100);
         }
     }
 }
