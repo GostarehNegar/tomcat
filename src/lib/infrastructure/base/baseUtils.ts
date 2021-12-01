@@ -107,8 +107,12 @@ export class BaseUtils {
   }
 
 
-  public getProxy(url = "https://youtube.com", max_trials = 10, dont_reject = true, interval = 5000): Promise<Agent> {
+  private _proxy: Agent;
+  public getProxy(url = "https://youtube.com", max_trials = 10, dont_reject = true, interval = 5000, refersh = false): Promise<Agent> {
     return new Promise((resolve, reject) => {
+      if (this._proxy != null && !refersh) {
+        resolve(this._proxy);
+      }
       const logger = this.getLogger('utils');
       const proxyUrl = config.proxy.url;
       const agent = proxyUrl && proxyUrl.length > 0
@@ -124,6 +128,7 @@ export class BaseUtils {
             (res)
             logger.info(`Successfully connected to proxy:'${proxyUrl}:' after ${count} trials`)
             clearInterval(handle)
+            this._proxy = agent;
             resolve(agent)
           })
           .catch((err) => {

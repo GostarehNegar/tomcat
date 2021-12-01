@@ -326,6 +326,7 @@ export class DataSourceStreamEx extends CandleStream implements ICandleStream {
         let _stop = false
         while (!_stop) {
             try {
+                await this.redisStream.tryConnect(stop);
                 if (!this.redisStream.client.connected)
                     throw "redis disconnected";
 

@@ -4,9 +4,23 @@ import { CandleStickCollection, CandleStickData, Intervals, Markets, Symbols } f
 import utils from '../common/Domain.Utils';
 import { Exchanges } from '../common/Exchanges';
 import { ILogger, Ticks, TimeEx } from '../infrastructure/base';
+import fetch from 'node-fetch';
 
-function getExchange(ex: Exchanges, market: Markets): ccxt.Exchange {
-    const opt = { options: { 'defaultType': market } };
+const binance_nooce = async () => {
+
+    const agent = await utils.getProxy();
+    var resp = await fetch('https://api.binance.com/api/v3/time', { agent: agent })
+    var f = await resp.json();
+    return f.serverTime;
+
+}
+/// tomcat
+/// 1189A75DDBA0442CA5996E544783DA1A
+/// E08F2D0C43915121567096210AC8B3E3827921EEEC260C72
+function getExchange_dep(ex: Exchanges, market: Markets): ccxt.Exchange {
+    const opt = {
+        options: { 'defaultType': market }
+    };
     switch (ex) {
         case 'coinex':
             return new ccxt.coinex(opt);
@@ -16,6 +30,25 @@ function getExchange(ex: Exchanges, market: Markets): ccxt.Exchange {
             return new ccxt.okex(opt);
     };
 }
+(getExchange_dep);
+function getExchange(ex: Exchanges, market: Markets): ccxt.Exchange {
+    const opt = {
+        apiKey: null,
+        secret: null,
+
+        options: { 'defaultType': market }
+    };
+    if (ex == 'coinex') {
+        opt.apiKey = '1189A75DDBA0442CA5996E544783DA1A';
+        opt.secret = 'E08F2D0C43915121567096210AC8B3E3827921EEEC260C72'
+    };
+    const exchangeId = ex;
+    const _class = ccxt[exchangeId];
+    const res = new _class(opt);
+    return res;
+
+}
+
 export class CCXTExchange implements IExchange {
     private _ccxt_exchange: Exchange = null;
     private logger: ILogger;
@@ -50,6 +83,8 @@ export class CCXTExchange implements IExchange {
             this._ccxt_exchange = getExchange(this._exchange_name, this._market);
             this._ccxt_exchange.httpsAgent = await utils.getProxy();
             await this._ccxt_exchange.loadMarkets();
+            var noonce = await binance_nooce();
+            this._ccxt_exchange.nonce = () => noonce
         }
         return this._ccxt_exchange;
     }
@@ -66,6 +101,59 @@ export class CCXTExchange implements IExchange {
         return new CandleStickData(
             c[0], c[1], c[2], c[3], c[4], c[0] + m, c[5]);
     }
+    async getBalance() {
+        return this.safeCall(async () => {
+            var exchange = await this.getExchange();
+            return await exchange.fetchBalance();
+
+        });
+
+
+    }
+    async safeCall<T>(call: () => Promise<T>, max_triarls = 5, wait_between_calls = 2000) {
+        let refersh_proxy = false;
+        for (let i = 0; i < max_triarls; i++) {
+            try {
+                await utils.getProxy(undefined, undefined, undefined, undefined, refersh_proxy);
+                return await call();
+            }
+            catch (err) {
+                refersh_proxy = true;
+
+            }
+            await utils.delay(wait_between_calls)
+        }
+        return null;
+    }
+
+    async sell(symbol: Symbols, amount: number) {
+        var exchange = await this.getExchange();
+        // var m = await this.getMarkets();
+        // const limit = m[symbol].limits;
+        // if (amount < limit.amount.min) {
+        //     throw "limit less than min";
+        // }
+        // (limit);
+
+        const order = await exchange.createMarketOrder(symbol, 'sell', amount);
+        return order;
+    }
+
+    async buy(symbol: Symbols, amount: number, price: number) {
+        var exchange = await this.getExchange();
+        // var m = await this.getMarkets();
+        // const limit = m[symbol].limits;
+        // if (amount < limit.amount.min) {
+        //     throw "limit less than min";
+        // }
+        // (limit);
+        // exchange.fetchTradingLimits();
+
+        const order = await exchange.createMarketOrder(symbol, 'buy', amount, price);
+        return order;
+    }
+
+
 
     public async getCandlesAt(symbol: Symbols, interval: Intervals, startTime: Ticks, include_last_uncomplete = false) {
         const _startTime = utils.floorTime(

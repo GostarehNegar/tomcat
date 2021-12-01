@@ -4,8 +4,11 @@ import tomcat from '../src'
 import { CandleStickCollection, Markets, Symbols } from '../src/lib/common';
 import { DataSourceStreamEx } from '../src/lib/streams';
 import { Pipeline } from '../src/lib/pipes';
+import { CCXTExchange } from '../src/lib/exchanges';
 
-config.proxy.url = "http://localhost:2395";
+//config.proxy.url = "http://localhost:2395";
+config.proxy.url = "http://localhost:1080";
+(config);
 jest.setTimeout(20000000)
 describe('CoinEx', () => {
     test('exchange ha symbol', async () => {
@@ -79,16 +82,12 @@ describe('CoinEx', () => {
                 number_of_duplicates++;
             candles.push(c);
         }, start, err => {
-            console.log(err);
-            return err.time.ticks > end.ticks;
+            //console.log(err);
+            return err && err.time && err.time.ticks > end.ticks;
 
         })
 
-        const ttt = utils.toTimeEx(candles.endTime);
-        (ttt);
-
         expect(number_of_duplicates).toBe(0);
-
         expect(candles.endTime < end.ticks);
         const elapsed_mili = utils.toTimeEx().ticks - test_start_time.ticks;
         (elapsed_mili);
@@ -111,13 +110,26 @@ describe('CoinEx', () => {
                 number_of_duplicates++;
             candles.push(c);
         }, start, err => {
-            console.log(err);
-            return err.time.ticks > end.ticks;
+            //console.log(err);
+            return err && err.time && err.time.ticks > end.ticks;
 
         })
         expect(number_of_duplicates).toBe(0);
         expect(candles.endTime < end.ticks);
-        expect(utils.SubtractDates(utils.toTimeEx().asDate, test_start_time.asDate).absMinutes).toBeCloseTo(minutes_to_future);
+        expect(utils.SubtractDates(utils.toTimeEx().asDate, test_start_time.asDate).absMinutes)
+            .toBeLessThan(minutes_to_future + 1);
+    });
+    test('fetch balance works', async () => {
+
+        var exchange = new CCXTExchange('coinex', 'spot');
+        (exchange)
+        // const order = await exchange.buy('DOGE/USDT', 5, 0.2150);
+        // (order);
+        const balance = await exchange.getBalance();
+        expect(balance).not.toBeNull();
+        expect(balance['DOGE'].free).toBeGreaterThan(0);
+        //await utils.getProxy();
+
     });
 
     test('stream writer works', async () => {
@@ -126,24 +138,24 @@ describe('CoinEx', () => {
         const stream = new DataSourceStreamEx(data);
         //const interval = '1h'
         const start = utils.toTimeEx().addMinutes(-8 * 60);
-        const minutes_to_future = 3;
+        const minutes_to_future = 2;
         const end = utils.toTimeEx().addMinutes(minutes_to_future);
         const test_start_time = utils.toTimeEx();
         const candles = new CandleStickCollection([]);
         let number_of_duplicates = 0;
         await stream.startEx(start, ctx => {
             (ctx);
-
             if (ctx.err)
                 console.error(ctx.err);
-            return false;
+            return ctx && ctx.time && ctx.time.ticks > end.ticks;
         });
 
         expect(number_of_duplicates).toBe(0);
         expect(candles.endTime < end.ticks);
-        expect(utils.SubtractDates(utils.toTimeEx().asDate, test_start_time.asDate).absMinutes).toBeCloseTo(minutes_to_future);
+        expect(utils.SubtractDates(utils.toTimeEx().asDate, test_start_time.asDate).absMinutes)
+            .toBeLessThan(minutes_to_future + 1);
     });
-    test("pipeline", async () => {
+    test("pipeline stops as expected", async () => {
         const pipeline = new Pipeline();
         const start = utils.toTimeEx().addMinutes(-50 * 60).roundToMinutes(1);
         const candles = new CandleStickCollection([]);
@@ -161,7 +173,7 @@ describe('CoinEx', () => {
             return false;
         });
 
-        console.log("here");
+        expect(candles.items.length).toBe(4);
     });
 
 });
