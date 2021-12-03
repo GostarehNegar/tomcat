@@ -2,16 +2,14 @@
 import { IHandler } from './IHandler';
 import { IMessageBusSubscription } from './IMessageBusSubscription';
 import { IMessageContext } from './IMessageContext';
-import { MessageTopic } from './Topics';
+//import { MessageTopic } from './Topics';
 
 export class MessageBusSubscription implements IMessageBusSubscription {
   public handler: IHandler = null;
-  private _topic: MessageTopic;
-
   /**
    * 
    * @param topicPattern 
-   * @param channel 
+   * @param endpoint
    * @param handler 
    */
   constructor(
@@ -19,24 +17,21 @@ export class MessageBusSubscription implements IMessageBusSubscription {
      * the pattern to be used
      */
     public topicPattern: string,
-    public channel: string,
+    public endpoint: string,
     handler?: IHandler
   ) {
     this.handler = handler;
-    this._topic = MessageTopic.parse(topicPattern);
-    this._topic.channel = this._topic.channel || channel || '';
+    //this._topic = topicPattern
+    //this._topic.channel = this._topic.channel || channel || '';
   }
   public matches(message: IMessageContext): boolean {
     return (
-      message &&
-      (message.message.channel === '*' ||
-        typeof message.message.channel === 'undefined' ||
-        message.message.channel == null ||
-        this._matchRuleShort(
-          message.message.channel,
-          this._topic.channel || '*'
-        )) &&
-      this._matchRuleShort(message.message.topic, this._topic.topic)
+      message && message.message &&
+      (
+        !message.message.to || message.message.to === '*' || message.message.to === this.endpoint ||
+        this._matchRuleShort(message.message.to, this.endpoint)
+      ) &&
+      this._matchRuleShort(message.message.topic, this.topicPattern)
     );
   }
   private _matchRuleShort(str, rule) {
@@ -53,5 +48,8 @@ export class MessageBusSubscription implements IMessageBusSubscription {
       : Promise.resolve();
 
     if (!message || !this.handle(message)) return Promise.resolve();
+  }
+  public toString(): string {
+    return `Subscription (${this.topicPattern})`;
   }
 }

@@ -1,12 +1,13 @@
 
+import { IMessageHeader } from '.';
 import { IMessage } from './IMessage';
-import { MessageTopic } from './Topics';
+//import { MessageTopic } from './Topics';
 
 export const uniqueId = (): string => {
   return Date.now().toString();
 };
 export class Message implements IMessage {
-  public headers: { [id: string]: string } = {};
+  public headers: IMessageHeader = {}
   /**
    * unique id of this message that us usually automatically
    * created fot each new message.
@@ -30,17 +31,17 @@ export class Message implements IMessage {
      * Message topic. 
      */
     public topic: string,
-    public channel: string,
     public from: string,
     public to: string,
     public payload: unknown
   ) {
     this.id = uniqueId();
-    const _topic = MessageTopic.parse(topic);
-    this.channel = channel || _topic.channel;
-    this.topic = _topic.topic;
+    //    this.topic = topic;
   }
   cast<T>(): T {
     return this.payload as unknown as T
+  }
+  public toString(): string {
+    return `${this.topic}`
   }
 }

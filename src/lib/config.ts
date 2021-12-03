@@ -12,7 +12,7 @@ export const config = {
     }
   },
   messaging: {
-    channel: `smaple-${Math.random()}` as string | undefined,
+    endpoint: `<noname>` as string | undefined,
     transports: {
       websocket: {
         url: 'http://localhost:8080/hub',

@@ -8,7 +8,7 @@ import { ILogger } from './ILogger';
 import { Ticks, TimeEx, TimeSpan } from './TimeEx';
 import { Logger } from './logger';
 import config from '../../config';
-
+import { randomUUID } from 'node:crypto';
 
 export class BaseUtils {
   public test(): string {
@@ -101,6 +101,13 @@ export class BaseUtils {
     return res
   }
 
+  public UUID() {
+    return randomUUID()
+  }
+  public isValidUrl(url: string) {
+    return url && url.length > 1;
+  }
+
 
   public randomName(name: string, numberOfRandoms = 3) {
     return name + "-" + Math.floor(Math.random() * Math.pow(10, numberOfRandoms))
@@ -112,6 +119,7 @@ export class BaseUtils {
     return new Promise((resolve, reject) => {
       if (this._proxy != null && !refersh) {
         resolve(this._proxy);
+        return;
       }
       const logger = this.getLogger('utils');
       const proxyUrl = config.proxy.url;
