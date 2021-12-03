@@ -3,6 +3,7 @@ export class SequentialPromise<T> {
     private myPromise: { reject?: any, resolve?: any } = {}
     private promiseItems: (() => Promise<T>)[] = []
     private promiseResults: T[] = []
+    private _stop = false;
     constructor(...params: (() => Promise<T>)[]) {
         this.push(...params)
     }
@@ -17,6 +18,10 @@ export class SequentialPromise<T> {
             if (id === 0) {
                 this.myPromise.resolve = resolve
                 this.myPromise.reject = reject
+            }
+            if (this._stop) {
+                this.myPromise.resolve(this.promiseResults);
+                return;
             }
             this.promiseItems[id]().then((data) => {
                 this.promiseResults.push(data);
@@ -40,6 +45,10 @@ export class SequentialPromise<T> {
                 }
             })
         })
+    }
+    stop() {
+        this._stop = true;
+
     }
     execute(rejectMode = true, cb?: (data: T) => void) {
         return this._execute(0, rejectMode, cb)

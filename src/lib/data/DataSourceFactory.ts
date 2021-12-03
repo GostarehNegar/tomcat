@@ -1,4 +1,5 @@
 import { Exchanges, Intervals, Markets, Symbols } from '../common/index';
+import { CCXTDataStream } from '../exchanges';
 import { BinanceDataSource } from '../exchanges/BinanceDataSource';
 
 import { IDataSource } from './IDataSource';
@@ -12,10 +13,10 @@ export class DataSourceFactory {
     interval: Intervals
   ): IDataSource {
     switch (exchange) {
-      case 'binance':
-        return new BinanceDataSource(market, symbol, interval);
+      // case 'binance':
+      //   return new BinanceDataSource(market, symbol, interval);
       default:
-        return new BinanceDataSource(market, symbol, interval);
+        return new CCXTDataStream(exchange, symbol, market, interval);
     }
   }
   createdataSourceEx(
@@ -28,7 +29,7 @@ export class DataSourceFactory {
       case 'binance':
         return new BinanceDataSource(market, symbol, interval);
       default:
-        return new BinanceDataSource(market, symbol, interval);
+        return new CCXTDataStream(exchange, symbol, market, interval);
     }
   }
 }

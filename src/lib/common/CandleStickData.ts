@@ -1,4 +1,5 @@
 import { baseUtils, Ticks } from '../infrastructure/base';
+import utils from './Domain.Utils';
 
 import { ICandleStickData, ISignalValues } from "./ICandleStickData";
 import { IndicatorValueCollection } from "./IndicatorValueCollection";
@@ -57,6 +58,12 @@ export class CandleStickData implements ICandleStickData {
     }
     public get isMissing() {
         return this.open == -1
+    }
+    public interval() {
+        return utils.toInterval(this.closeTime - this.openTime);
+    }
+    public openDate() {
+        return new Date(this.openTime).toISOString();
     }
 
 }

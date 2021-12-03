@@ -1,1 +1,1 @@
-export type Exchanges = 'binance' | 'coinex';
+export type Exchanges = 'binance' | 'coinex' | 'okeex';

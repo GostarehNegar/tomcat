@@ -21,7 +21,6 @@ export interface IMessageBus {
         topic: string,
         body?: unknown | null,
         to?: string | null,
-        channel?: string
     ): IMessageContext;
     /**
      *
@@ -31,7 +30,6 @@ export interface IMessageBus {
     subscribe(
         topic: string,
         handler: IHandler,
-        channel?: string
     ): Promise<IMessageBusSubscription>;
     start(): Promise<unknown>;
     get endpoint(): string; stop(): Promise<unknown>;

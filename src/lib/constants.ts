@@ -25,8 +25,11 @@ export const Constants = {
   messages: {
     hub: {
       publish: 'publish',
+      subscribe: 'subscribe',
       connect: 'connect',
       send: 'send',
+      ping: 'ping',
+      pong: 'pong'
     },
   },
 };

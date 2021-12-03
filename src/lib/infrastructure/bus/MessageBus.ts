@@ -1,5 +1,4 @@
 
-
 import { config } from '../../config';
 import { ILogger, Logger } from '../base';
 import { BackgroundService, CanellationToken } from '../hosting';
@@ -13,14 +12,19 @@ import { Message } from './Message';
 import { MessageBusSubscription } from './MessageBusSubscription';
 import { MessageBusSubscriptions } from './MessageBusSubscriptions';
 import { MessageContext } from './MessageContext';
-import { SignalRTransport } from './SignalRTransport';
-import { MessageTopic } from './Topics';
+//import { SignalRTransport } from './SignalRTransport';
+import SystemTopics from './Topics';
 import { WebSocketTransport } from './WebSocketTranstport';
+
+import { Utils } from '../../common';
+import { IEndpointInfo } from './IEndpointInfo';
+import { IMessage } from '.';
 
 type promise_def = {
   resolve: (e: unknown) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  error: (err: any) => void;
+  reject: (err: any) => void;
+  always_resolve?: boolean;
 };
 
 export class MessageBus extends BackgroundService implements IMessageBus {
@@ -37,6 +41,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
   private _transports: IMessageTransport[] = [];
   private _config = config.messaging;
   private _logger: ILogger;
+  private _alreadyProcessed = [];
   constructor(
     cf?: (c: typeof config.messaging) => void,
     cfg?: typeof config.messaging
@@ -44,110 +49,126 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     super();
     this._config = cfg || config.messaging;
     if (cf) cf(this._config);
-    //this._config = cfg ?? config.messaging;
     this._logger = Logger.getLogger('tomcat.MessageBus');
     this._subscriptions;
-    SignalRTransport;
-    this._endpoint = this._config.channel; // "test_channel@" + Math.random().toString();
-    //this._channelName = channel || this.channelName;
-
-    if (this._config.transports.websocket.diabled !== true) {
-      this._transports.push(
-        new WebSocketTransport(null, this._config.transports.websocket)
-      );
-      this._transports[0].on((msg) => {
-        const _msg = JSON.parse(msg.toString()) as {
-          method: string;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          payload: any;
-        };
-        const ctx = new MessageContext(_msg.payload, this);
-        //ctx.setScope('local');
-        ctx.scope = 'local';
-        this.publishMessageContext(ctx);
-      });
-    }
+    this._endpoint = this._config.endpoint || Math.random().toString();
+    this._endpoint = `${this._config.endpoint} (${Utils.instance.UUID()})`
+    this.getTransports(true);
   }
-  publish(m: Message): Promise<unknown> {
+  private getTransports(refresh = false): IMessageTransport[] {
+    if (refresh) {
+      this._transports = [];
+      const config = this._config.transports.websocket;
+
+      if (config.diabled !== true && Utils.instance.isValidUrl(config.url)) {
+        this._transports.push(
+          new WebSocketTransport(null, this._config.transports.websocket)
+        );
+      }
+    }
+    return this._transports;
+  }
+  private getInfo(): IEndpointInfo {
+    return {
+      endpoint: this.endpoint,
+      topics: this._subscriptions.getTopics()
+    };
+  }
+  private handleMessageFromTransport(transport: IMessageTransport, msg: string) {
+    (transport);
+    const _msg = JSON.parse(msg.toString()) as {
+      method: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      payload: any;
+    };
+    if (_msg && _msg.method === SystemTopics.Internal.ping) {
+      transport.pong(this.getInfo());
+    } else {
+      const ctx = new MessageContext(_msg.payload, this);
+      if (ctx?.message?.from === this.endpoint) {
+        // This was originaly sent by us
+        // we do not need to republish it.
+        this._logger.warn(
+          'A message received from a transport was originally sent by this endpoint.' +
+          `Normally the transport should prevent messages bounces back to the originator. ` +
+          `We wil ignore this message, but something is worng with this transport.`);
+
+      } else {
+        ctx.scope = 'local';
+        ctx.transport(transport?.name);
+        this._logger.trace(
+          `Message received from transport ${transport.name}. Topic:'${ctx.message.topic}'. From:'${ctx.message.from}' `);
+        this.publishMessageContext(ctx);
+      }
+    }
+
+  }
+  publish(m: Message): Promise<void> {
     return this.publishMessageContext(new MessageContext(m, this))
   }
   get endpoint(): string {
     return this._endpoint;
   }
   async start(): Promise<void> {
-    if (this._transports.length < 1) return Promise.resolve();
-    await this._transports[0].open({ endpoint: this.endpoint });
-    this._logger.log('started');
+    const transports = this.getTransports();
+    let success_names = '';
+    for (let i = 0; i < transports.length; i++) {
+      try {
+        await transports[i].open(this.handleMessageFromTransport.bind(this), this.getInfo())
+        success_names += ' ' + transports[i].name;
+      }
+      catch (err) {
+        this._logger.error(
+          `An error occured while trying to start this transport. Name:${transports[i].name}. ` +
+          `Error: '${err}'`)
+      }
+    }
+    this._logger.info(
+      `MessageBus successfullys started at Endpoint:'${this.endpoint}'. Transports:'${success_names}' `);
   }
   async stop(): Promise<void> {
-    if (this._transports.length < 1) return Promise.resolve();
-    return this._transports[0].close();
-    //return this._transport.stop();
+    const transports = this.getTransports();
+    for (let i = 0; i < transports.length; i++) {
+      await transports[i].close();
+    }
   }
 
   subscribe(
     topic: string,
     handler: IHandler,
-    channel?: string
   ): Promise<IMessageBusSubscription> {
-    const result = new MessageBusSubscription(topic, channel, handler);
+    const result = new MessageBusSubscription(topic, this.endpoint, handler);
     return this._subscribe(result);
   }
 
-  public createReplyPromise(message: IMessageContext): Promise<unknown> {
-    const result = new Promise<unknown>((res, err) => {
-      this.promises[message.message.id] = { resolve: res, error: err };
+  public createReplyPromise(message: IMessageContext, always_resolve = false): Promise<IMessage> {
+    const result = new Promise<IMessage>((res, err) => {
+      this.promises[message.message.id] = { resolve: res, reject: err, always_resolve: always_resolve };
     });
     return result;
   }
-  createMessageEx(config: {
-    /**
-     * sagduygusya
-     */
-    topic: string;
-    channel?: string;
-    to?: string | null;
-    body?: unknown;
-  }): IMessageContext {
-    config;
-    let { topic, channel, body } = config;
-    const { to } = config;
-    const _topic = MessageTopic.parse(topic);
-    channel = channel || _topic.channel; // || this.channelName;
-    topic = _topic.topic;
-    //topic = _topic.topic;
-    body = body || {};
-    return new MessageContext(
-      new Message(topic, channel, this.endpoint, to, body),
-      this
-    );
-  }
-
   createMessage(
     topic: string,
     body?: unknown | null,
     to?: string | null,
-    channel?: string
   ): IMessageContext {
-    const _topic = MessageTopic.parse(topic);
-    channel = _topic.channel || channel; //|| this.channelName;
-    topic = _topic.topic;
-    //topic = _topic.topic;
+    //const _topic = this._parseTopic(topic);
+    //topic = _topic?.topic;
+    //to = to || _topic?.to;
     body = body || {};
-
     return new MessageContext(
-      new Message(topic, channel, to, this.endpoint, body),
+      new Message(topic, this.endpoint, to, body),
       this
     );
   }
-  private _subscribe(
+  private async _subscribe(
     subscription: MessageBusSubscription
   ): Promise<IMessageBusSubscription> {
-    return new Promise<IMessageBusSubscription>((resolve, reject) => {
-      this._subscriptions.add(subscription);
-      resolve(subscription);
-      reject;
-    });
+    this._subscriptions.add(subscription);
+    for (let i = 0; i < this._transports.length; i++) {
+      await this._transports[i].subscribe(subscription.topicPattern);
+    }
+    return subscription;
   }
   public publishToTransports(ctx: IMessageContext): Promise<void> {
     if (ctx.isLocal() || this._transports.length < 1) {
@@ -156,15 +177,37 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     return this._transports[0].pubish(ctx);
   }
   public publishMessageContext(context: IMessageContext): Promise<void> {
+    if (!context || !context?.message) {
+      return Promise.reject("Missing Message.")
+    }
+    const id = context?.message?.id;
+    if (!id) {
+      return Promise.reject("Missing Message Id.")
+    }
+    /// Check if we have already seen
+    // this message;
+    if (this._alreadyProcessed[id]) {
+      return Promise.resolve();
+    }
+    this._alreadyProcessed.push(id);
+    this._alreadyProcessed[id] = true;
+    if (this._alreadyProcessed.length > 1000) {
+      delete this._alreadyProcessed[this._alreadyProcessed.shift()]
+    }
     if (
       context &&
       context.message &&
-      context.message.topic === MessageTopic.reply &&
+      (context.message.topic === SystemTopics.reply || context.message.topic === SystemTopics.reject) &&
       context.message.to === this.endpoint
     ) {
       const promise = this.promises[context.message.reply_to];
       if (promise) {
-        promise.resolve(context.message);
+        if (context.message.topic === SystemTopics.reject && !promise.always_resolve) {
+          promise.reject(context.message);
+        }
+        else {
+          promise.resolve(context.message);
+        }
         delete this.promises[context.message.reply_to];
       }
       return Promise.resolve();
@@ -179,6 +222,9 @@ export class MessageBus extends BackgroundService implements IMessageBus {
             .catch((err) => reject(err));
         })
         .catch((err) => {
+          this.publishToTransports(context)
+            .then(resolve)
+            .catch((err) => reject(err));
           reject(err);
         });
     });

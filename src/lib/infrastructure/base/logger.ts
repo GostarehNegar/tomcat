@@ -1,7 +1,8 @@
 import { ILogger } from "./ILogger";
 
-export type LogLevel = 'log' | 'debug' | 'info' | 'error' | 'warn';
+export type LogLevel = 'log' | 'debug' | 'info' | 'error' | 'warn' | 'trace';
 const logLevels = {
+  trace: -1,
   debug: 0,
   log: 1,
   info: 2,
@@ -28,8 +29,12 @@ export class Logger implements ILogger {
   debug(message?: undefined, ...params: unknown[]) {
     this.send('debug', message, params);
   }
+  trace(message?: undefined, ...params: unknown[]) {
+    this.send('trace', message, params);
+  }
+
   send(
-    level: 'log' | 'debug' | 'info' | 'error' | 'warn',
+    level: 'log' | 'debug' | 'info' | 'error' | 'warn' | 'trace',
     message?: unknown,
     ...params: unknown[]
   ) {
@@ -41,7 +46,11 @@ export class Logger implements ILogger {
       return;
     }
     message = `${this.name}: ${message}`;
+
     switch (level) {
+      case 'trace':
+        console.trace(message, params);
+        break;
       case 'log':
         console.log(message, params);
         break;
@@ -49,7 +58,10 @@ export class Logger implements ILogger {
         console.debug(message, params);
         break;
       case 'info':
-        console.info(message, params);
+        if (params)
+          console.info(message, params);
+        else
+          console.info(message);
         break;
       case 'warn':
         console.warn(message, params);
