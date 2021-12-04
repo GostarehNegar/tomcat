@@ -1,4 +1,4 @@
-import './infrastructure/hosting/extensions';
+import './infrastructure/extensions';
 import config from './config';
 import Constants from './constants';
 import { IServiceProvider, ServiceProvider } from './infrastructure/base/ServiceProvider';

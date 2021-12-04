@@ -9,10 +9,18 @@ import { Ticks, TimeEx, TimeSpan } from './TimeEx';
 import { Logger } from './logger';
 import config from '../../config';
 import { randomUUID } from 'node:crypto';
-
+import provider from './ServiceProvider'
+import { Exception, KnownExceptions } from './exception'
+(provider);
 export class BaseUtils {
   public test(): string {
     return 'test from 1';
+  }
+  public Throw(exception: KnownExceptions, message: string, data: unknown = null) {
+    Exception.Throw(exception, message, data);
+  }
+  public toException(exception: KnownExceptions, message: string, data: unknown = null) {
+    return Exception.create(exception, message, data)
   }
   public ticks(input: Date | number | TimeEx | string): number {
     if (input instanceof TimeEx) {
@@ -29,6 +37,10 @@ export class BaseUtils {
     }
     return input
   }
+  public getClassName(o: unknown): string {
+    return Object.getPrototypeOf(o).constructor.name;
+  }
+
   public toTimeEx(ticks?: Ticks): TimeEx {
     return new TimeEx(this.ticks(ticks));
 

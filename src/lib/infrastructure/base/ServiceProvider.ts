@@ -65,6 +65,7 @@ class ServiceDef {
   identifier = '';
 }
 const noname = 'nodef';
+const _ON_NEW_SERVICE_PROVIDER_ = '_ON_NEW_SERVICE_PROVIDER_';
 /**
  * Represents a ServiceProvider that is capable of
  * returning service instances based on service names,
@@ -132,6 +133,17 @@ export interface IServiceProvider {
 export class ServiceProvider implements IServiceProvider {
   private serviceDefinitions: ServiceDef[] = [];
   constructor() {
+
+    if (ServiceProvider.instance) {
+      const callbacks = ServiceProvider.instance.getServices(_ON_NEW_SERVICE_PROVIDER_);
+      callbacks.forEach(x => {
+        if (x) {
+          try { (x as (sp: IServiceProvider) => void)(this) } catch { }
+        }
+
+      });
+    }
+
     ServiceProvider.instances.push(this);
     ServiceProvider.instance = this;
   }

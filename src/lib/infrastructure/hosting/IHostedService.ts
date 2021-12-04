@@ -1,4 +1,4 @@
 export interface IHostedService {
-    start(): Promise<unknown>;
-    stop(): Promise<unknown>;
+    start(): Promise<void>;
+    stop(): Promise<void>;
 }

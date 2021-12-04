@@ -1,6 +1,6 @@
 
-import { CancellationTokenSource } from './CancellationTokenSource';
-import { CanellationToken } from './CanellationToken';
+//import { CancellationTokenSource } from './CancellationTokenSource';
+import { CancellationToken, CancellationTokenSource } from '../base';
 import { IHostedService } from './IHostedService';
 
 export abstract class BackgroundService implements IHostedService {
@@ -10,7 +10,7 @@ export abstract class BackgroundService implements IHostedService {
   async start() {
     this._task = this.run(this._token);
   }
-  protected run(token: CanellationToken): Promise<void> {
+  protected run(token: CancellationToken): Promise<void> {
     token;
     return Promise.resolve();
   }

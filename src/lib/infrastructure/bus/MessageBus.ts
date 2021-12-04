@@ -1,7 +1,7 @@
 
 import { config } from '../../config';
-import { ILogger, Logger } from '../base';
-import { BackgroundService, CanellationToken } from '../hosting';
+import { ILogger, Logger, CancellationToken } from '../base';
+import { BackgroundService } from '../hosting';
 
 import { IHandler } from './IHandler';
 import { IMessageBus } from './IMessageBus';
@@ -29,7 +29,7 @@ type promise_def = {
 
 export class MessageBus extends BackgroundService implements IMessageBus {
   public name = 'MessageBus';
-  protected run(token: CanellationToken): Promise<void> {
+  protected run(token: CancellationToken): Promise<void> {
     token;
     return Promise.resolve();
   }
