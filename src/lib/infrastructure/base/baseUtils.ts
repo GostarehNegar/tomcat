@@ -11,6 +11,7 @@ import config from '../../config';
 import { randomUUID } from 'node:crypto';
 import provider from './ServiceProvider'
 import { Exception, KnownExceptions } from './exception'
+import ServiceProvider from './ServiceProvider';
 (provider);
 export class BaseUtils {
   public test(): string {
@@ -21,6 +22,9 @@ export class BaseUtils {
   }
   public toException(exception: KnownExceptions, message: string, data: unknown = null) {
     return Exception.create(exception, message, data)
+  }
+  public getServiceProvider() {
+    return ServiceProvider
   }
   public ticks(input: Date | number | TimeEx | string): number {
     if (input instanceof TimeEx) {

@@ -1,3 +1,6 @@
+import { BaseConstants } from "./baseconstants";
+
+
 /**
  * ServiceProvider
  * An implementation of 'ServiceProvider' pattern in favor of
@@ -65,7 +68,7 @@ class ServiceDef {
   identifier = '';
 }
 const noname = 'nodef';
-const _ON_NEW_SERVICE_PROVIDER_ = '_ON_NEW_SERVICE_PROVIDER_';
+const _ON_NEW_SERVICE_PROVIDER_ = BaseConstants.Internals._ON_NEW_SERVICE_PROVIDER_;
 /**
  * Represents a ServiceProvider that is capable of
  * returning service instances based on service names,

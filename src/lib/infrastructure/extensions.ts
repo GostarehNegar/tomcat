@@ -1,9 +1,10 @@
 
 import { ServiceProvider, IServiceProvider } from './base/ServiceProvider';
-import { IClock, IStopService, IRedisClientFactory } from './services'
+import { IClock, IStopService, IRedisClientFactory, IDistributedCacheService } from './services'
 import { IStoreFactory } from './data/IStoreFactory'
-import { BaseConstats } from './base/baseconstants'
-const names = BaseConstats.ServiceNames;
+
+import { BaseConstants } from './base/baseconstants'
+const names = BaseConstants.ServiceNames;
 type ServiceTypes = '1' | '2';
 declare module './base/ServiceProvider' {
     interface ServiceProvider {
@@ -13,6 +14,7 @@ declare module './base/ServiceProvider' {
         getStop(): IStopService;
         getRedisFactory(): IRedisClientFactory;
         getStoreFactory(): IStoreFactory;
+        getCacheService(): IDistributedCacheService;
     }
     interface IServiceProvider {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,6 +23,7 @@ declare module './base/ServiceProvider' {
         getStop(): IStopService;
         getRedisFactory(): IRedisClientFactory;
         getStoreFactory(): IStoreFactory;
+        getCacheService(): IDistributedCacheService;
     }
 
 }
@@ -38,6 +41,9 @@ ServiceProvider.prototype.getRedisFactory = function (): IRedisClientFactory {
 };
 ServiceProvider.prototype.getStoreFactory = function (): IStoreFactory {
     return (this as IServiceProvider).getService<IStoreFactory>(names.IStoreFactory);
+};
+ServiceProvider.prototype.getCacheService = function (): IDistributedCacheService {
+    return (this as IServiceProvider).getService<IDistributedCacheService>(names.IDistrubutedCache);
 };
 
 // ServiceProvider.prototype.getBus() {

@@ -5,7 +5,6 @@ import tomcat from "../../src";
 // import '../../src/lib/infrastructure/hosting/extensions'
 // tomcat.services.Provider.getConfig();
 //tomcat.services.Provider.getMessageBus2();
-import utils from "../../src/lib/common/Domain.Utils";
 
 
 const Logger = tomcat.Infrastructure.Base.Logger
@@ -97,7 +96,7 @@ describe('clock', () => {
 
         test('redisclientprovider', async () => {
             const client = tomcat.services.getRedisFactory().createClient({});
-            const f = utils.getClassName(client);
+            const f = tomcat.utils.getClassName(client);
             (f);
             var funcNameRegex = /function (.{1,})\(/;
             var results = (funcNameRegex).exec((client).constructor.toString());
@@ -106,7 +105,7 @@ describe('clock', () => {
             console.log(n);
             console.log(n1);
             client.ping();
-            await utils.delay(100);
+            await tomcat.utils.delay(100);
 
 
 
@@ -124,13 +123,13 @@ describe('clock', () => {
             type record = { firstName: string, id: string };
             const store = tomcat.services.getStoreFactory().createStore('redis');
             const repo_name = `contacts_${(Math.random() * 1000).toFixed()}`;
-
             var repo = store.getRepository<record>(repo_name);
             expect((await repo.toArray()).length).toBe(0);
             const babak: record = { firstName: 'babak', id: '1' };
             const paria: record = { firstName: 'paria', id: '2' };
             await repo.insert(babak);
             await repo.insert(paria);
+            expect(await repo.exists(babak.id)).toBeTruthy();
             expect((await repo.get(babak.id)).firstName).toBe(babak.firstName);
             expect((await repo.get(paria.id)).firstName).toBe(paria.firstName);
             expect((await repo.toArray(undefined, undefined)).length).toBe(2);
@@ -147,4 +146,26 @@ describe('clock', () => {
         });
 
     });
+
+    describe('cache', () => {
+        test('cache works', async () => {
+            const data = { v: 'value' };
+            const cache = tomcat.services.getCacheService();
+            const expires = 15;
+            const key = Math.random().toString();
+
+            await cache.set(key, data, 10)
+            expect(await cache.get(key)).not.toBeNull();
+            await tomcat.utils.delay(expires * 1000);
+            expect(await cache.get(key)).toBeNull();
+
+
+
+
+
+
+        });
+
+    });
+
 });

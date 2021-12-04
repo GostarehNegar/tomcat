@@ -7,7 +7,6 @@ export * from './baseUtils'
 export * from './logger'
 export * from "./ILogger"
 export * from './SequentialPromise'
-//export * from './BaseServices'
 export * from './CancellationTokenSource'
 export * from './exception'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -19,7 +18,9 @@ export import BaseServices = base.BaseServices;
 export const services = () => {
     return base.BaseServices.Instance;
 }
-import r from './BaseRegistrar'
-r.registerServices();
+import * as baseRegistrar from './BaseRegistrar'
+baseRegistrar.instance.registerServices();
+//export const registerServices = () => { r.registerServices() }
+export import BaseRegistrar = baseRegistrar.instance;
 
 

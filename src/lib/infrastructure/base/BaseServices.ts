@@ -1,7 +1,7 @@
 import { IServiceProvider } from '.';
 import provider from './ServiceProvider'
 
-import { BaseConstats } from './baseconstants';
+import { BaseConstants } from './baseconstants';
 import { IClock, IRedisClientFactory } from '../services';
 //import { IStopCallBack, IStopContext, StopTypes } from './stop'
 import { IStopService } from "../services/IStopService";
@@ -9,7 +9,7 @@ import { IMessageBus } from '../bus';
 import { IStoreFactory } from '../data/IStoreFactory';
 //import { IServiceRegistrar } from './IServiceRegistrar';
 //import { IServiceRegistrar } from './IServiceRegistrar'
-const names = BaseConstats.ServiceNames;
+const names = BaseConstants.ServiceNames;
 
 export class BaseServices {
     readonly Provider: IServiceProvider = provider;

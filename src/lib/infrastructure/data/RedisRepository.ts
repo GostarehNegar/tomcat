@@ -1,23 +1,24 @@
 
 
-import { baseUtils } from "../base";
-import BaseServices from "../base/BaseServices";
+import { baseUtils, ILogger, IServiceProvider } from "../base";
+
 import { RedisClient } from "../services";
 import { IRepository } from "./IRepository";
 import { IStore } from "./IStore";
-// async function* name<T>(params: string[], cb: (id: string) => Promise<T>) {
-//     for (let i = 0; i < params.length; i++) {
-//         const item = await cb(params[i]);
-//         yield item;
-//     }
-// }
 
+/// revise it according to this example:
+// https://github.com/redis/node-redis/blob/master/examples/search-hashes.js
 export class RedisRepository<T> implements IRepository<T>{
-    private client: RedisClient;
-    constructor(public readonly name: string) {
-        this.client = BaseServices.getRedisFactory().createClient({});
-        (this.client);
-
+    private _client: RedisClient;
+    private logger: ILogger;
+    constructor(public readonly name: string, serviceProvider: IServiceProvider) {
+        serviceProvider = serviceProvider || baseUtils.getServiceProvider();
+        this._client = serviceProvider.getRedisFactory().createClient({});
+        this.logger = baseUtils.getLogger('RedisRepository');
+        (this.logger);
+    }
+    private get client() {
+        return this._client;
     }
     delete(id: string): Promise<unknown> {
         const key = this._getKey(id);
@@ -30,9 +31,7 @@ export class RedisRepository<T> implements IRepository<T>{
                     resolve(res);
                 }
             })
-
         });
-
     }
     async toArray(predicate: (item: T) => boolean = null, limit: number = 100): Promise<T[]> {
         const result: T[] = [];
@@ -48,6 +47,24 @@ export class RedisRepository<T> implements IRepository<T>{
         return result;
     }
 
+    private _exists(key: string): Promise<boolean> {
+        //var key = this._getKey(id);
+        return new Promise<boolean>((resolve, reject) => {
+            this.client.exists(key, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res > 0);
+                }
+            });
+
+        });
+    }
+
+    public exists(id: string): Promise<boolean> {
+        const key = this._getKey(id);
+        return this._exists(key);
+    }
 
     private async * _getIterator(): AsyncGenerator<T, any, undefined> {
         let cursor = '0';
@@ -120,6 +137,7 @@ export class RedisRepository<T> implements IRepository<T>{
         const key = this._getKey(id || (val as any).id);
         const value = JSON.stringify(val);
         return new Promise((resolve, reject) => {
+
             this.client.set(key, value, (err, res) => {
                 //this.client.sendCommand('HSET', [key, 'val', JSON.stringify(val)], (err, res) => {
                 if (err) {
@@ -155,11 +173,14 @@ export class RedisRepository<T> implements IRepository<T>{
 
 }
 export class ReidsStore implements IStore {
+    constructor(public serviceProvider: IServiceProvider) {
+
+    }
     getRepository<T>(name: string | T): IRepository<T> {
         if (typeof name !== 'string') {
             name = baseUtils.getClassName(name);
         }
-        return new RedisRepository<T>(name);
+        return new RedisRepository<T>(name, this.serviceProvider);
     }
 
 }

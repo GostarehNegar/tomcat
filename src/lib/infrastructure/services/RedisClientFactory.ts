@@ -3,7 +3,7 @@ import { baseUtils } from "../base";
 
 import ServiceProvider from "../base/ServiceProvider";
 import { IClock } from "./IClock";
-import { BaseConstats } from "../base/baseconstants";
+import { BaseConstants } from "../base/baseconstants";
 import { IRedisClientFactory, RedisClient, RedisClientOptions } from "./IRedisClientFactory";
 
 
@@ -15,7 +15,7 @@ export class RedisClientFactory implements IRedisClientFactory {
 
     constructor() {
         (this.logger);
-        this.clock = ServiceProvider.getService<IClock>(BaseConstats.ServiceNames.IClock);
+        this.clock = ServiceProvider.getService<IClock>(BaseConstants.ServiceNames.IClock);
         (this.clock);
     }
     createClient(options: RedisClientOptions = null): RedisClient {

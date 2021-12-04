@@ -1,4 +1,4 @@
-export const BaseConstats = {
+export const BaseConstants = {
     Internals:
     {
         '_ON_NEW_SERVICE_PROVIDER_': '_ON_NEW_SERVICE_PROVIDER_'
@@ -9,7 +9,8 @@ export const BaseConstats = {
         'IMessageBus': 'IMessageBus',
         'IServiceRegistrar': 'IServiceRegistrar',
         'IRedisClientFactory': 'IRedisClientFactory',
-        'IStoreFactory': 'IStoreFactory'
+        'IStoreFactory': 'IStoreFactory',
+        'IDistrubutedCache': 'IDistributedCache'
 
     }
 }

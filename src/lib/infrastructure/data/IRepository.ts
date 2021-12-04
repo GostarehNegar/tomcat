@@ -6,5 +6,6 @@ export interface IRepository<T> {
     iterator(): AsyncGenerator<T>;
     toArray(predicate?: (item: T) => boolean, limit?: number): Promise<T[]>;
     delete(id: string): Promise<unknown>;
+    exists(id: string): Promise<boolean>;
 
 }
