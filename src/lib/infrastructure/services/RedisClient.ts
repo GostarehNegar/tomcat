@@ -12,8 +12,8 @@ export class RedisClient extends ioredis {
     private _connected: boolean;
 
 
-    constructor(public options: RedisClientOptions) {
-        super(options);
+    constructor(_options: RedisClientOptions) {
+        super(_options || undefined);
         this.on('error', (err) => {
             this._connected = false;
             this.logger.warn(

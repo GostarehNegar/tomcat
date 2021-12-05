@@ -3,6 +3,7 @@
 import { baseUtils, ILogger, IServiceProvider } from "../base";
 
 import { RedisClient } from "../services";
+import { RedisClientOptions } from "../services/RedisClientOptions";
 import { IRepository } from "./IRepository";
 
 /// revise it according to this example:
@@ -10,9 +11,9 @@ import { IRepository } from "./IRepository";
 export class RedisRepository<T> implements IRepository<T>{
     private _client: RedisClient;
     private logger: ILogger;
-    constructor(public readonly name: string, serviceProvider: IServiceProvider) {
+    constructor(public readonly name: string, serviceProvider: IServiceProvider, options: RedisClientOptions) {
         serviceProvider = serviceProvider || baseUtils.getServiceProvider();
-        this._client = serviceProvider.getRedisFactory().createClient({});
+        this._client = serviceProvider.getRedisFactory().createClient(options);
         this.logger = baseUtils.getLogger('RedisRepository');
         (this.logger);
     }

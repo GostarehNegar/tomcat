@@ -2,6 +2,7 @@
 
 import { baseUtils, IServiceProvider, Ticks } from "../base";
 import { ISerielizationService, RedisClient } from "../services";
+import { RedisClientOptions } from "../services/RedisClientOptions";
 import { IDataStream, IStreamInfo } from "./IDataSream";
 type decoded = {
     id: string,
@@ -11,9 +12,10 @@ type decoded = {
 
 export class RedisDataStream<T> implements IDataStream<T>{
     private serializer: ISerielizationService;
-    constructor(public name: string, private client?: RedisClient, private serviceProvider?: IServiceProvider) {
+    constructor(public name: string, private client?: RedisClient, private serviceProvider?: IServiceProvider,
+        public options?: RedisClientOptions) {
         this.serviceProvider = serviceProvider || baseUtils.getServiceProvider();
-        this.client = client || this.serviceProvider.getRedisFactory().createClient({});
+        this.client = client || this.serviceProvider.getRedisFactory().createClient(this.options);
         this.serializer = this.serviceProvider.getSerilizer();
 
         (this.client);
