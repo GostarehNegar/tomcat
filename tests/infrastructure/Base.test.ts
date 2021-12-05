@@ -207,7 +207,8 @@ describe('clock', () => {
             //     .createStore('redis')
             //     .getDataStream<dataType>(name);
             setTimeout(async () => {
-                await stream.add({ index: 100, tick: 100 });
+                data.push({ index: -1, tick: 100 })
+                await stream.add(data[data.length - 1]);
             }, 200);
             stream_read_count = 0;
             await stream.play(() => {
@@ -215,8 +216,22 @@ describe('clock', () => {
                 return true;
             });
             expect(stream_read_count).toBe(1);
+            const info = await stream.getInfo();
+            expect(info.length).toBe(data.length);
+            const first = await stream.getAt(data[0].tick);
+            (first)
+            stream_read_count = 0;
+            let reverse_first: dataType = null;
+            for await (const item of stream.reverse()) {
+                (item);
+                reverse_first = item;
 
-
+            }
+            expect(reverse_first.index).toBe(data[0].index);
+            const first_item = await stream.getFirst();
+            const last_item = await stream.getLast();
+            expect(first_item.index).toBe(data[0].index);
+            expect(last_item.index).toBe(data[data.length - 1].index);
         });
 
     });
