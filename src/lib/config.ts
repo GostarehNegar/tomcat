@@ -1,6 +1,9 @@
+import baseconfig from "./infrastructure/base/baseconfig";
+
 
 
 export const config = {
+  infrastructure: baseconfig,
   data: {
     redis: { /**
     * The url to redis server.

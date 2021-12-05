@@ -1,4 +1,4 @@
-export * from './CanellationToken'
+
 export * from './IHost'
 export * from './IWebHost'
 export * from './IHostBuilder'
@@ -12,7 +12,7 @@ export * from './IMiddleware'
 export * from './IPeer'
 export * from './IPeerCollection'
 export * from './BackgroundService'
-export * from './CancellationTokenSource'
+
 export * from './ExpressWebHost'
 export * from './Host'
 export * from './HostBuilder'

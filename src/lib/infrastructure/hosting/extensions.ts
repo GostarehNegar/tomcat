@@ -1,15 +1,10 @@
-import { ServiceProvider } from '../base/ServiceProvider';
+//import { ServiceProvider } from '../base/ServiceProvider';
 
 //import { IHostBuilder } from './interfaces'
 import { HostBuilder } from './HostBuilder';
 import { WebHost } from './WebHost';
 
-declare module '../base/ServiceProvider' {
-  interface ServiceProvider {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getMessageBus2(elseValue: any): any;
-  }
-}
+
 
 declare module './IHostBuilder' {
   interface IHostBuilder {

@@ -1,6 +1,8 @@
 //import { constants as hosting_constants } from './hosting'
 //(hosting_constants)
+import { BaseConstants } from './infrastructure/base/baseconstants'
 export const Constants = {
+  Infrastructure: BaseConstants,
   ServiceNames: {
     IDataProvider: 'IDataProvider',
     IDataSource: 'IDataSource',
@@ -12,7 +14,9 @@ export const Constants = {
     WebSocketHub: 'WebSocketHub',
     Router: 'Router',
     Config: 'Config',
-    IBot: 'IBot'
+    IBot: 'IBot',
+    ICock: BaseConstants.ServiceNames.IClock
+
   },
   DataSources: {
     bainance: 'binance',

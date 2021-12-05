@@ -1,3 +1,6 @@
+import { BaseConstants } from "./baseconstants";
+
+
 /**
  * ServiceProvider
  * An implementation of 'ServiceProvider' pattern in favor of
@@ -65,6 +68,7 @@ class ServiceDef {
   identifier = '';
 }
 const noname = 'nodef';
+const _ON_NEW_SERVICE_PROVIDER_ = BaseConstants.Internals._ON_NEW_SERVICE_PROVIDER_;
 /**
  * Represents a ServiceProvider that is capable of
  * returning service instances based on service names,
@@ -132,6 +136,17 @@ export interface IServiceProvider {
 export class ServiceProvider implements IServiceProvider {
   private serviceDefinitions: ServiceDef[] = [];
   constructor() {
+
+    if (ServiceProvider.instance) {
+      const callbacks = ServiceProvider.instance.getServices(_ON_NEW_SERVICE_PROVIDER_);
+      callbacks.forEach(x => {
+        if (x) {
+          try { (x as (sp: IServiceProvider) => void)(this) } catch { }
+        }
+
+      });
+    }
+
     ServiceProvider.instances.push(this);
     ServiceProvider.instance = this;
   }

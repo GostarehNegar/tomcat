@@ -62,16 +62,17 @@ export class WebSocketHub implements IHostedService {
       this._services.getService(constants.ServiceNames.HttpServer);
     this.options.port = this.options.server ? undefined : this.options.port;
   }
-  public stop(): Promise<unknown> {
+  public stop(): Promise<void> {
     if (this.intervalHandle) {
       clearInterval(this.intervalHandle);
     }
-    const result = new Promise<unknown>((resolve, reject) => {
+    const result = new Promise<void>((resolve, reject) => {
       this._ws.close((err) => {
-        err ? reject(err) : resolve(this);
+        err ? reject(err) : resolve();
       });
     });
     return result;
+
   }
   private _doSend(to: WebSocket, message: unknown): Promise<unknown> {
     if (typeof message === 'object') message = JSON.stringify(message);
@@ -126,7 +127,7 @@ export class WebSocketHub implements IHostedService {
 
     return Promise.all(promises);
   }
-  public start(): Promise<unknown> {
+  public start(): Promise<void> {
     this._ws = new WebSocket.Server({
       port: this.options.port,
       path: this.options.path || '/hub',

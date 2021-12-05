@@ -6,13 +6,16 @@ import { BotHost, IBotHost } from './bot/botHost';
 import * as _Domain from './domain'
 import * as _Infrastructure from "./infrastructure"
 import { ServiceProvider } from './infrastructure/base';
-
-import * as _all from './';
+//import _Services from './DomainServices'
+import { Constants } from './constants'
+import { config as _config } from './config'
+import './extensions'
 
 namespace TomCat {
   export const utils = _utils
-  export const constants = _all.constants;
-  export const config = _all.Config.config;
+  export const constants = Constants;
+  export const config = _config;
+  export const services = ServiceProvider.instance;
   //export const builder: _Interfaces.Hosting.IHostBuilder = new _Implementaions.Hosting.HostBuilder(null);
 
   export const hosts = _Infrastructure.Hosting.hosts;

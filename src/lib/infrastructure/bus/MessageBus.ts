@@ -1,7 +1,7 @@
 
 import { config } from '../../config';
-import { ILogger, Logger } from '../base';
-import { BackgroundService, CanellationToken } from '../hosting';
+import { ILogger, Logger, CancellationToken } from '../base';
+import { BackgroundService } from '../hosting';
 
 import { IHandler } from './IHandler';
 import { IMessageBus } from './IMessageBus';
@@ -29,7 +29,7 @@ type promise_def = {
 
 export class MessageBus extends BackgroundService implements IMessageBus {
   public name = 'MessageBus';
-  protected run(token: CanellationToken): Promise<void> {
+  protected run(token: CancellationToken): Promise<void> {
     token;
     return Promise.resolve();
   }
@@ -84,7 +84,8 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     if (_msg && _msg.method === SystemTopics.Internal.ping) {
       transport.pong(this.getInfo());
     } else {
-      const ctx = new MessageContext(_msg.payload, this);
+
+      const ctx = new MessageContext(Message.FromMessage(_msg.payload), this);
       if (ctx?.message?.from === this.endpoint) {
         // This was originaly sent by us
         // we do not need to republish it.

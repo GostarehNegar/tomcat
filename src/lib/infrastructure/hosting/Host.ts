@@ -1,12 +1,13 @@
 
 import { config } from '../../config';
-import { IServiceProvider } from '../base';
+import { IServiceProvider, CancellationToken } from '../base';
 import { IMessageBus } from '../bus';
 
-import { CanellationToken } from './CanellationToken';
+
 import { IHost } from './IHost';
 import { IHostedService } from './IHostedService';
 import { serviceNames } from './ServerBuilder';
+import registrar from '../base/BaseRegistrar'
 
 export class Host implements IHost {
   private _tasks: IHostedService[] = [];
@@ -20,6 +21,7 @@ export class Host implements IHost {
     );
     // this.pipeline = new Pipeline()
     this.config = this.services.getService(serviceNames.Config);
+    registrar.registerServices();
     // this.bots = new BotCollection(services)
   }
   get bus(): IMessageBus {
@@ -40,7 +42,7 @@ export class Host implements IHost {
     );
     return Promise.all(this._tasks.map((x) => x.stop()));
   }
-  run(token: CanellationToken) {
+  run(token: CancellationToken) {
     token;
   }
 }
