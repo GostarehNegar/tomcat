@@ -10,7 +10,8 @@ export const BaseConstants = {
         'IServiceRegistrar': 'IServiceRegistrar',
         'IRedisClientFactory': 'IRedisClientFactory',
         'IStoreFactory': 'IStoreFactory',
-        'IDistrubutedCache': 'IDistributedCache'
+        'IDistrubutedCache': 'IDistributedCache',
+        'ISerializationService': 'ISerializationService'
 
     }
 }

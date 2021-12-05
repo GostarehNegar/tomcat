@@ -1,6 +1,6 @@
 
 import { ServiceProvider, IServiceProvider } from './base/ServiceProvider';
-import { IClock, IStopService, IRedisClientFactory, IDistributedCacheService } from './services'
+import { IClock, IStopService, IRedisClientFactory, IDistributedCacheService, ISerielizationService } from './services'
 import { IStoreFactory } from './data/IStoreFactory'
 
 import { BaseConstants } from './base/baseconstants'
@@ -15,6 +15,7 @@ declare module './base/ServiceProvider' {
         getRedisFactory(): IRedisClientFactory;
         getStoreFactory(): IStoreFactory;
         getCacheService(): IDistributedCacheService;
+        getSerilizer(): ISerielizationService;
     }
     interface IServiceProvider {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,6 +25,8 @@ declare module './base/ServiceProvider' {
         getRedisFactory(): IRedisClientFactory;
         getStoreFactory(): IStoreFactory;
         getCacheService(): IDistributedCacheService;
+        getSerilizer(): ISerielizationService;
+
     }
 
 }
@@ -44,6 +47,10 @@ ServiceProvider.prototype.getStoreFactory = function (): IStoreFactory {
 };
 ServiceProvider.prototype.getCacheService = function (): IDistributedCacheService {
     return (this as IServiceProvider).getService<IDistributedCacheService>(names.IDistrubutedCache);
+};
+
+ServiceProvider.prototype.getSerilizer = function (): ISerielizationService {
+    return (this as IServiceProvider).getService<ISerielizationService>(names.ISerializationService);
 };
 
 // ServiceProvider.prototype.getBus() {

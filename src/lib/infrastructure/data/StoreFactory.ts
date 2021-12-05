@@ -1,7 +1,7 @@
 import { IServiceProvider } from "../base";
 import { IStore } from "./IStore";
 import { IStoreFactory, StoreProviders } from "./IStoreFactory";
-import { ReidsStore } from "./RedisRepository";
+import { ReidsStore } from "./ReidsStore";
 
 export class StoreFactory implements IStoreFactory {
     constructor(public sericeProvider: IServiceProvider) {

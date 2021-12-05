@@ -1,4 +1,6 @@
 import tomcat from "../../src";
+import utils from "../../src/lib/common/Domain.Utils";
+
 //import '../../src/lib/extensions'
 //import '../../src/lib/infrastructure/extensions';
 
@@ -124,7 +126,9 @@ describe('clock', () => {
             const store = tomcat.services.getStoreFactory().createStore('redis');
             const repo_name = `contacts_${(Math.random() * 1000).toFixed()}`;
             var repo = store.getRepository<record>(repo_name);
+
             expect((await repo.toArray()).length).toBe(0);
+            await utils.delay(10);
             const babak: record = { firstName: 'babak', id: '1' };
             const paria: record = { firstName: 'paria', id: '2' };
             await repo.insert(babak);
@@ -153,15 +157,64 @@ describe('clock', () => {
             const cache = tomcat.services.getCacheService();
             const expires = 15;
             const key = Math.random().toString();
-
             await cache.set(key, data, 10)
             expect(await cache.get(key)).not.toBeNull();
             await tomcat.utils.delay(expires * 1000);
             expect(await cache.get(key)).toBeNull();
+        });
 
+    });
+    describe('datastream', () => {
+        test('datastream', async () => {
+            type dataType = { tick: number, index: number };
+            const name = utils.randomName('data-stream', 2);
+            const data: dataType[] = [];
+            const start = Date.now();
+            const count = 100;
+            for (let i = 0; i < count; i++) {
+                data.push({
+                    tick: start + i,
+                    index: i
+                })
+            }
 
+            const stream = tomcat.services
+                .getStoreFactory()
+                .createStore('redis')
+                .getDataStream<dataType>(name);
+            for (let i = 0; i < data.length; i++) {
+                try {
+                    await stream.add(data[i], data[i].tick)
+                }
+                catch (err) {
+                    console.log(err);
 
-
+                }
+            }
+            const all = await stream.toArray();
+            expect(all.length).toBe(data.length);
+            expect((await stream.toArray(x => x.index > 10, undefined, undefined, 2)).length).toBe(2)
+            let stream_read_count = 0
+            await stream.play((item, t) => {
+                (item);
+                (t);
+                stream_read_count++;
+                return stream_read_count >= data.length;
+            }, 0);
+            expect(stream_read_count).toBe(data.length);
+            // const stream1 = tomcat.services
+            //     .getStoreFactory()
+            //     .createStore('redis')
+            //     .getDataStream<dataType>(name);
+            setTimeout(async () => {
+                await stream.add({ index: 100, tick: 100 });
+            }, 200);
+            stream_read_count = 0;
+            await stream.play(() => {
+                stream_read_count++;
+                return true;
+            });
+            expect(stream_read_count).toBe(1);
 
 
         });
