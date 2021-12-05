@@ -44,4 +44,11 @@ export class Message implements IMessage {
   public toString(): string {
     return `${this.topic}`
   }
+  public static FromMessage(msg: Message) {
+    const result = new Message(msg.topic, msg.from, msg.to, msg.payload);
+    result.id = msg.id;
+    result.reply_to = msg.reply_to;
+    result.headers = msg.headers;
+    return result;
+  }
 }

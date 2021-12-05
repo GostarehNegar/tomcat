@@ -36,11 +36,15 @@ function getExchange(ex: Exchanges, market: Markets): ccxt.Exchange {
         apiKey: null,
         secret: null,
 
-        options: { 'defaultType': market }
+        options: {
+            'defaultType': market,
+            'createMarketBuyOrderRequiresPrice': false
+        }
     };
     if (ex == 'coinex') {
         opt.apiKey = '1189A75DDBA0442CA5996E544783DA1A';
         opt.secret = 'E08F2D0C43915121567096210AC8B3E3827921EEEC260C72'
+        opt.options.createMarketBuyOrderRequiresPrice = false;
     };
     const exchangeId = ex;
     const _class = ccxt[exchangeId];
@@ -61,8 +65,9 @@ export class CCXTExchange implements IExchange {
         this.logger = utils.getLogger("Exchanges.CCTX." + exchange)
     }
     async getServerTime(): Promise<TimeEx> {
-        var exchange = await this.getExchange();
-        return utils.toTimeEx(await exchange.fetchTime());
+        // TODO if exchange ...
+        //var exchange = await this.getExchange();
+        return utils.toTimeEx(await binance_nooce());
     }
     async getCachedServerTime(refersh = false): Promise<TimeEx> {
         if (!this._cached_server_time_diff || refersh) {
@@ -83,8 +88,9 @@ export class CCXTExchange implements IExchange {
             this._ccxt_exchange = getExchange(this._exchange_name, this._market);
             this._ccxt_exchange.httpsAgent = await utils.getProxy();
             await this._ccxt_exchange.loadMarkets();
-            var noonce = await binance_nooce();
-            this._ccxt_exchange.nonce = () => noonce
+            // TODO correct noonce
+            //var noonce = await binance_nooce();
+            //this._ccxt_exchange.nonce = () => noonce
         }
         return this._ccxt_exchange;
     }
@@ -110,7 +116,7 @@ export class CCXTExchange implements IExchange {
 
 
     }
-    async safeCall<T>(call: () => Promise<T>, max_triarls = 5, wait_between_calls = 2000) {
+    async safeCall<T>(call: () => Promise<T>, max_triarls = 3, wait_between_calls = 2000) {
         let refersh_proxy = false;
         for (let i = 0; i < max_triarls; i++) {
             try {
@@ -118,7 +124,7 @@ export class CCXTExchange implements IExchange {
                 return await call();
             }
             catch (err) {
-                refersh_proxy = true;
+                refersh_proxy = false;
 
             }
             await utils.delay(wait_between_calls)
@@ -127,16 +133,24 @@ export class CCXTExchange implements IExchange {
     }
 
     async sell(symbol: Symbols, amount: number) {
-        var exchange = await this.getExchange();
-        // var m = await this.getMarkets();
-        // const limit = m[symbol].limits;
-        // if (amount < limit.amount.min) {
-        //     throw "limit less than min";
-        // }
-        // (limit);
+        return await this.safeCall(async () => {
+            var exchange = await this.getExchange();
+            // var m = await this.getMarkets();
+            // const limit = m[symbol].limits;
+            // if (amount < limit.amount.min) {
+            //     throw "limit less than min";
+            // }
+            // (limit);
 
-        const order = await exchange.createMarketOrder(symbol, 'sell', amount);
-        return order;
+            const order = await exchange.createMarketOrder(symbol, 'sell', amount);
+            return order;
+        });
+    }
+    async buyWithoutPrice(symbol, amount) {
+        await this.safeCall(async () => {
+            const exchange = await this.getExchange();
+            await exchange.createMarketOrder(symbol, 'buy', amount)
+        })
     }
 
     async buy(symbol: Symbols, amount: number, price: number) {
@@ -164,6 +178,7 @@ export class CCXTExchange implements IExchange {
             const server_time = (await this.getCachedServerTime()).ticks;
             var m = utils.toMinutes(interval as Intervals) * 60 * 1000 - 1;
             let _start = _startTime;
+            // TODO limit =1000 for coinex
             (await coinex.fetchOHLCV(symbol, interval, _start))
                 .forEach(c => {
                     if ((c[0] + m < server_time) || include_last_uncomplete) {
