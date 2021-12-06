@@ -19,7 +19,8 @@ export const BaseConstants = {
         'HttpServer': 'HttpServer',
         'IWebHost': 'IWebHost',
         'MeshServer': 'MeshServer',
-        'MeshNode': 'MeshNode'
+        'MeshNode': 'MeshNode',
+        'IServiceDiscovery': 'IServiceDiscovery'
 
 
     }
