@@ -19,6 +19,7 @@ import { WebSocketTransport } from './WebSocketTranstport';
 import { Utils } from '../../common';
 import { IEndpointInfo } from './IEndpointInfo';
 import { IMessage } from '.';
+import { IMessageContract } from './IMessageContract';
 
 type promise_def = {
   resolve: (e: unknown) => void;
@@ -149,16 +150,28 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     return result;
   }
   createMessage(
-    topic: string,
+    topic: string | IMessageContract,
     body?: unknown | null,
     to?: string | null,
   ): IMessageContext {
+
+    let _topic: string = null;
+    if (typeof topic === 'string') {
+      _topic = topic;
+    }
+    else {
+      _topic = topic?.topic;
+      body = body || topic?.payload;
+    }
+
+
+    //const _topic = typeof topic === 'string' ? topic : topic?.topic;
     //const _topic = this._parseTopic(topic);
     //topic = _topic?.topic;
     //to = to || _topic?.to;
     body = body || {};
     return new MessageContext(
-      new Message(topic, this.endpoint, to, body),
+      new Message(_topic, this.endpoint, to, body),
       this
     );
   }

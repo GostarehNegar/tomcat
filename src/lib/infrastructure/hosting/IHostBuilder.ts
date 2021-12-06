@@ -35,6 +35,9 @@ export interface IHostBuilder {
     addServices(cb: (s: IServiceProvider) => void): IHostBuilder;
     addRouter(router: unknown): IHostBuilder;
     addWebSocketHub(path?: string): IHostBuilder;
+    addMeshServer(): IHostBuilder;
+    addMeshNode(): IHostBuilder;
+
     addHttp(): IHostBuilder;
     addExpress();
     addMessageBus(cf?: (c: typeof config.messaging) => void): IHostBuilder;

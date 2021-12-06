@@ -3,6 +3,7 @@ import { IMessageBusSubscription } from "./IMessageBusSubscription";
 import { IMessageContext } from "./IMessageContext";
 
 import { Message } from ".";
+import { IMessageContract } from "./IMessageContract";
 
 /**
  * Represents messaging features.
@@ -18,7 +19,7 @@ export interface IMessageBus {
      * @param to Optionaly name of the destination endpoint.
      */
     createMessage(
-        topic: string,
+        topic: string | IMessageContract,
         body?: unknown | null,
         to?: string | null,
     ): IMessageContext;

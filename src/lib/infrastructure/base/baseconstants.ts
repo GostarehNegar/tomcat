@@ -11,7 +11,16 @@ export const BaseConstants = {
         'IRedisClientFactory': 'IRedisClientFactory',
         'IStoreFactory': 'IStoreFactory',
         'IDistrubutedCache': 'IDistributedCache',
-        'ISerializationService': 'ISerializationService'
+        'ISerializationService': 'ISerializationService',
+        'IHostedService': 'IHostedService',
+        'WebSocketHub': 'WebSocketHub',
+        'Router': 'Router',
+        'Config': 'Config',
+        'HttpServer': 'HttpServer',
+        'IWebHost': 'IWebHost',
+        'MeshServer': 'MeshServer',
+        'MeshNode': 'MeshNode'
+
 
     }
 }

@@ -2,7 +2,10 @@ import http from 'http';
 
 import { config } from '../../config';
 import { IServiceProvider, ServiceProvider } from '../base';
+import { BaseConstants } from '../base/baseconstants';
 import { MessageBus } from '../bus';
+import { MeshNode } from '../mesh/MeshNode';
+import { MeshServer } from '../mesh/MeshServer';
 
 
 
@@ -14,9 +17,10 @@ import { IHostBuilder } from './IHostBuilder';
 import { IHostCollection } from './IHostCollection';
 import { IHttpHandler } from './IHttpHandler';
 import { IWebHost } from './IWebHost';
-import { serviceNames } from './ServerBuilder';
+//import { serviceNames } from './ServerBuilder';
 import { LightWebHost } from './SimpleWebHost';
 import { WebSocketHub } from './WebSocketHub';
+const serviceNames = BaseConstants.ServiceNames
 
 export class HostBuilder implements IHostBuilder {
   private addWebSocket: boolean;
@@ -43,6 +47,19 @@ export class HostBuilder implements IHostBuilder {
     this.services.register(serviceNames.IMessageBus, bus);
     return this;
   }
+  addMeshServer(): IHostBuilder {
+    const server = new MeshServer(this.services);
+    this.services.register(serviceNames.IHostedService, server);
+    this.services.register(serviceNames.MeshServer, server);
+    return this
+  }
+  addMeshNode(): IHostBuilder {
+    const mesh = new MeshNode(this.services);
+    this.services.register(serviceNames.IHostedService, mesh);
+    this.services.register(serviceNames.MeshNode, mesh);
+
+    return this;
+  }
   addRouter(router: () => unknown): IHostBuilder {
     this.services.register(serviceNames.Router, router);
     return this;
@@ -65,6 +82,8 @@ export class HostBuilder implements IHostBuilder {
       this.services.register(serviceNames.WebSocketHub, hub);
       this.services.register(serviceNames.IHostedService, hub);
     }
+
+
     this._collection?.add(this._name, result);
 
     this.handlers.map((h) => result.use(h));

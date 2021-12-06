@@ -180,7 +180,7 @@ describe('clock', () => {
 
             const stream = tomcat.services
                 .getStoreFactory()
-                .createStore('redis')
+                .createStore({ provider: 'redis' })
                 .getDataStream<dataType>(name);
             for (let i = 0; i < data.length; i++) {
                 try {
