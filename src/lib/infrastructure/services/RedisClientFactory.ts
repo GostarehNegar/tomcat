@@ -4,7 +4,9 @@ import { baseUtils } from "../base";
 import ServiceProvider from "../base/ServiceProvider";
 import { IClock } from "./IClock";
 import { BaseConstants } from "../base/baseconstants";
-import { IRedisClientFactory, RedisClient, RedisClientOptions } from "./IRedisClientFactory";
+import { IRedisClientFactory } from "./IRedisClientFactory";
+import { RedisClientOptions } from "./RedisClientOptions";
+import { RedisClient } from "./RedisClient";
 
 
 export class RedisClientFactory implements IRedisClientFactory {
@@ -23,5 +25,6 @@ export class RedisClientFactory implements IRedisClientFactory {
         RedisClientFactory.instances.push(result);
         return result;
     }
+
 
 }

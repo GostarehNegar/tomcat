@@ -1,18 +1,18 @@
 import { IServiceProvider } from "../base";
 import { IStore } from "./IStore";
-import { IStoreFactory, StoreProviders } from "./IStoreFactory";
-import { ReidsStore } from "./RedisRepository";
+import { IFactoryOptions, IStoreFactory } from "./IStoreFactory";
+import { ReidsStore } from "./ReidsStore";
 
 export class StoreFactory implements IStoreFactory {
     constructor(public sericeProvider: IServiceProvider) {
 
     }
-    createStore(provider: StoreProviders): IStore {
-        switch (provider) {
+    createStore(options: IFactoryOptions): IStore {
+        switch (options.provider) {
             case 'redis':
-                return new ReidsStore(this.sericeProvider);
+                return new ReidsStore(this.sericeProvider, options.redis);
             default:
-                return new ReidsStore(this.sericeProvider);
+                return new ReidsStore(this.sericeProvider, options.redis);
         }
     }
 

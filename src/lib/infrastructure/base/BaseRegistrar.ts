@@ -6,6 +6,7 @@ import { Clock, RedisClientFactory } from '../services';
 import { StopService } from '../services/stop'
 import { StoreFactory } from '../data';
 import { RedisCacheService } from '../services/RedisCacheService'
+import { SerializationService } from '../services/SerializationService'
 
 const names = BaseConstants.ServiceNames;
 
@@ -20,6 +21,7 @@ const register = (services: IServiceProvider) => {
     services.register(names.IRedisClientFactory, () => redis, true);
     services.register(names.IStoreFactory, () => store, true);
     services.register(names.IDistrubutedCache, (sp: IServiceProvider) => new RedisCacheService(sp.getService(names.IRedisClientFactory)), true);
+    services.register(names.ISerializationService, (sp: IServiceProvider) => new SerializationService(sp), true);
 
 }
 class BaseServiceRegistrar {

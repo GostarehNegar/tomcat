@@ -3,24 +3,27 @@
 import { baseUtils, ILogger, IServiceProvider } from "../base";
 
 import { RedisClient } from "../services";
+import { RedisClientOptions } from "../services/RedisClientOptions";
 import { IRepository } from "./IRepository";
-import { IStore } from "./IStore";
 
 /// revise it according to this example:
 // https://github.com/redis/node-redis/blob/master/examples/search-hashes.js
 export class RedisRepository<T> implements IRepository<T>{
     private _client: RedisClient;
     private logger: ILogger;
-    constructor(public readonly name: string, serviceProvider: IServiceProvider) {
+    constructor(public readonly name: string, serviceProvider: IServiceProvider, options: RedisClientOptions) {
         serviceProvider = serviceProvider || baseUtils.getServiceProvider();
-        this._client = serviceProvider.getRedisFactory().createClient({});
+        this._client = serviceProvider.getRedisFactory().createClient(options);
         this.logger = baseUtils.getLogger('RedisRepository');
         (this.logger);
     }
     private get client() {
         return this._client;
     }
-    delete(id: string): Promise<unknown> {
+    async ensureConnection() {
+        return this.client.ensureConnection();
+    }
+    _delete(id: string): Promise<unknown> {
         const key = this._getKey(id);
         return new Promise<number>((resolve, reject) => {
             this.client.del(key, (error, res) => {
@@ -33,19 +36,7 @@ export class RedisRepository<T> implements IRepository<T>{
             })
         });
     }
-    async toArray(predicate: (item: T) => boolean = null, limit: number = 100): Promise<T[]> {
-        const result: T[] = [];
 
-        for await (const v of this.iterator()) {
-            if (result.length >= limit) {
-                break;
-            }
-            if (!predicate || predicate(v)) {
-                result.push(v);
-            }
-        }
-        return result;
-    }
 
     private _exists(key: string): Promise<boolean> {
         //var key = this._getKey(id);
@@ -61,15 +52,12 @@ export class RedisRepository<T> implements IRepository<T>{
         });
     }
 
-    public exists(id: string): Promise<boolean> {
-        const key = this._getKey(id);
-        return this._exists(key);
-    }
 
     private async * _getIterator(): AsyncGenerator<T, any, undefined> {
         let cursor = '0';
         const match = this._getKey('*');
         let ids: string[] = [];
+        await this.client.ensureConnection();
         while (true) {
             const res = await this.scan(cursor, match);
             if (Array.isArray(res[1]) && res[1].length > 0) {
@@ -85,9 +73,6 @@ export class RedisRepository<T> implements IRepository<T>{
             if (cursor == '0')
                 break;
         }
-    }
-    iterator(): AsyncGenerator<T, any, undefined> {
-        return this._getIterator();
     }
     private scan(cursor: string, match: string) {
         //const match = this.getKey('*');
@@ -116,7 +101,8 @@ export class RedisRepository<T> implements IRepository<T>{
                 resolve([]);
                 return
             }
-            this.client.MGET(keys, (err, res) => {
+            //this.client.mget()
+            this.client.mget(keys, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -128,29 +114,6 @@ export class RedisRepository<T> implements IRepository<T>{
     private _getKey(id?: string): string {
         return `${this.name}:${id}`
 
-    }
-    insert(val: T, id?: string): Promise<T> {
-        id = id || (val as any).id;
-        if (typeof id !== 'string') {
-            baseUtils.Throw('unexpected', 'Id not Found');
-        }
-        const key = this._getKey(id || (val as any).id);
-        const value = JSON.stringify(val);
-        return new Promise((resolve, reject) => {
-
-            this.client.set(key, value, (err, res) => {
-                //this.client.sendCommand('HSET', [key, 'val', JSON.stringify(val)], (err, res) => {
-                if (err) {
-                    reject(err);
-
-                } else {
-                    (res);
-                    resolve(val);
-                }
-            });
-
-        });
-        throw new Error("Method not implemented.");
     }
     _getByKey(key: string): Promise<T> {
         return new Promise<T>((resolve, reject) => {
@@ -165,22 +128,68 @@ export class RedisRepository<T> implements IRepository<T>{
 
         });
     }
-    get(id: string): Promise<T> {
-        var key = this._getKey(id);
-        return this._getByKey(key);
-    }
-
-
-}
-export class ReidsStore implements IStore {
-    constructor(public serviceProvider: IServiceProvider) {
-
-    }
-    getRepository<T>(name: string | T): IRepository<T> {
-        if (typeof name !== 'string') {
-            name = baseUtils.getClassName(name);
+    _insert(val: T, id?: string): Promise<T> {
+        id = id || (val as any).id;
+        if (typeof id !== 'string') {
+            baseUtils.Throw('unexpected', 'Id not Found');
         }
-        return new RedisRepository<T>(name, this.serviceProvider);
+        const key = this._getKey(id || (val as any).id);
+        const value = JSON.stringify(val);
+        return new Promise((resolve, reject) => {
+            this.client.set(key, value, (err, res) => {
+                //this.client.sendCommand('HSET', [key, 'val', JSON.stringify(val)], (err, res) => {
+                if (err) {
+                    reject(err);
+
+                } else {
+                    (res);
+                    resolve(val);
+                }
+            });
+
+        });
     }
 
+    iterator(): AsyncGenerator<T, any, undefined> {
+        return this._getIterator();
+    }
+
+    async get(id: string): Promise<T> {
+        await this.client.ensureConnection();
+        var key = this._getKey(id);
+        return await this._getByKey(key);
+    }
+    async insert(val: T, id?: string): Promise<T> {
+        await this.client.ensureConnection();
+        return await this._insert(val, id);
+    }
+    async delete(id: string): Promise<unknown> {
+        await this.ensureConnection();
+        return await this._delete(id)
+    }
+    public async exists(id: string): Promise<boolean> {
+        const key = this._getKey(id);
+        await this.ensureConnection();
+
+        return await this._exists(key);
+    }
+
+    async toArray(predicate: (item: T) => boolean = null, limit: number = 100): Promise<T[]> {
+        const result: T[] = [];
+
+        for await (const v of this.iterator()) {
+            if (result.length >= limit) {
+                break;
+            }
+            if (!predicate || predicate(v)) {
+                result.push(v);
+            }
+        }
+        return result;
+    }
+
+
+
+
 }
+

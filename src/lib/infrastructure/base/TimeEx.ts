@@ -42,7 +42,7 @@ export class TimeEx {
     return new TimeEx(Math.ceil(this.ticks / coeff) * coeff);
   }
   public toString() {
-    return this.asDate.toUTCString();
+    return this.asDate.toISOString();
   }
   public get asUTCDate() {
     return this.toString()
