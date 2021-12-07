@@ -40,9 +40,16 @@ export class LightWebHost extends WebHost {
     // if (gg.babak)
     //     _res.statusCode = context.response.statusCode;
   }
-  listen(port: number): Promise<unknown> {
+  listen(port: number, hosts: string[]): Promise<unknown> {
+    (hosts);
     const server = this.createServer(this.listener);
-    server.listen(port);
+    const host = hosts && hosts.length > 0 ? hosts[0] : undefined;
+    //server.listen(port, host);
+    server.listen(port, host, undefined, () => {
+      console.info(`=================================`);
+      console.info(`🚀 App listening on the port ${this.port}`);
+      console.info(`=================================`);
+    });
     return super.listen(port);
   }
   private async handle(ctx: HttpContext): Promise<unknown> {
