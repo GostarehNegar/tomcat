@@ -1,12 +1,15 @@
 
+import { Utils } from '../../common';
 import { config } from '../../config';
-import { ILogger, Logger, CancellationToken } from '../base';
+import { CancellationToken, ILogger, Logger } from '../base';
 import { BackgroundService } from '../hosting';
 
+import { IEndpointInfo } from './IEndpointInfo';
 import { IHandler } from './IHandler';
 import { IMessageBus } from './IMessageBus';
 import { IMessageBusSubscription } from './IMessageBusSubscription';
 import { IMessageContext } from './IMessageContext';
+import { IMessageContract } from './IMessageContract';
 import { IMessageTransport } from './IMessageTransport';
 import { Message } from './Message';
 import { MessageBusSubscription } from './MessageBusSubscription';
@@ -16,16 +19,16 @@ import { MessageContext } from './MessageContext';
 import SystemTopics from './Topics';
 import { WebSocketTransport } from './WebSocketTranstport';
 
-import { Utils } from '../../common';
-import { IEndpointInfo } from './IEndpointInfo';
+
 import { IMessage } from '.';
-import { IMessageContract } from './IMessageContract';
+
 
 type promise_def = {
   resolve: (e: unknown) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reject: (err: any) => void;
   always_resolve?: boolean;
+  cb?: (context: IMessageContext) => boolean
 };
 
 export class MessageBus extends BackgroundService implements IMessageBus {
@@ -143,9 +146,9 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     return this._subscribe(result);
   }
 
-  public createReplyPromise(message: IMessageContext, always_resolve = false): Promise<IMessage> {
+  public createReplyPromise(message: IMessageContext, always_resolve = false, cb?): Promise<IMessage> {
     const result = new Promise<IMessage>((res, err) => {
-      this.promises[message.message.id] = { resolve: res, reject: err, always_resolve: always_resolve };
+      this.promises[message.message.id] = { resolve: res, reject: err, always_resolve: always_resolve, cb: cb };
     });
     return result;
   }
@@ -217,12 +220,15 @@ export class MessageBus extends BackgroundService implements IMessageBus {
       const promise = this.promises[context.message.reply_to];
       if (promise) {
         if (context.message.topic === SystemTopics.reject && !promise.always_resolve) {
+          delete this.promises[context.message.reply_to];
           promise.reject(context.message);
         }
         else {
-          promise.resolve(context.message);
+          if (!promise.cb || promise.cb(context)) {
+            delete this.promises[context.message.reply_to];
+            promise.resolve(context.message);
+          }
         }
-        delete this.promises[context.message.reply_to];
       }
       return Promise.resolve();
     }

@@ -1,9 +1,9 @@
 import { IHandler } from "./IHandler";
 import { IMessageBusSubscription } from "./IMessageBusSubscription";
 import { IMessageContext } from "./IMessageContext";
+import { IMessageContract } from "./IMessageContract";
 
 import { Message } from ".";
-import { IMessageContract } from "./IMessageContract";
 
 /**
  * Represents messaging features.

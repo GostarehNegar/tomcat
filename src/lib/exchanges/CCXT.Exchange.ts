@@ -1,16 +1,19 @@
 import ccxt, { Exchange } from 'ccxt';
-import { IExchange } from './IExchange';
+import fetch from 'node-fetch';
+
 import { CandleStickCollection, CandleStickData, Intervals, Markets, Symbols } from '../common';
 import utils from '../common/Domain.Utils';
 import { Exchanges } from '../common/Exchanges';
 import { ILogger, Ticks, TimeEx } from '../infrastructure/base';
-import fetch from 'node-fetch';
+
+import { IExchange } from './IExchange';
+
 
 const binance_nooce = async () => {
 
     const agent = await utils.getProxy();
-    var resp = await fetch('https://api.binance.com/api/v3/time', { agent: agent })
-    var f = await resp.json();
+    const resp = await fetch('https://api.binance.com/api/v3/time', { agent: agent })
+    const f = await resp.json();
     return f.serverTime;
 
 }
@@ -95,21 +98,21 @@ export class CCXTExchange implements IExchange {
         return this._ccxt_exchange;
     }
     public async hasSymbol(symbol: Symbols): Promise<boolean> {
-        var exchange = await this.getExchange();
+        const exchange = await this.getExchange();
         return (exchange.markets[symbol] != null)
     }
     public async getMarkets() {
-        var exchange = await this.getExchange();
+        const exchange = await this.getExchange();
         return exchange.markets;
     }
     private toCandleStickData(c: ccxt.OHLCV, interval: Intervals) {
-        var m = utils.toMinutes(interval as Intervals) * 60 * 1000 - 1;
+        const m = utils.toMinutes(interval as Intervals) * 60 * 1000 - 1;
         return new CandleStickData(
             c[0], c[1], c[2], c[3], c[4], c[0] + m, c[5]);
     }
     async getBalance() {
         return this.safeCall(async () => {
-            var exchange = await this.getExchange();
+            const exchange = await this.getExchange();
             return await exchange.fetchBalance();
 
         });
@@ -134,7 +137,7 @@ export class CCXTExchange implements IExchange {
 
     async sell(symbol: Symbols, amount: number) {
         return await this.safeCall(async () => {
-            var exchange = await this.getExchange();
+            const exchange = await this.getExchange();
             // var m = await this.getMarkets();
             // const limit = m[symbol].limits;
             // if (amount < limit.amount.min) {
@@ -154,7 +157,7 @@ export class CCXTExchange implements IExchange {
     }
 
     async buy(symbol: Symbols, amount: number, price: number) {
-        var exchange = await this.getExchange();
+        const exchange = await this.getExchange();
         // var m = await this.getMarkets();
         // const limit = m[symbol].limits;
         // if (amount < limit.amount.min) {
@@ -176,8 +179,8 @@ export class CCXTExchange implements IExchange {
         try {
             const coinex = await this.getExchange();
             const server_time = (await this.getCachedServerTime()).ticks;
-            var m = utils.toMinutes(interval as Intervals) * 60 * 1000 - 1;
-            let _start = _startTime;
+            const m = utils.toMinutes(interval as Intervals) * 60 * 1000 - 1;
+            const _start = _startTime;
             // TODO limit =1000 for coinex
             (await coinex.fetchOHLCV(symbol, interval, _start))
                 .forEach(c => {
@@ -204,7 +207,7 @@ export class CCXTExchange implements IExchange {
         const result = new CandleStickCollection([]);
         try {
             const coinex = await this.getExchange();
-            var m = utils.toMinutes(interval as Intervals) * 60 * 1000 - 1;
+            const m = utils.toMinutes(interval as Intervals) * 60 * 1000 - 1;
             let fin = false
             let _start = _startTime;
             const server_time = (await this.getCachedServerTime()).ticks;
@@ -235,7 +238,7 @@ export class CCXTExchange implements IExchange {
         let result: CandleStickData = null;
         try {
             const since = utils.floorTime(utils.ticks(time), utils.toMinutes(interval));
-            var exchange = await this.getExchange();
+            const exchange = await this.getExchange();
 
             const data = (await exchange.fetchOHLCV(symbol, interval, since));
             result = data.map(x => this.toCandleStickData(x, interval))
@@ -254,7 +257,7 @@ export class CCXTExchange implements IExchange {
         try {
             const minutes = utils.toMinutes(interval);
             const since = utils.floorTime(utils.toTimeEx().addMinutes(-3 * minutes).ticks, minutes);
-            var exchange = await this.getExchange();
+            const exchange = await this.getExchange();
             const data = (await exchange.fetchOHLCV(symbol, interval, since, 5))
                 .reverse()
                 .map(x => this.toCandleStickData(x, interval));

@@ -4,7 +4,7 @@ import { config } from '../../config';
 import { IServiceProvider, ServiceProvider } from '../base';
 import { BaseConstants } from '../base/baseconstants';
 import { MessageBus } from '../bus';
-import { MeshNode } from '../mesh/MeshNode';
+import { MeshNode, MeshNodeConfiguration } from '../mesh/MeshNode';
 import { MeshServer } from '../mesh/MeshServer';
 
 
@@ -51,10 +51,13 @@ export class HostBuilder implements IHostBuilder {
     const server = new MeshServer(this.services);
     this.services.register(serviceNames.IHostedService, server);
     this.services.register(serviceNames.MeshServer, server);
+    this.services.register(serviceNames.IServiceDiscovery, server)
     return this
   }
-  addMeshNode(): IHostBuilder {
-    const mesh = new MeshNode(this.services);
+  addMeshNode(cb: (cfg: MeshNodeConfiguration) => void): IHostBuilder {
+    const config: MeshNodeConfiguration = { executeservice: null, queryService: null, serviceCapability: null }
+    cb(config)
+    const mesh = new MeshNode(this.services, config);
     this.services.register(serviceNames.IHostedService, mesh);
     this.services.register(serviceNames.MeshNode, mesh);
 

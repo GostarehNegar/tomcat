@@ -16,7 +16,7 @@ export interface IMessageContext {
      * message topic and body.
      */
     get message(): IMessage; publish(): Promise<void>;
-    execute(always_resolve?: boolean): Promise<IMessage>;
+    execute(cb?: (context: IMessageContext) => boolean, timeout?: number, always_resolve?: boolean): Promise<IMessage>
     /**
      * sends a reply to this message.
      * @param body body of reply. 
