@@ -7,5 +7,6 @@ export interface ILogger {
     error(message?: unknown, ...params: unknown[]);
     debug(message?: unknown, ...params: unknown[]);
     trace(message?: unknown, ...params: unknown[]);
+    criticalInfo(message?: unknown, ...params: unknown[])
     level: LogLevel;
 }

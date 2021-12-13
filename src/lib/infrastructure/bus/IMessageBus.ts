@@ -1,6 +1,7 @@
 import { IHandler } from "./IHandler";
 import { IMessageBusSubscription } from "./IMessageBusSubscription";
 import { IMessageContext } from "./IMessageContext";
+import { IMessageContract } from "./IMessageContract";
 
 import { Message } from ".";
 
@@ -18,7 +19,7 @@ export interface IMessageBus {
      * @param to Optionaly name of the destination endpoint.
      */
     createMessage(
-        topic: string,
+        topic: string | IMessageContract,
         body?: unknown | null,
         to?: string | null,
     ): IMessageContext;

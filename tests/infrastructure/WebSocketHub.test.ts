@@ -125,7 +125,10 @@ describe('WebSocketHub', () => {
         let response3 = null;
         // The first request would work fine!
         const response1 = await client2.bus.createMessage(messageName, 'hi there')
-            .execute();
+            .execute((ctx) => {
+                (ctx);
+                return false
+            });
         await client2.bus.createMessage(messageName, "hi there")
             .execute()
             .then()
@@ -139,7 +142,7 @@ describe('WebSocketHub', () => {
                 response3 = err;
             });
         const response4 = await client2.bus.createMessage(messageName, "hi there")
-            .execute(true)
+            .execute(null, true)
 
         await wait(500);
         //tomcat.utils.getLogger().info(received);
@@ -179,7 +182,7 @@ describe('WebSocketHub', () => {
         // (client2);
         (hub);
         await hub.listen(port);
-        var data = new CandleStickCollection([]);
+        const data = new CandleStickCollection([]);
         for (let i = 0; i < 50000; i++) {
             data.push(new CandleStickData(Date.now() + i * 100, 1, 1, 1, 1, 1, 1, 1, 1));
         }

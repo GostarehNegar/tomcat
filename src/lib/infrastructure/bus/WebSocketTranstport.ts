@@ -61,8 +61,9 @@ export class WebSocketTransport implements IMessageTransport {
   }
   public async _open(): Promise<WebSocket> {
     if (this._ws) return Promise.resolve(this._ws);
+    const ws = new WebSocket(this._config.url);
+    this._ws = ws;
     return new Promise<WebSocket>((resolve, reject) => {
-      const ws = new WebSocket(this._config.url);
       ws.on('open', () => {
         this._ws = ws;
         ws.on('message', (msg) => {

@@ -56,8 +56,8 @@ const app = tomcat
     .getHostBuilder("bot")
     .buildWebHost('express')
     .expressApp;
-const strategyStream = new CandleStream("strategy-BT-02")
-const walletStream = new CandleStream("wallet-BT-02")
+const strategyStream = new CandleStream("strategy-BT-01")
+const walletStream = new CandleStream("wallet-BT-01")
 
 
 

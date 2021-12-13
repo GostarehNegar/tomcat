@@ -2,6 +2,7 @@
 
 import { config } from '../../config';
 import { IServiceProvider } from '../base';
+import { MeshNodeConfiguration, ServiceConstructor, ServiceDefinition } from '../mesh';
 
 import { IHost } from './IHost';
 import { IHostedService } from "./IHostedService";
@@ -14,6 +15,8 @@ import { IWebHost } from './IWebHost';
  * will provide features to the end user.
  *
  */
+
+
 export interface IHostBuilder {
     /**
      * Builds a simple console host.
@@ -35,6 +38,9 @@ export interface IHostBuilder {
     addServices(cb: (s: IServiceProvider) => void): IHostBuilder;
     addRouter(router: unknown): IHostBuilder;
     addWebSocketHub(path?: string): IHostBuilder;
+    addMeshServer(): IHostBuilder;
+    addMeshNode(cb: (cfg: MeshNodeConfiguration) => void): IHostBuilder;
+    addMeshService(serviceDefinition: ServiceDefinition, ctor: ServiceConstructor): IHostBuilder
     addHttp(): IHostBuilder;
     addExpress();
     addMessageBus(cf?: (c: typeof config.messaging) => void): IHostBuilder;

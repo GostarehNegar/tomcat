@@ -1,6 +1,8 @@
 import { ILogger } from "./ILogger";
 
-export type LogLevel = 'log' | 'debug' | 'info' | 'error' | 'warn' | 'trace';
+// import { ServiceProvider } from ".";
+
+export type LogLevel = 'log' | 'debug' | 'info' | 'error' | 'warn' | 'trace' | 'criticalInfo';
 const logLevels = {
   trace: -1,
   debug: 0,
@@ -8,12 +10,16 @@ const logLevels = {
   info: 2,
   warn: 3,
   error: 4,
+  criticalInfo: 5,
 };
 const toNumber = (l: LogLevel) => logLevels[l];
 
 export class Logger implements ILogger {
   public level: LogLevel = 'debug';
   constructor(public name?: string) { }
+  criticalInfo(message?: unknown, ...params: unknown[]) {
+    this.send('criticalInfo', message, params)
+  }
   info(message?: unknown, ...params: unknown[]) {
     this.send('info', message, params);
   }
@@ -34,7 +40,7 @@ export class Logger implements ILogger {
   }
 
   send(
-    level: 'log' | 'debug' | 'info' | 'error' | 'warn' | 'trace',
+    level: 'log' | 'debug' | 'info' | 'error' | 'warn' | 'trace' | 'criticalInfo',
     message?: unknown,
     ...params: unknown[]
   ) {
@@ -68,7 +74,12 @@ export class Logger implements ILogger {
         break;
       case 'error':
         console.error(message, params);
+        break
+      case 'criticalInfo':
+        console.info(message, params)
+        break
     }
+    // ServiceProvider.instance.getBus()?.createMessage(`logger/${level}`, { message: message, params: params }).publish();
   }
 
   private static loggers: Map<string, Logger> = new Map<string, Logger>();

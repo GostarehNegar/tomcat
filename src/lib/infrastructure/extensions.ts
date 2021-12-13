@@ -1,14 +1,14 @@
 
-import { ServiceProvider, IServiceProvider } from './base/ServiceProvider';
-import { IClock, IStopService, IRedisClientFactory, IDistributedCacheService, ISerielizationService } from './services'
-import { IStoreFactory } from './data/IStoreFactory'
-
+import { IServiceProvider, ServiceProvider } from './base/ServiceProvider';
 import { BaseConstants } from './base/baseconstants'
+import { IMessageBus } from './bus';
+import { IStoreFactory } from './data/IStoreFactory'
+import { IServiceDiscovery } from './mesh/IServiceDiscovery';
+import { IClock, IDistributedCacheService, IRedisClientFactory, ISerielizationService, IStopService } from './services'
 const names = BaseConstants.ServiceNames;
 type ServiceTypes = '1' | '2';
 declare module './base/ServiceProvider' {
     interface ServiceProvider {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getBaseService(s: ServiceTypes);
         getClock(): IClock;
         getStop(): IStopService;
@@ -16,9 +16,10 @@ declare module './base/ServiceProvider' {
         getStoreFactory(): IStoreFactory;
         getCacheService(): IDistributedCacheService;
         getSerilizer(): ISerielizationService;
+        getBus(): IMessageBus;
+        getServiceDiscovery(): IServiceDiscovery
     }
     interface IServiceProvider {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getBaseService(s: ServiceTypes);
         getClock(): IClock;
         getStop(): IStopService;
@@ -26,10 +27,12 @@ declare module './base/ServiceProvider' {
         getStoreFactory(): IStoreFactory;
         getCacheService(): IDistributedCacheService;
         getSerilizer(): ISerielizationService;
-
+        getBus(): IMessageBus;
+        getServiceDiscovery(): IServiceDiscovery
     }
 
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ServiceProvider.prototype.getBaseService = function (): any {
     return "";
 };
@@ -52,6 +55,13 @@ ServiceProvider.prototype.getCacheService = function (): IDistributedCacheServic
 ServiceProvider.prototype.getSerilizer = function (): ISerielizationService {
     return (this as IServiceProvider).getService<ISerielizationService>(names.ISerializationService);
 };
+ServiceProvider.prototype.getBus = function (): IMessageBus {
+    return (this as IServiceProvider).getService<IMessageBus>(names.IMessageBus);
+};
+ServiceProvider.prototype.getServiceDiscovery = function (): IServiceDiscovery {
+    return (this as IServiceProvider).getService<IServiceDiscovery>(names.IServiceDiscovery);
+};
+
 
 // ServiceProvider.prototype.getBus() {
 //     return provider.getService<IMessageBus>(names.IMessageBus);

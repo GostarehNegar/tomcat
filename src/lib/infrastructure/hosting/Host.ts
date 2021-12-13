@@ -1,13 +1,13 @@
 
 import { config } from '../../config';
-import { IServiceProvider, CancellationToken } from '../base';
+import { CancellationToken, IServiceProvider } from '../base';
+import registrar from '../base/BaseRegistrar'
 import { IMessageBus } from '../bus';
-
+import { IMeshNode } from '../mesh';
 
 import { IHost } from './IHost';
 import { IHostedService } from './IHostedService';
 import { serviceNames } from './ServerBuilder';
-import registrar from '../base/BaseRegistrar'
 
 export class Host implements IHost {
   private _tasks: IHostedService[] = [];
@@ -23,6 +23,9 @@ export class Host implements IHost {
     this.config = this.services.getService(serviceNames.Config);
     registrar.registerServices();
     // this.bots = new BotCollection(services)
+  }
+  get node(): IMeshNode {
+    return this.services.getService(serviceNames.MeshNode)
   }
   get bus(): IMessageBus {
     return this.services.getService(serviceNames.IMessageBus);

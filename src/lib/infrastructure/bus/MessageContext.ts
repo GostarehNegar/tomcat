@@ -1,9 +1,10 @@
-import { IMessage, IMessageContextHeader } from '.';
 import { IMessageBus } from './IMessageBus';
 import { IMessageContext } from './IMessageContext';
 import { Message } from './Message';
 import { MessageBus } from './MessageBus';
 import SystemTopics from './Topics';
+
+import { IMessage, IMessageContextHeader } from '.';
 
 
 export class MessageContext implements IMessageContext {
@@ -36,11 +37,16 @@ export class MessageContext implements IMessageContext {
       this.scope == 'local'
     );
   }
-  execute(always_resolve = false): Promise<IMessage> {
+  execute(cb?: (context: IMessageContext) => boolean, timeout = 10000, always_resolve = false): Promise<IMessage> {
     this.message.headers.is_request = true;
-    const result = this._bus.createReplyPromise(this, always_resolve) as Promise<IMessage>;
+    const timeoutPromise = new Promise<IMessage>((resolve, reject) => {
+      setTimeout(() => {
+        (always_resolve ? resolve(null) : reject("time out"))
+      }, timeout)
+    })
+    const result = this._bus.createReplyPromise(this, always_resolve, cb) as Promise<IMessage>;
     this.publish();
-    return result;
+    return Promise.race([timeoutPromise, result])
   }
   publish(): Promise<void> {
     return this._bus.publishMessageContext(this);

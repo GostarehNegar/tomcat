@@ -2,6 +2,7 @@
 import { CandleStickData, Signals } from "../common";
 import { Signal } from "../common/Signal";
 // import * as Indicators from "../indicators";
+import * as _Indicators from "../indicators";
 import { baseUtils, Ticks } from "../infrastructure/base";
 import { IFilter, Pipeline } from "../pipes";
 import { Stream } from "../streams";
@@ -10,7 +11,6 @@ import { Wallet } from "../wallet";
 // const isSarAbove: Indicators.IIndicator = {
 
 // import { CandleStickData, States, Symbols } from "../common";
-import * as _Indicators from "../indicators";
 // import { baseUtils, Ticks } from "../infrastructure/base";
 // import { IFilter, Pipeline } from "../pipes";
 // import { Stream } from "../streams";
@@ -163,13 +163,12 @@ export class Bot {
             .add(this.indicators.plusDi)
             .add(isSarAbove)
             .add(adxSlope)
-            .add(stopLossAtr, { stream: true, name: "Indicators" })
+            .add(stopLossAtr, { stream: true, name: "indicators-BT-01" })
             .add(async (candle, THIS) => {
 
                 THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy-BT-01")
-
-                THIS.services.getService("gdyuf")
-                THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy-BT-20")
+                // THIS.services.getService("gdyuf")
+                // THIS.context.stream = THIS.context.stream || new Stream<Strategy>("strategy-BT-20")
 
                 const stream = THIS.context.stream as Stream<Strategy>
                 const res = await strategy(candle)

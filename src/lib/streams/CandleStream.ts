@@ -1,11 +1,11 @@
 import EventEmitter from "events";
+
 import redis from 'redis'
 
 import { CandleStickData } from "../common";
 import utils from "../common/Domain.Utils";
-import { IDataSource } from "../data";
-
 import { IStopCallBack } from "../common/IStopCallBack";
+import { IDataSource } from "../data";
 import { baseUtils, Ticks } from "../infrastructure/base";
 
 import { RedisStream } from "./RedisStream";
@@ -17,6 +17,7 @@ export interface ICandleStream {
     play(cb: (candle: CandleStickData, err) => Promise<boolean>, startTime?: Ticks, timeOut?, count?, generateMissingCandles?);
     start(startTime?: Ticks, cb?: (candle: CandleStickData) => boolean): Promise<void>;
     startEx(startTime?: Ticks, stop?: IStopCallBack);
+    get name(): string
 }
 
 export class CandleStream extends EventEmitter implements ICandleStream {
@@ -28,6 +29,9 @@ export class CandleStream extends EventEmitter implements ICandleStream {
         super()
         this.factory = (n: string) => new RedisStream(n, factory, _stop);
         (this._stop);
+    }
+    get name(): string {
+        return this._streamName
     }
     startEx(startTime?: Ticks, stop?: IStopCallBack) {
         (startTime);
@@ -291,7 +295,7 @@ export class DataSourceStreamEx extends CandleStream implements ICandleStream {
                     : candles.items[0].openTime;
                 candles.populate(utils.ticks(populate_start), utils.ticks(candles.endTime))
                 lastCandle = candles.lastCandle;
-                for (var i = 0; i < candles.length; i++) {
+                for (let i = 0; i < candles.length; i++) {
                     while (true) {
                         let failures = 0;
                         try {

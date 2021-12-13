@@ -1,10 +1,10 @@
 
-import constants from '../../constants';
+import { CancellationToken } from '../base';
+import { BaseConstants } from '../base/baseconstants';
 
 import { BackgroundService } from './BackgroundService';
-import { CancellationToken } from '../base';
 
-export const serviceNames = constants.ServiceNames;
+export const serviceNames = BaseConstants.ServiceNames;
 
 export class SimpleTask extends BackgroundService {
   protected override run(token: CancellationToken): Promise<void> {

@@ -97,7 +97,7 @@ export class WebSocketHub implements IHostedService {
         should_send = should_send &&
           (
             Topics.isSystemTopic(topic) ||
-            receiver.topics.findIndex(x => utils.wildCardMatch(x, topic)) > -1
+            receiver.topics.findIndex(x => utils.wildCardMatch(topic, x)) > -1
           )
       }
       else {
@@ -155,7 +155,7 @@ export class WebSocketHub implements IHostedService {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           payload: any;
         };
-        this.log.info(
+        this.log.debug(
           `WebSocket Received New Message:`, _message);
         switch (_message.method) {
           case messages.publish:

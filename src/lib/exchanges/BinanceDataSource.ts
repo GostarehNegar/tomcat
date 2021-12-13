@@ -1,11 +1,11 @@
 
 
 import { CandleStickCollection, Exchanges, ICandleStickData, Intervals, Markets, Symbols } from '../common';
+import { IStopCallBack } from '../common/IStopCallBack';
 import { IDataSource } from '../data';
 import { baseUtils, Ticks } from '../infrastructure/base';
 
 import { BinanceExchange } from './Binance.Exchange';
-import { IStopCallBack } from '../common/IStopCallBack';
 
 export class BinanceDataSource implements IDataSource {
   public exchange: Exchanges = 'binance';
