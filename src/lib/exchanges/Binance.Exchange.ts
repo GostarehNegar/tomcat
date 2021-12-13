@@ -1,13 +1,13 @@
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import fetch from 'node-fetch';
 
 
 import { CandleStickCollection, CandleStickData, ICandleStickData, Intervals, Markets, Symbols } from '../common';
+import config from '../config';
 import { baseUtils, TimeEx } from '../infrastructure/base';
 import { IHttpContext } from '../infrastructure/hosting';
 
 import { IExchange } from "./IExchange";
-import config from '../config';
-import { HttpsProxyAgent } from 'https-proxy-agent';
 // import HttpsProxyAgent from 'https-proxy-agent/dist/agent';
 const api = (_api: string) => 'https://api.binance.com/api/v3/' + _api;
 

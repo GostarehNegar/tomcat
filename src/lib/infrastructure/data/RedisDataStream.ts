@@ -3,6 +3,7 @@
 import { baseUtils, IServiceProvider, Ticks } from "../base";
 import { ISerielizationService, RedisClient } from "../services";
 import { RedisClientOptions } from "../services/RedisClientOptions";
+
 import { IDataStream, IStreamInfo } from "./IDataSream";
 type decoded = {
     id: string,
@@ -19,6 +20,9 @@ export class RedisDataStream<T> implements IDataStream<T>{
         this.serializer = this.serviceProvider.getSerilizer();
 
         (this.client);
+    }
+    dispose() {
+        this.client.quit()
     }
     async _listenForMessage(lastId = "$", cb: (item: T, time: Ticks) => boolean, client: RedisClient) {
         // `results` is an array, each element of which corresponds to a key.

@@ -47,4 +47,10 @@ export function serviceOrder(serviceDefinition: ServiceDefinition): Contract<ser
         payload: { serviceDefinition: serviceDefinition }
     }
 }
+export function requireService(serviceDefinition: ServiceDefinition): Contract<ServiceDefinition> {
+    return {
+        topic: ServiceCommandContract("requireservice"),
+        payload: serviceDefinition
+    }
+}
 

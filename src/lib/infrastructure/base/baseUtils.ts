@@ -1,17 +1,19 @@
 
 import HttpsProxyAgent from 'https-proxy-agent/dist/agent';
-import httpsAgent, { Agent } from 'node:https';
 import fetch from 'node-fetch';
+import { randomUUID } from 'node:crypto';
+import httpsAgent, { Agent } from 'node:https';
 import ping from 'ping'
 
-import { ILogger } from './ILogger';
-import { Ticks, TimeEx, TimeSpan } from './TimeEx';
-import { Logger } from './logger';
 import config from '../../config';
-import { randomUUID } from 'node:crypto';
+
+import { ILogger } from './ILogger';
 import provider from './ServiceProvider'
-import { Exception, KnownExceptions } from './exception'
 import ServiceProvider from './ServiceProvider';
+import { Ticks, TimeEx, TimeSpan } from './TimeEx';
+import { Exception, KnownExceptions } from './exception'
+import { Logger } from './logger';
+
 (provider);
 export class BaseUtils {
   public test(): string {
@@ -88,6 +90,9 @@ export class BaseUtils {
     });
   }
   public wildCardMatch(str, rule) {
+    if (!rule) {
+      return false
+    }
     const escapeRegex = (str) =>
       //eslint-disable-next-line no-useless-escape
       str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');

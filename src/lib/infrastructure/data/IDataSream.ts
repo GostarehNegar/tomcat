@@ -17,4 +17,5 @@ export interface IDataStream<T> {
     getInfo(): Promise<IStreamInfo>;
     getFirst(): Promise<T>;
     getLast(): Promise<T>;
+    dispose()
 }

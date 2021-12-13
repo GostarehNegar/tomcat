@@ -8,4 +8,5 @@ export * as Exchange from "../exchanges"
 export * as Indicators from '../indicators'
 export * as Streams from '../streams'
 export * as Pipes from '../pipes'
+export * as Contracts from '../contracts'
 export const Services = _domain;

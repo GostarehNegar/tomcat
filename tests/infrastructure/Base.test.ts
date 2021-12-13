@@ -39,6 +39,7 @@ describe('Logger', () => {
         (logger);
         (logger2);
         logger.log("hi", logger2)
+        logger.criticalInfo("hello from logger")
 
 
 
@@ -100,8 +101,8 @@ describe('clock', () => {
             const client = tomcat.services.getRedisFactory().createClient({});
             const f = tomcat.utils.getClassName(client);
             (f);
-            var funcNameRegex = /function (.{1,})\(/;
-            var results = (funcNameRegex).exec((client).constructor.toString());
+            const funcNameRegex = /function (.{1,})\(/;
+            const results = (funcNameRegex).exec((client).constructor.toString());
             const n1 = (results && results.length > 1) ? results[1] : "";
             const n = client.constructor.toString();
             console.log(n);
@@ -123,9 +124,9 @@ describe('clock', () => {
     describe('store', () => {
         test('crud', async () => {
             type record = { firstName: string, id: string };
-            const store = tomcat.services.getStoreFactory().createStore('redis');
+            const store = tomcat.services.getStoreFactory().createStore({ provider: 'redis' });
             const repo_name = `contacts_${(Math.random() * 1000).toFixed()}`;
-            var repo = store.getRepository<record>(repo_name);
+            const repo = store.getRepository<record>(repo_name);
 
             expect((await repo.toArray()).length).toBe(0);
             await utils.delay(10);

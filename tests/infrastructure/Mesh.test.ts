@@ -1,10 +1,19 @@
 import tomcat from "../../src";
-import { ServiceDefinition } from "../../src/lib/infrastructure/mesh";
+import { IMeshService, matchService, ServiceDefinition, ServiceInformation } from "../../src/lib/infrastructure/mesh";
 
+
+class myService implements IMeshService {
+    getInformation(): ServiceInformation {
+        return { category: "data", parameters: { interval: "15m", exchange: "coinex" } }
+    }
+    async start() {
+        return null
+    }
+}
 jest.setTimeout(80000)
 describe('Mesh', () => {
     test('heartbeat', async () => {
-        const port = 8081;
+        const port = 8082;
         const hub = tomcat.hosts.getHostBuilder('hub')
             .addWebSocketHub()
             .buildWebHost();
@@ -16,30 +25,33 @@ describe('Mesh', () => {
             .addMeshServer()
 
             .buildWebHost();
-        const services: ServiceDefinition[] = [{ category: "data", parameters: { interval: "15m", exchange: "binance" } }]
+        // const services: ServiceDefinition[] = [{ category: "data", parameters: { interval: "15m", exchange: "binance" } }]
         const client1 = tomcat.hosts.getHostBuilder('client1')
             .addMessageBus(cfg => {
                 cfg.endpoint = "clinet";
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
-            .addMeshNode((cfg) => {
-                cfg.queryService = () => services
+            .addMeshService({ category: "data", parameters: { interval: "15m", exchange: "binance" } }, null)
+            // .addMeshNode((cfg) => {
+            //     cfg.queryService = () => services
 
-            })
+            // })
             .build();
-        const services2: ServiceDefinition[] = [{ category: "data", parameters: { interval: "15m", exchange: "coinex" } }]
+        // const services2: ServiceDefinition[] = [{ category: "data", parameters: { interval: "15m", exchange: "coinex" } }]
         const client2 = tomcat.hosts.getHostBuilder('client2')
             .addMessageBus(cfg => {
                 cfg.endpoint = "clinet2";
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
-            .addMeshNode((cfg) => {
-                cfg.queryService = () => services2
-            })
+            .addMeshService({ category: "data", parameters: { interval: "15m", exchange: "coinex" } }, () => new myService())
+            // .addMeshNode((cfg) => {
+            //     cfg.queryService = () => services2
+            // })
             .build();
+        client2.node.startService({ category: "data", parameters: { interval: "15m", exchange: "coinex" } })
 
         await hub.listen(port);
-        // await tomcat.utils.delay(1000);
+        // await tomcat.utils.delay(5000);
         await server.start();
         // await tomcat.utils.delay(1000);
         await client1.start()
@@ -48,7 +60,7 @@ describe('Mesh', () => {
         const meshServer = server.services.getService<tomcat.Infrastructure.Mesh.MeshServer>(tomcat.constants.Infrastructure.ServiceNames.MeshServer)
         const discoveryService = server.services.getServiceDiscovery();
         expect(meshServer.meshState.runningNodes.size).toBe(2)
-        expect((await discoveryService.discover({ 'category': "data", parameters: { interval: "15m" } })).length).toBe(2)
+        expect((await discoveryService.discover({ 'category': "data", parameters: { interval: "15m" } })).length).toBe(1)
         expect((await discoveryService.discover({ 'category': "data", parameters: {} })).length).toBe(2)
         expect((await discoveryService.discover({ 'category': "data", parameters: { exchange: "binance" } })).length).toBe(1)
         expect((await discoveryService.discover({ 'category': 'strategy', parameters: {} })).length).toBe(0)
@@ -138,4 +150,12 @@ describe('Mesh', () => {
 
 
     });
+    test("match", () => {
+        expect(matchService({ category: 'data', parameters: { "interval": '15m' } }, { category: 'data', parameters: {} })).toBe(true)
+        expect(matchService({ category: 'data', parameters: { "interval": '15m' } }, { category: 'data', parameters: { "interval": "30m" } })).toBe(false)
+        expect(matchService({ category: 'data', parameters: { "interval": '30m' } }, { category: 'data', parameters: { "interval": "30m", "exchange": "binance" } })).toBe(true)
+        expect(matchService({ category: 'data', parameters: { "interval": '15m' } }, { category: 'indicator', parameters: {} })).toBe(false)
+        expect(matchService({ category: 'data', parameters: { "interval": '15m' } }, { category: 'data', parameters: { interval: "*m" } })).toBe(true)
+
+    })
 });

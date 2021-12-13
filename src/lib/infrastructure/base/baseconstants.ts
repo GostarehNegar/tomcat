@@ -20,7 +20,8 @@ export const BaseConstants = {
         'IWebHost': 'IWebHost',
         'MeshServer': 'MeshServer',
         'MeshNode': 'MeshNode',
-        'IServiceDiscovery': 'IServiceDiscovery'
+        'IServiceDiscovery': 'IServiceDiscovery',
+        'ServiceDescriptor': 'ServiceDescriptor'
 
 
     }

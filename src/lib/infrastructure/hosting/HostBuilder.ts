@@ -4,6 +4,7 @@ import { config } from '../../config';
 import { IServiceProvider, ServiceProvider } from '../base';
 import { BaseConstants } from '../base/baseconstants';
 import { MessageBus } from '../bus';
+import { ServiceConstructor, ServiceDefinition } from '../mesh';
 import { MeshNode, MeshNodeConfiguration } from '../mesh/MeshNode';
 import { MeshServer } from '../mesh/MeshServer';
 
@@ -47,6 +48,13 @@ export class HostBuilder implements IHostBuilder {
     this.services.register(serviceNames.IMessageBus, bus);
     return this;
   }
+  addMeshService(serviceDefinition: ServiceDefinition, ctor: ServiceConstructor) {
+    this.services.register(serviceNames.ServiceDescriptor, { serviceDefinition: serviceDefinition, serviceConstructor: ctor })
+    const mesh = new MeshNode(this.services, null);
+    this.services.register(serviceNames.MeshNode, mesh);
+    this.services.register(serviceNames.IHostedService, mesh);
+    return this
+  }
   addMeshServer(): IHostBuilder {
     const server = new MeshServer(this.services);
     this.services.register(serviceNames.IHostedService, server);
@@ -55,7 +63,7 @@ export class HostBuilder implements IHostBuilder {
     return this
   }
   addMeshNode(cb: (cfg: MeshNodeConfiguration) => void): IHostBuilder {
-    const config: MeshNodeConfiguration = { executeservice: null, queryService: null, serviceCapability: null }
+    const config: MeshNodeConfiguration = { executeservice: null, queryService: null, serviceCapability: null, runningServices: [], serviceDefinitions: [], serviceFactory: null }
     cb(config)
     const mesh = new MeshNode(this.services, config);
     this.services.register(serviceNames.IHostedService, mesh);

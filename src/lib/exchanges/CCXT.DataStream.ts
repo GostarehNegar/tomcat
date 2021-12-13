@@ -1,13 +1,15 @@
 
 
 import { clearIntervalAsync, setIntervalAsync } from "set-interval-async/dynamic";
+
 import { CandleStickCollection, CandleStickData, Exchanges, ICandleStickData, Intervals } from "../common";
 import { Markets, Symbols } from "../common";
 import utils from "../common/Domain.Utils";
+import { IStopCallBack } from "../common/IStopCallBack";
 import { IDataSource } from "../data";
 import { ILogger, Ticks, TimeEx } from "../infrastructure/base";
+
 import { CCXTExchange } from "./CCXT.Exchange";
-import { IStopCallBack } from "../common/IStopCallBack";
 
 export class CCXTDataStream implements IDataSource {
 
@@ -34,7 +36,7 @@ export class CCXTDataStream implements IDataSource {
         stop?: IStopCallBack) {
         const intervalMinutest = utils.toMinutes(this.interval);
         let _start = utils.toTimeEx(utils.ticks(start));
-        let time_inter_val = 100;
+        const time_inter_val = 100;
         let _stop = false;
         let _next_tick = 0;
         let _number_of_failures = 0;
@@ -127,7 +129,7 @@ export class CCXTDataStream implements IDataSource {
         stop?: IStopCallBack) {
         const intervalMinutest = utils.toMinutes(this.interval);
         let _start = utils.toTimeEx(utils.ticks(start));
-        let time_inter_val = 100;
+        const time_inter_val = 100;
         let _stop = false;
         let _next_tick = 0;
         let _number_of_failures = 0;
@@ -218,10 +220,11 @@ export class CCXTDataStream implements IDataSource {
 
     public async playSync(cb: (candle: CandleStickData) => void,
         start?: Ticks,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stop?: (arg: { err: any, time: TimeEx, failures: number }) => boolean) {
         const intervalMinutest = utils.toMinutes(this.interval);
         let _start = utils.toTimeEx(utils.ticks(start));
-        let time_inter_val = 100;
+        const time_inter_val = 100;
         let _stop = false;
         let _next_tick = 0;
         let _number_of_failures = 0;
@@ -298,11 +301,6 @@ export class CCXTDataStream implements IDataSource {
             }, time_inter_val);
 
         });
-
-
-
-
-
     }
 }
 

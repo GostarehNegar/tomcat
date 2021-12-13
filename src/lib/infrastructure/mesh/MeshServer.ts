@@ -35,7 +35,6 @@ export class MeshServer extends BackgroundService implements IServiceDiscovery {
             }
         } catch (err) {
             console.error(err);
-
         }
         return null
     }
@@ -67,6 +66,9 @@ export class MeshServer extends BackgroundService implements IServiceDiscovery {
         this.bus.subscribe(contracts.NodeStatusEvent('*', null).topic, async (ctx) => {
             await this.handleNodeStatusPayload(ctx);
         });
+        this.bus.subscribe(contracts.requireService(null).topic, async (ctx) => {
+            await ctx.reply(await this.executeService(ctx.message.cast<ServiceDefinition>()))
+        })
         await super.start();
     }
     async stop(): Promise<void> {

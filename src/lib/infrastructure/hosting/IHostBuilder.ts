@@ -2,7 +2,7 @@
 
 import { config } from '../../config';
 import { IServiceProvider } from '../base';
-import { MeshNodeConfiguration } from '../mesh';
+import { MeshNodeConfiguration, ServiceConstructor, ServiceDefinition } from '../mesh';
 
 import { IHost } from './IHost';
 import { IHostedService } from "./IHostedService";
@@ -40,7 +40,7 @@ export interface IHostBuilder {
     addWebSocketHub(path?: string): IHostBuilder;
     addMeshServer(): IHostBuilder;
     addMeshNode(cb: (cfg: MeshNodeConfiguration) => void): IHostBuilder;
-
+    addMeshService(serviceDefinition: ServiceDefinition, ctor: ServiceConstructor): IHostBuilder
     addHttp(): IHostBuilder;
     addExpress();
     addMessageBus(cf?: (c: typeof config.messaging) => void): IHostBuilder;

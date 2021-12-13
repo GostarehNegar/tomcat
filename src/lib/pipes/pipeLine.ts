@@ -1,4 +1,5 @@
 import { Exchanges, Intervals, Markets, Symbols } from "../common";
+import { IStopCallBack } from "../common/IStopCallBack";
 import { DataSourceFactory } from "../data";
 import { IIndicator } from "../indicators";
 import { baseUtils, IServiceProvider, Ticks } from "../infrastructure/base";
@@ -10,7 +11,6 @@ import { IFilterOptions } from "./IFilterOptions";
 import { Filter } from "./filter";
 import { PipelineContext } from "./pipelineContext";
 
-import { IStopCallBack } from "../common/IStopCallBack";
 (DataSourceStream);
 
 
@@ -115,7 +115,7 @@ export class Pipeline implements IPipeline {
 
             });
         }
-        for (var i = 0; i < promises.length; i++) {
+        for (let i = 0; i < promises.length; i++) {
             try {
                 await promises[i];
             }

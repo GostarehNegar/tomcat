@@ -32,7 +32,7 @@ type promise_def = {
 };
 
 export class MessageBus extends BackgroundService implements IMessageBus {
-  public name = 'MessageBus';
+  public nodeName = 'MessageBus';
   protected run(token: CancellationToken): Promise<void> {
     token;
     return Promise.resolve();
@@ -149,6 +149,11 @@ export class MessageBus extends BackgroundService implements IMessageBus {
   public createReplyPromise(message: IMessageContext, always_resolve = false, cb?): Promise<IMessage> {
     const result = new Promise<IMessage>((res, err) => {
       this.promises[message.message.id] = { resolve: res, reject: err, always_resolve: always_resolve, cb: cb };
+      setTimeout(() => {
+        if (this.promises[message.message.id]) {
+          delete this.promises[message.message.id]
+        }
+      }, 1 * 60 * 1000)
     });
     return result;
   }
