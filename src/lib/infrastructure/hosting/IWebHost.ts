@@ -4,7 +4,7 @@ import { IHost } from './IHost';
 import { IHttpHandler } from "./IHttpHandler";
 
 export interface IWebHost extends IHost {
-    listen(port?: number): Promise<unknown>;
+    listen(port?: number, hosts?: string[]): Promise<unknown>;
     get port(): number | string | null; expressApp: express.Application;
     close(): Promise<unknown>;
     use(

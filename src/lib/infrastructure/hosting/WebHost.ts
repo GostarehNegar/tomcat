@@ -41,9 +41,10 @@ export class WebHost extends Host implements IWebHost {
   protected createContext(req: any, res: any): HttpContext {
     return new HttpContext(req, res);
   }
-  async listen(port?: number): Promise<unknown> {
+  async listen(port?: number, hosts?: string[]): Promise<unknown> {
     port;
     this.port = port;
+    (hosts);
     this.peers.setSelf(this.getHostUrl());
     await this.start();
     return this;
@@ -77,6 +78,7 @@ export class WebHost extends Host implements IWebHost {
       return this.httpServer;
     }
     this.listener = (listener || this.listener).bind(this);
+
     this.httpServer = http.createServer(
       {
         IncomingMessage: HttpRequest,

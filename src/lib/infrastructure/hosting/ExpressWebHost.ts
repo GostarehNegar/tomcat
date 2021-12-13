@@ -22,6 +22,7 @@ class ExpressWebHost extends WebHost {
   constructor(name: string, services: IServiceProvider, routes?: Router[]) {
     super(name, services);
     this.expressApp = express();
+
     this.port = process.env.PORT || 3000;
     this.env = process.env.NODE_ENV || 'development';
     this.initializeMiddlewares();
@@ -35,12 +36,14 @@ class ExpressWebHost extends WebHost {
     //this.initializeErrorHandling();
   }
 
-  public listen(port?: number): Promise<unknown> {
+  public listen(port?: number, hosts?: string[]): Promise<unknown> {
     //this.port = process.env.PORT || 3000;
+    (hosts);
     this.port = port || process.env.PORT || 3000;
     const server = this.createServer(this.expressApp);
+    const host = hosts && hosts.length > 0 ? hosts[0] : undefined;
     //super.start()
-    server.listen(this.port, () => {
+    server.listen(port, host, undefined, () => {
       console.info(`=================================`);
       console.info(`======= ENV: ${this.env} =======`);
       console.info(`🚀 App listening on the port ${this.port}`);
