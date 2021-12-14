@@ -4,7 +4,6 @@ const port = 8082;
 const hub = tomcat.hosts.getHostBuilder('hub')
     .addWebSocketHub()
     .buildWebHost('express')
-    .expressApp;
 
 
 const server = tomcat.hosts.getHostBuilder('server')
@@ -16,9 +15,10 @@ const server = tomcat.hosts.getHostBuilder('server')
     .buildWebHost();
 
 // hub.get()
-hub.get("/gettime", (req, res) => {
+const app = hub.expressApp
+app.get("/ping", (req, res) => {
     (req);
-    res.send(Date.now())
+    res.send(Date.now().toString())
     res.end()
 })
 hub.listen(port)
