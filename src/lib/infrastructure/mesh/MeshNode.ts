@@ -2,7 +2,7 @@ import { baseUtils, CancellationToken, IServiceProvider } from "../base";
 import { BaseConstants } from "../base/baseconstants";
 import { IMessageBus } from "../bus";
 import * as contracts from '../contracts';
-import { queryServiceCapabilityReply, queryServicePayload } from "../contracts";
+import { queryServiceCapabilityReply, queryServicePayload, serviceOrderPayload } from "../contracts";
 import { BackgroundService } from "../hosting";
 
 import { ServiceDefinition, ServiceDescriptor } from "./ServiceDefinition";
@@ -86,8 +86,9 @@ export class MeshNode extends BackgroundService implements IMeshNode {
             }
         })
         await this._bus.subscribe(contracts.serviceOrder(null).topic, async (ctx) => {
-            const msg = ctx.message.cast<ServiceDefinition>()
-            this.startService(msg)
+            const msg = ctx.message.cast<serviceOrderPayload>()
+            const res = await this.startService(msg.serviceDefinition)
+            ctx.reply(res)
         })
         await super.start();
     }

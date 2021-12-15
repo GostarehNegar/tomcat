@@ -1,10 +1,12 @@
 import HttpsProxyAgent from 'https-proxy-agent/dist/agent';
+import fetch from 'node-fetch';
 import httpsAgent, { Agent } from 'node:https';
+
 import { Utils } from '../../common';
 import { baseUtils, CancellationToken, ILogger } from '../base';
-import fetch from 'node-fetch';
 import cfg from '../base/baseconfig';
 import { BackgroundService } from '../hosting';
+
 import { IInternetService } from './IInternetService';
 const config = cfg.internet;
 
