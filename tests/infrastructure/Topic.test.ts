@@ -1,5 +1,5 @@
 import tomcat from "../../src"
-import ServiceProvider from "../../src/lib/infrastructure/base/ServiceProvider";
+import ServiceProvider from "../../src/infrastructure/base/ServiceProvider";
 
 //const MessageTopic = tomcat.Infrastructure.Bus.MessageTopic
 

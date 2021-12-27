@@ -24,7 +24,7 @@ describe('indicators', () => {
                     pipeline.stop()
                 }
             })
-        pipeline.start(tomcat.utils.toTimeEx(time).addMinutes(-300))
+        pipeline.startEx(tomcat.utils.toTimeEx(time).addMinutes(-300))
 
         await tomcat.utils.delay(3000 * 1000)
         expect(resCandle.indicators.getNumberValue(Indicators.ADX(14, 200, '1m'))).toBeCloseTo(17.3524, 4)
@@ -105,5 +105,13 @@ describe('indicators', () => {
         pipeline.start(sTime);
         await tomcat.utils.delay(5000 * 1000);
         (resCandle)
+    })
+    test("speed", async () => {
+        const pipeline = new Pipeline()
+        const sTime = tomcat.utils.toTimeEx(Date.UTC(2021, 1, 1, 0, 0, 0, 0))
+        pipeline.from('binance', 'spot', 'BTCUSDT', '1m', tomcat.utils.randomName("source"));
+        pipeline.startEx(sTime);
+        await tomcat.utils.delay(5000 * 1000);
+
     })
 })

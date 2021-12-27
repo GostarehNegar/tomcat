@@ -1,4 +1,5 @@
 import tomcat from '../src'
+import { Pipeline } from '../src/pipes'
 
 const BinanceDataSource = tomcat.Domain.Exchange.BinanceDataSource
 const DataSourceStream = tomcat.Domain.Streams.DataSourceStream
@@ -126,5 +127,9 @@ describe("redis", () => {
         // const streamLastCandle = await target.getLastCandle()
         // const dataSourceLastCandle = await myDataProvider.getLatestCandle()
         // expect(streamLastCandle.openTime).toBe(dataSourceLastCandle.openTime)
+    })
+    test("pipeline", async () => {
+        const pipeline = new Pipeline()
+        pipeline.fromStream("")
     })
 })
