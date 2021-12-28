@@ -128,6 +128,12 @@ export class MessageBus extends BackgroundService implements IMessageBus {
           `Error: '${err}'`)
       }
     }
+    Logger.registerListner((level, message, args) => {
+      (args)
+      if (level == "criticalInfo") {
+        this.createMessage("loggs/critical", message).publish()
+      }
+    })
     this._logger.info(
       `MessageBus successfullys started at Endpoint:'${this.endpoint}'. Transports:'${success_names}' `);
   }

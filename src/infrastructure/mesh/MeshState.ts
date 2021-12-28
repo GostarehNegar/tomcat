@@ -1,11 +1,15 @@
+import { baseUtils } from '../base'
 import * as contracts from '../contracts'
-
 
 import { matchService, ServiceDefinition, ServiceInformation } from '.'
 export class MeshState {
     public runningNodes = new Map<string, contracts.NodeStatusPayload>()
+    public logger = baseUtils.getLogger("MeshState")
     addNode(status: contracts.NodeStatusPayload, node: string) {
         status.timestamp = Date.now()
+        if (!this.runningNodes.has(node)) {
+            this.logger.info(`a new node was detected, name: ${node}`)
+        }
         this.runningNodes.set(node, status)
     }
     async queryServices(definition: ServiceDefinition): Promise<ServiceInformation[]> {
@@ -19,6 +23,9 @@ export class MeshState {
             })
         })
         return res
+    }
+    disposeNode() {
+        //implement
     }
     // match(a: ServiceDefinition, b: ServiceDefinition) {
 

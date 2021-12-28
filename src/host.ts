@@ -2,7 +2,8 @@ import { Contracts } from "./infrastructure";
 import { ServiceCategories } from "./infrastructure/mesh";
 
 import tomcat from ".";
-
+tomcat.Infrastructure.Base.Logger.level = 'debug'
+tomcat.Infrastructure.Base.Logger.getLogger("WebSocketHub").level = 'info'
 const port = 8082;
 const hub = tomcat.getHostBuilder('hub')
     .addWebSocketHub()
@@ -57,7 +58,7 @@ app.get("/proxyex", async (req, res) => {
 })
 app.get("/arshia", async (req, res) => {
     const bus = server.services.getBus()
-    bus.createMessage(Contracts.serviceOrder({ category: 'strategy', parameters: req.query })).execute(undefined, 5 * 60 * 1000,true)
+    bus.createMessage(Contracts.serviceOrder({ category: 'strategy', parameters: req.query })).execute(undefined, 5 * 60 * 1000, true)
     res.send("done!")
     res.end()
 })

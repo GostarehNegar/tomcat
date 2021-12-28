@@ -1,4 +1,4 @@
-import { baseUtils, CancellationToken, IServiceProvider } from "../base";
+import { baseUtils, CancellationToken, ILogger, IServiceProvider } from "../base";
 import { BaseConstants } from "../base/baseconstants";
 import { IMessageBus } from "../bus";
 import * as contracts from '../contracts';
@@ -36,25 +36,39 @@ export class MeshNode extends BackgroundService implements IMeshNode {
     public runningServices: IMeshService[] = []
     private _bus: IMessageBus;
     public nodeName: string;
+    public logger: ILogger
     constructor(private serviceProvider: IServiceProvider, private config: MeshNodeConfiguration) {
         super();
+        this.logger = baseUtils.getLogger("MeshNode")
         this.serviceDescriptors = this.serviceProvider.getServices<ServiceDescriptor>(BaseConstants.ServiceNames.ServiceDescriptor)
         this.config = this.config || { executeservice: null, queryService: null, runningServices: null, serviceCapability: null, serviceDefinitions: null, serviceFactory: null }
     }
     async startService(serviceDefinition: ServiceDefinition): Promise<ServiceInformation> {
+        const stringifiedServiceDefinition = JSON.stringify(serviceDefinition)
+        this.logger.debug(`a new service order is recieved for ${stringifiedServiceDefinition}`)
+        let startServiceResult;
         if (this.serviceDescriptors.length > 0) {
             const availability = this.serviceDescriptors.filter((x) => matchService(serviceDefinition, x.serviceDefinition))
+            this.logger.debug(`${availability.length} services where matched with the required service definition`)
             if (availability.length > 0) {
-                const service = availability[0].serviceConstructor(serviceDefinition)
-                await service.start()
-                this.runningServices.push(service)
-                return service.getInformation()
+                this.logger.debug(`starting the first available service`)
+                try {
+                    const service = availability[0].serviceConstructor(serviceDefinition)
+                    await service.start()
+                    if (!this.runningServices.find(x => x.Id == service.Id)) {
+                        this.runningServices.push(service)
+                    }
+                    startServiceResult = service.getInformation()
+                } catch (err) {
+                    this.logger.error(`an error occoured while trying to start service error: ${err}`)
+                }
             }
         }
-        return null
+        startServiceResult ? this.logger.debug(`service was spawned with information ${JSON.stringify(startServiceResult)}`)
+            : this.logger.debug(`no available services where found for ${stringifiedServiceDefinition}`)
+        return startServiceResult
     }
     protected async run(token: CancellationToken): Promise<void> {
-
         while (!token.isCancelled) {
             await baseUtils.delay(3 * 1000);
             await this._bus.createMessage(
@@ -89,12 +103,16 @@ export class MeshNode extends BackgroundService implements IMeshNode {
             if (ctx.message.from !== this._bus.endpoint) {
                 const msg = ctx.message.cast<serviceOrderPayload>()
                 const res = await this.startService(msg.serviceDefinition)
-                if(res){
+                if (res) {
                     ctx.reply(res)
                 }
             }
         })
         await super.start();
+        this.logger.info(`a new mesh node is spawning, name : ${this.nodeName}, which provides these services:`)
+        this.serviceDescriptors.forEach(x => {
+            this.logger.info(JSON.stringify(x.serviceDefinition))
+        })
     }
     async stop() {
         await super.stop();

@@ -13,7 +13,9 @@ const logLevels = {
   criticalInfo: 5,
 };
 const toNumber = (l: LogLevel) => logLevels[l];
-
+export interface ILoggerListener {
+  (level: LogLevel, message?: unknown, ...params: unknown[]): void
+}
 export class Logger implements ILogger {
   public level: LogLevel = 'debug';
   constructor(public name?: string) { }
@@ -51,32 +53,32 @@ export class Logger implements ILogger {
     if (toNumber(level) < toNumber(this.level)) {
       return;
     }
+    Logger.listners.forEach(x => {
+      x(level, message, params)
+    })
     message = `${this.name}: ${message}`;
-
+    const noParams = params.length == 1 && (params[0] as unknown[]).length == 0
     switch (level) {
       case 'trace':
-        console.trace(message, params);
+        noParams ? console.trace(message) : console.trace(message, params)
         break;
       case 'log':
-        console.log(message, params);
+        noParams ? console.log(message) : console.log(message, params)
         break;
       case 'debug':
-        console.debug(message, params);
+        noParams ? console.debug(message) : console.debug(message, params)
         break;
       case 'info':
-        if (params)
-          console.info(message, params);
-        else
-          console.info(message);
+        noParams ? console.info(message) : console.info(message, params)
         break;
       case 'warn':
-        console.warn(message, params);
+        noParams ? console.warn(message) : console.warn(message, params)
         break;
       case 'error':
-        console.error(message, params);
+        noParams ? console.error(message) : console.error(message, params)
         break
       case 'criticalInfo':
-        console.info(message, params)
+        noParams ? console.info(message) : console.info(message, params)
         break
     }
     // ServiceProvider.instance.getBus()?.createMessage(`logger/${level}`, { message: message, params: params }).publish();
@@ -94,4 +96,8 @@ export class Logger implements ILogger {
   }
   public static disabled = false;
   public static level: LogLevel = 'info';
+  public static listners: ILoggerListener[] = []
+  public static registerListner(cb: ILoggerListener) {
+    this.listners.push(cb)
+  }
 }

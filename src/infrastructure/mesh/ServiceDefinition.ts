@@ -5,6 +5,7 @@ export type ServiceCategories = "data" | "indicator" | "strategy" | "telegram" |
 export interface IMeshService {
     getInformation(): ServiceInformation
     start(): Promise<unknown>
+    Id: string
 }
 
 export interface ServiceConstructor {
@@ -16,6 +17,9 @@ export interface IServiceDefinitionParameters {
 export class ServiceDefinitionBase<T extends IServiceDefinitionParameters> {
     public category: ServiceCategories
     public parameters: T = {} as T
+    toString() {
+        return JSON.stringify(this)
+    }
 }
 export class ServiceDefinition extends ServiceDefinitionBase<IServiceDefinitionParameters> {
 }
