@@ -3,8 +3,9 @@ import { IMeshService, matchService, ServiceDefinition, ServiceInformation } fro
 
 
 class myService implements IMeshService {
+    Id: string;
     getInformation(): ServiceInformation {
-        return { category: "data", parameters: { interval: "15m", exchange: "coinex" } }
+        return { category: "data", parameters: { interval: "15m", exchange: "coinex" }, status: 'start' }
     }
     async start() {
         return null
@@ -14,10 +15,10 @@ jest.setTimeout(80000)
 describe('Mesh', () => {
     test('heartbeat', async () => {
         const port = 8082;
-        const hub = tomcat.hosts.getHostBuilder('hub')
+        const hub = tomcat.getHostBuilder('hub')
             .addWebSocketHub()
             .buildWebHost();
-        const server = tomcat.hosts.getHostBuilder('server')
+        const server = tomcat.getHostBuilder('server')
             .addMessageBus(cfg => {
                 cfg.endpoint = 'server'
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
@@ -26,7 +27,7 @@ describe('Mesh', () => {
 
             .buildWebHost();
         // const services: ServiceDefinition[] = [{ category: "data", parameters: { interval: "15m", exchange: "binance" } }]
-        const client1 = tomcat.hosts.getHostBuilder('client1')
+        const client1 = tomcat.getHostBuilder('client1')
             .addMessageBus(cfg => {
                 cfg.endpoint = "clinet";
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
@@ -38,7 +39,7 @@ describe('Mesh', () => {
             // })
             .build();
         // const services2: ServiceDefinition[] = [{ category: "data", parameters: { interval: "15m", exchange: "coinex" } }]
-        const client2 = tomcat.hosts.getHostBuilder('client2')
+        const client2 = tomcat.getHostBuilder('client2')
             .addMessageBus(cfg => {
                 cfg.endpoint = "clinet2";
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
@@ -67,10 +68,10 @@ describe('Mesh', () => {
     });
     test('queryService', async () => {
         const port = 8081;
-        const hub = tomcat.hosts.getHostBuilder('hub')
+        const hub = tomcat.getHostBuilder('hub')
             .addWebSocketHub()
             .buildWebHost();
-        const server = tomcat.hosts.getHostBuilder('server')
+        const server = tomcat.getHostBuilder('server')
             .addMessageBus(cfg => {
                 cfg.endpoint = 'server'
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
@@ -83,7 +84,7 @@ describe('Mesh', () => {
         //     pipeline: Pipeline
         // }
         // const ServiceDescriptions: ServiceDescription[] = []
-        const client1 = tomcat.hosts.getHostBuilder('client1')
+        const client1 = tomcat.getHostBuilder('client1')
             .addMessageBus(cfg => {
                 cfg.endpoint = "clinet";
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
@@ -110,7 +111,7 @@ describe('Mesh', () => {
 
         // })
         const service2: ServiceDefinition[] = []
-        const client2 = tomcat.hosts.getHostBuilder('client2')
+        const client2 = tomcat.getHostBuilder('client2')
             .addMessageBus(cfg => {
                 cfg.endpoint = "clinet2";
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
@@ -156,6 +157,27 @@ describe('Mesh', () => {
         expect(matchService({ category: 'data', parameters: { "interval": '30m' } }, { category: 'data', parameters: { "interval": "30m", "exchange": "binance" } })).toBe(true)
         expect(matchService({ category: 'data', parameters: { "interval": '15m' } }, { category: 'indicator', parameters: {} })).toBe(false)
         expect(matchService({ category: 'data', parameters: { "interval": '15m' } }, { category: 'data', parameters: { interval: "*m" } })).toBe(true)
+    })
+    test('requirement', async () => {
+        const port = 8085;
+        tomcat.config.infrastructure.messaging.transports.websocket.url = `http://localhost:${port}/hub`
+        const hub = tomcat.getHostBuilder('hub')
+            .addWebSocketHub()
+            .buildWebHost();
+        const server = tomcat.getHostBuilder('server')
+            .addMessageBus(cfg => {
+                cfg.endpoint = 'server'
+                // cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+            })
+            .addMeshServer()
+            .buildWebHost();
+        await hub.listen(port)
+        await server.start()
+        await tomcat.utils.delay(5000)
+        const service: ServiceDefinition = { category: 'data', parameters: {} }
+        const res = await server.services.getBus().createMessage(tomcat.Infrastructure.Contracts.requireService(service)).execute();
+        (res)
+        console.log("done");
 
     })
 });

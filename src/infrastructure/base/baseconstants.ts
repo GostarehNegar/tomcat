@@ -21,7 +21,8 @@ export const BaseConstants = {
         'MeshServer': 'MeshServer',
         'MeshNode': 'MeshNode',
         'IServiceDiscovery': 'IServiceDiscovery',
-        'ServiceDescriptor': 'ServiceDescriptor'
+        'ServiceDescriptor': 'ServiceDescriptor',
+        'INodeManagerService' : 'INodeManagerService'
 
 
     }

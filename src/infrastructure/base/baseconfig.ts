@@ -9,7 +9,7 @@ export default {
         endpoint: `<noname>` as string | undefined,
         transports: {
             websocket: {
-                url: 'http://localhost:8080/hub',
+                url: 'http://localhost:8082/hub',
                 diabled: false,
             },
         },

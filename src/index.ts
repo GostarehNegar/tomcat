@@ -8,7 +8,7 @@ import { ServiceProvider } from './infrastructure/base';
 import './extensions'
 import { HostBuilder, IHostBuilder } from './infrastructure/hosting';
 
-namespace TomCat {
+namespace tomcat {
     export const utils = _utils
     export const constants = Constants;
     export const config = _config;
@@ -21,4 +21,4 @@ namespace TomCat {
     export import Domain = _Domain
     export const getHostBuilder = (name: string): IHostBuilder => new HostBuilder(name, null);
 }
-export default TomCat;
+export default tomcat;

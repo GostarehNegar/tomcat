@@ -33,6 +33,21 @@ describe('ServiceLocator', () => {
     });
 
 });
+describe("NodeManager", () => {
+    test("first", async () => {
+        const host = tomcat.getHostBuilder("NodeManager").build()
+        const node = host.services.getNodeManagerService()
+        node.startNode({ name: "paria", jsFileName: "dataService.js", cwd: "../tomcat-bot-hosting/build/main/services/" })
+        await tomcat.utils.delay(10000)
+    })
+    test("script", async () => {
+        const host = tomcat.getHostBuilder("NodeManager").build()
+        const node = host.services.getNodeManagerService()
+        const res = await node.startNodeByName("dataScript");
+        (res)
+        await tomcat.utils.delay(10000)
+    })
+})
 describe('Logger', () => {
     test('should create logger', () => {
         // const logger = Logger.getLogger("test");

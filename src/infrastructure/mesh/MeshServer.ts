@@ -20,7 +20,7 @@ export class MeshServer extends BackgroundService implements IServiceDiscovery {
         this.meshState = new MeshState()
 
     }
-    async executeService(serviceDefinition: ServiceDefinition): Promise<ServiceInformation> {
+    async executeService(serviceDefinition: ServiceDefinition, secondTry = false): Promise<ServiceInformation> {
         let executeServiceResult;
         const serviceDefinitionString = JSON.stringify(serviceDefinition)
         try {
@@ -29,13 +29,27 @@ export class MeshServer extends BackgroundService implements IServiceDiscovery {
             if (discovered.length == 0) {
                 this.logger.debug(`no services was discoverd, trying to query service capability`)
                 const capabilities = await this.queryServiceCapability(serviceDefinition)
-                this.logger.debug(`${capabilities.length} capable services were found`)
-                for (let i = 0; i < capabilities.length; i++) {
-                    const node = capabilities[i]
-                    if (node.acceptable) {
-                        this.logger.debug(`ordering service to ${node.endpoint}`)
-                        const res = await this.bus.createMessage(contracts.serviceOrder(serviceDefinition), undefined, node.endpoint).execute(undefined, 5 * 60 * 1000)
-                        executeServiceResult = res.cast<ServiceInformation>()
+                if (capabilities.length > 0) {
+                    this.logger.debug(`${capabilities.length} capable services were found`)
+                    for (let i = 0; i < capabilities.length; i++) {
+                        const node = capabilities[i]
+                        if (node.acceptable) {
+                            this.logger.debug(`ordering service to ${node.endpoint}`)
+                            const res = await this.bus.createMessage(contracts.serviceOrder(serviceDefinition), undefined, node.endpoint).execute(undefined, 5 * 60 * 1000)
+                            executeServiceResult = res.cast<ServiceInformation>()
+                        }
+                    }
+                } else {
+                    this.logger.debug(`no capable services were found, trying to spin up a new node`)
+                    if (!secondTry) {
+                        try {
+                            await this.serviceProvider.getNodeManagerService().startNodeByServiceDefinition(serviceDefinition)
+                            await baseUtils.delay(10000)
+                            executeServiceResult = await this.executeService(serviceDefinition, true)
+
+                        } catch (err) {
+                            this.logger.error(`was uable to start a new node , ${err}`)
+                        }
                     }
                 }
             } else {

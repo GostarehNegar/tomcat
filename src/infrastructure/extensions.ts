@@ -4,7 +4,7 @@ import { BaseConstants } from './base/baseconstants'
 import { IMessageBus } from './bus';
 import { IStoreFactory } from './data/IStoreFactory'
 import { IServiceDiscovery } from './mesh/IServiceDiscovery';
-import { IClock, IDistributedCacheService, IRedisClientFactory, ISerielizationService, IStopService } from './services'
+import { IClock, IDistributedCacheService, INodeManagerService, IRedisClientFactory, ISerielizationService, IStopService } from './services'
 const names = BaseConstants.ServiceNames;
 type ServiceTypes = '1' | '2';
 declare module './base/ServiceProvider' {
@@ -18,6 +18,7 @@ declare module './base/ServiceProvider' {
         getSerilizer(): ISerielizationService;
         getBus(): IMessageBus;
         getServiceDiscovery(): IServiceDiscovery
+        getNodeManagerService(): INodeManagerService
     }
     interface IServiceProvider {
         getBaseService(s: ServiceTypes);
@@ -29,6 +30,7 @@ declare module './base/ServiceProvider' {
         getSerilizer(): ISerielizationService;
         getBus(): IMessageBus;
         getServiceDiscovery(): IServiceDiscovery
+        getNodeManagerService(): INodeManagerService
     }
 
 }
@@ -61,6 +63,9 @@ ServiceProvider.prototype.getBus = function (): IMessageBus {
 ServiceProvider.prototype.getServiceDiscovery = function (): IServiceDiscovery {
     return (this as IServiceProvider).getService<IServiceDiscovery>(names.IServiceDiscovery);
 };
+ServiceProvider.prototype.getNodeManagerService = function (): INodeManagerService {
+    return (this as IServiceProvider).getService<INodeManagerService>(names.INodeManagerService);
+}
 
 
 // ServiceProvider.prototype.getBus() {

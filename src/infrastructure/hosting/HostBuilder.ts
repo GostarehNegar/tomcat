@@ -1,3 +1,4 @@
+import fs from "fs"
 import http from 'http';
 
 import { IServiceProvider, ServiceProvider } from '../base';
@@ -8,7 +9,6 @@ import { MessageBus } from '../bus';
 import { ServiceConstructor, ServiceDefinition } from '../mesh';
 import { MeshNode, MeshNodeConfiguration } from '../mesh/MeshNode';
 import { MeshServer } from '../mesh/MeshServer';
-
 
 import { BackgroundService } from './BackgroundService';
 import ExpressWebHost from './ExpressWebHost';
@@ -33,12 +33,18 @@ export class HostBuilder implements IHostBuilder {
   constructor(private _name?: string, private _collection?: IHostCollection) {
     this._name = _name || `host-${Math.random()}`;
     this.services = new ServiceProvider();
-    registrar.registerServices();
+    registrar.registerServices(this.services);
     // this.services.register("IBot", s => { new Bot(s) })
     /// Add a dummy host that will be eventually
     /// replaced with the actual one, so that there is
     /// a current host
     ///
+    if (fs.existsSync("./config.json")) {
+      const conf = fs.readFileSync("./config.json").toString()
+      config.messaging = JSON.parse(conf).messaging || config.messaging
+      config.data = JSON.parse(conf).data || config.data
+      config.internet = JSON.parse(conf).internet || config.internet
+    }
     this._collection?.add(this._name, new Host(this._name, this.services));
     this._config = JSON.parse(JSON.stringify(config));
     this.services.register(serviceNames.Config, this._config);
