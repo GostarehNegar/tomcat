@@ -1,5 +1,6 @@
 import tomcat from "../../src";
-import utils from "../../src/lib/common/Domain.Utils";
+import utils from "../../src/common/Domain.Utils";
+import { Logger } from "../../src/infrastructure/base";
 
 //import '../../src/lib/extensions'
 //import '../../src/lib/infrastructure/extensions';
@@ -9,7 +10,7 @@ import utils from "../../src/lib/common/Domain.Utils";
 //tomcat.services.Provider.getMessageBus2();
 
 
-const Logger = tomcat.Infrastructure.Base.Logger
+// const Logger = tomcat.Infrastructure.Base.Logger
 const TimeEx = tomcat.Infrastructure.Base.TimeEx
 
 
@@ -34,15 +35,12 @@ describe('ServiceLocator', () => {
 });
 describe('Logger', () => {
     test('should create logger', () => {
-        const logger = Logger.getLogger("test");
-        const logger2 = tomcat.Infrastructure.Base.Logger.getLogger("test");
-        (logger);
-        (logger2);
-        logger.log("hi", logger2)
-        logger.criticalInfo("hello from logger")
-
-
-
+        // const logger = Logger.getLogger("test");
+        Logger.level = 'debug'
+        const logger2 = tomcat.Infrastructure.Base.Logger.getLogger("test")
+        // logger2.level = 'debug'
+        // (logger);
+        logger2.debug("hi")
     });
 });
 describe('TimeEx', () => {

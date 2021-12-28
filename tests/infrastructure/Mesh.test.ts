@@ -1,5 +1,5 @@
 import tomcat from "../../src";
-import { IMeshService, matchService, ServiceDefinition, ServiceInformation } from "../../src/lib/infrastructure/mesh";
+import { IMeshService, matchService, ServiceDefinition, ServiceInformation } from "../../src/infrastructure/mesh";
 
 
 class myService implements IMeshService {

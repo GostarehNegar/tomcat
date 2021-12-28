@@ -1,7 +1,7 @@
 import tomcat from '../src'
-import { CandleStickCollection, CandleStickData } from '../src/lib/common'
+import { CandleStickCollection, CandleStickData } from '../src/common'
 // import utils from '../src/lib/common/Domain.Utils'
-import { Stream } from '../src/lib/streams'
+import { Stream } from '../src/streams'
 
 const HalfTrend = tomcat.Domain.Indicators.HalfTrend
 const HTSignal = tomcat.Domain.Indicators.HTSignal

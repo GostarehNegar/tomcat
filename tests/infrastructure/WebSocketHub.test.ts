@@ -1,5 +1,5 @@
 import tomcat from "../../src"
-import { CandleStickCollection, CandleStickData } from "../../src/lib/common";
+import { CandleStickCollection, CandleStickData } from "../../src/common";
 
 async function wait(ms) {
     return new Promise(resolve => {
@@ -24,7 +24,7 @@ describe('WebSocketHub', () => {
         await hub.listen(port);
         await client1.start();
         await wait(1000);
-        await client1.bus.subscribe("topic", async () => { });
+        await client1.bus.subscribe("topic", null);
         await wait(100000);
         await client1.stop();
         await wait(10000);
@@ -142,7 +142,7 @@ describe('WebSocketHub', () => {
                 response3 = err;
             });
         const response4 = await client2.bus.createMessage(messageName, "hi there")
-            .execute(null, true)
+            .execute(null, 10000, true)
 
         await wait(500);
         //tomcat.utils.getLogger().info(received);

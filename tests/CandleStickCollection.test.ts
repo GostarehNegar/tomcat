@@ -1,6 +1,6 @@
 import tomcat from '../src'
-import { CandleStickCollection, CandleStickData } from '../src/lib/common'
-import { Pipeline } from '../src/lib/pipes'
+import { CandleStickCollection, CandleStickData } from '../src/common'
+import { Pipeline } from '../src/pipes'
 
 jest.setTimeout(500000)
 describe('candleCollection', () => {

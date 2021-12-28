@@ -1,10 +1,10 @@
-import utils from '../src/lib/common/Domain.Utils';
-import config from '../src/lib/config';
 import tomcat from '../src'
-import { CandleStickCollection, Markets, Symbols } from '../src/lib/common';
-import { DataSourceStreamEx } from '../src/lib/streams';
-import { Pipeline } from '../src/lib/pipes';
-import { CCXTExchange } from '../src/lib/exchanges';
+import { CandleStickCollection, Markets, Symbols } from '../src/common';
+import utils from '../src/common/Domain.Utils';
+import config from '../src/config';
+import { CCXTExchange } from '../src/exchanges';
+import { Pipeline } from '../src/pipes';
+import { DataSourceStreamEx } from '../src/streams';
 
 //config.proxy.url = "http://localhost:2395";
 config.proxy.url = "http://localhost:1080";
@@ -12,7 +12,7 @@ config.proxy.url = "http://localhost:1080";
 jest.setTimeout(20000000)
 describe('CoinEx', () => {
     test('exchange ha symbol', async () => {
-        var exchange = new tomcat.Domain.Exchange.CCXTExchange('binance', 'spot');
+        const exchange = new tomcat.Domain.Exchange.CCXTExchange('binance', 'spot');
 
         const hasShiba = await exchange.hasSymbol('SHIB/USDT');
 
@@ -23,18 +23,18 @@ describe('CoinEx', () => {
     });
     test('binance getdata works', async () => {
         const market: Markets = 'future';
-        var exchange = new tomcat.Domain.Exchange.CCXTExchange('binance', market);
+        const exchange = new tomcat.Domain.Exchange.CCXTExchange('binance', market);
         const interval = '1h'
         const minutes = utils.toMinutes(interval);
         const start = utils.toTimeEx().addMinutes(-3000);
         const symbol: Symbols = 'BTC/USDT';
-        var mm = await exchange.getMarkets();
+        const mm = await exchange.getMarkets();
         (mm);
         const data = await exchange.getCandles(symbol, interval, start.ticks, start.addMinutes(800).ticks);
         const exact = await exchange.getExactCandle(symbol, interval, start);
         const latest = await exchange.getLatestCandle(symbol, interval);
-        var server_time = await exchange.getServerTime();
-        var future_exchange = new tomcat.Domain.Exchange.CCXTExchange('binance', market);
+        const server_time = await exchange.getServerTime();
+        const future_exchange = new tomcat.Domain.Exchange.CCXTExchange('binance', market);
         const at2021_11_29_15_0_0 = await future_exchange
             .getExactCandle('BTC/USDT', '1h', utils.toTimeEx(Date.UTC(2021, 10, 29, 15, 0, 0, 0)));
         expect(server_time.ticks).toBeGreaterThan(utils.toTimeEx().addMinutes(-4).ticks);
@@ -50,15 +50,15 @@ describe('CoinEx', () => {
 
     test('okex getdata works', async () => {
         const market: Markets = 'spot';
-        var exchange = new tomcat.Domain.Exchange.CCXTExchange('okeex', market);
+        const exchange = new tomcat.Domain.Exchange.CCXTExchange('okeex', market);
         const interval = '1h'
         const minutes = utils.toMinutes(interval);
         const start = utils.toTimeEx().addMinutes(-3000);
         const symbol: Symbols = 'SHIB/USDT';
-        var mm = await exchange.getMarkets();
+        const mm = await exchange.getMarkets();
         (mm);
         const data = await exchange.getCandles(symbol, interval, start.ticks, start.addMinutes(800).ticks);
-        var exact = await exchange.getExactCandle(symbol, interval, start);
+        const exact = await exchange.getExactCandle(symbol, interval, start);
         const latest = await exchange.getLatestCandle(symbol, interval);
         expect(latest).not.toBeNull();
         expect(exact.openTime).toBe(start.floorToMinutes(minutes).ticks);
@@ -67,7 +67,7 @@ describe('CoinEx', () => {
     });
     test('binance stream ', async () => {
         //const market: Markets = 'spot';
-        var stream = new tomcat.Domain.Exchange.CCXTDataStream('binance', 'BTC/USDT', 'future', '1m')
+        const stream = new tomcat.Domain.Exchange.CCXTDataStream('binance', 'BTC/USDT', 'future', '1m')
         //const interval = '1h'
         const start = utils.toTimeEx().addMinutes(-8 * 60);
         const minutes_to_future = 5;
@@ -96,7 +96,7 @@ describe('CoinEx', () => {
     });
     test('playSync works', async () => {
         //const market: Markets = 'spot';
-        var stream = new tomcat.Domain.Exchange.CCXTDataStream('binance', 'BTC/USDT', 'future', '1m')
+        const stream = new tomcat.Domain.Exchange.CCXTDataStream('binance', 'BTC/USDT', 'future', '1m')
         //const interval = '1h'
         const start = utils.toTimeEx().addMinutes(-8 * 60);
         const minutes_to_future = 3;
@@ -121,7 +121,7 @@ describe('CoinEx', () => {
     });
     test('fetch balance works', async () => {
 
-        var exchange = new CCXTExchange('coinex', 'spot');
+        const exchange = new CCXTExchange('coinex', 'spot');
         (exchange)
         // const order = await exchange.buy('DOGE/USDT', 5, 0.2150);
         // (order);
@@ -134,7 +134,7 @@ describe('CoinEx', () => {
 
     test('stream writer works', async () => {
         //const market: Markets = 'spot';
-        var data = new tomcat.Domain.Exchange.CCXTDataStream('binance', 'BTC/USDT', 'future', '1m')
+        const data = new tomcat.Domain.Exchange.CCXTDataStream('binance', 'BTC/USDT', 'future', '1m')
         const stream = new DataSourceStreamEx(data);
         //const interval = '1h'
         const start = utils.toTimeEx().addMinutes(-8 * 60);
@@ -142,7 +142,7 @@ describe('CoinEx', () => {
         const end = utils.toTimeEx().addMinutes(minutes_to_future);
         const test_start_time = utils.toTimeEx();
         const candles = new CandleStickCollection([]);
-        let number_of_duplicates = 0;
+        const number_of_duplicates = 0;
         await stream.startEx(start, ctx => {
             (ctx);
             if (ctx.err)
@@ -175,5 +175,21 @@ describe('CoinEx', () => {
 
         expect(candles.items.length).toBe(4);
     });
+    test("speed", async () => {
+        const data = new tomcat.Domain.Exchange.CCXTDataStream('coinex', 'BTC/USDT', 'future', '1m')
+        const stream = new DataSourceStreamEx(data);
+        //const interval = '1h'
+        const start = utils.toTimeEx().addMinutes(-8 * 60 * 24);
+        const minutes_to_future = 2;
+        const end = utils.toTimeEx().addMinutes(minutes_to_future);
+        // const test_start_time = utils.toTimeEx();
+        // const candles = new CandleStickCollection([]);
+        // const number_of_duplicates = 0;
+        await stream.startEx(start, ctx => {
+            if (ctx.err)
+                console.error(ctx.err);
+            return ctx && ctx.time && ctx.time.ticks > end.ticks;
+        });
+    })
 
 });
