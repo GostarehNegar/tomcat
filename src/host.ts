@@ -4,7 +4,8 @@ import { ServiceCategories } from "./infrastructure/mesh";
 import tomcat from ".";
 tomcat.Infrastructure.Base.Logger.level = 'debug'
 tomcat.Infrastructure.Base.Logger.getLogger("WebSocketHub").level = 'info'
-const port = 8082;
+const port = 8084;
+tomcat.config.infrastructure.messaging.transports.websocket.url = `http://localhost:${port}/hub`
 const hub = tomcat.getHostBuilder('hub')
     .addWebSocketHub()
     .buildWebHost('express')
