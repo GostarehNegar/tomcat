@@ -59,10 +59,9 @@ export class DataService implements IMeshService {
 const dataServices: DataService[] = [];
 
 (async () => {
-    const client1 = new HostBuilder('dataservice',null)
+    const client1 = new HostBuilder('dataservice', null)
         .addMessageBus(cfg => {
             cfg.endpoint = "dataservice";
-            cfg.transports.websocket.url
         })
         .addMeshService({ category: 'data' as ServiceCategories, parameters: {} }, (def) => {
             let service = dataServices.find(x => matchService(x.getInformation(), def))

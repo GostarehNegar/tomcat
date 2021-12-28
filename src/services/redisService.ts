@@ -71,7 +71,6 @@ export class RedisService implements IMeshService {
     const client1 = new HostBuilder('redisservice', null)
         .addMessageBus(cfg => {
             cfg.endpoint = "redisservice";
-            cfg.transports.websocket.url = "http://localhost:8082/hub";
         })
         .addMeshService({ category: 'redis', parameters: {} }, (def) => new RedisService(def))
         .build();
