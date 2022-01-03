@@ -22,12 +22,13 @@ export function queryDataStreamName(payload: queryDataStreamNamePayload): Contra
 }
 
 export type orderRedisServicePayload = {
-    containerId : string
+    containerId: string
     dataDrirectory?: string,
     portNumber?: string,
 }
-export type queryRedisContainerPayload={
+export type queryRedisContainerPayload = {
     containerName: string
+    id: string
 }
 
 export function orderRedisService(payload: orderRedisServicePayload): Contract<orderRedisServicePayload> {
@@ -36,11 +37,14 @@ export function orderRedisService(payload: orderRedisServicePayload): Contract<o
         payload: payload
     }
 }
-export function queryRedisContainer(payload: queryRedisContainerPayload): Contract<queryRedisContainerPayload>{
+export function queryRedisContainer(payload: queryRedisContainerPayload): Contract<queryRedisContainerPayload> {
     return {
         topic: ServiceCommandContract("queryrediscontainer"),
         payload: payload
     }
 }
 
+export type getRedisConnectionReplyPayload = {
+    id: string
+}
 

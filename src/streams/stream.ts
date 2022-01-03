@@ -16,7 +16,7 @@ export class Stream<T> implements IStream<T> {
     private _redisStream: RedisStream;
 
 
-    constructor(private _streamName: string, private connectionString?: string, deserialize?: (data: string) => T) {
+    constructor(private _streamName: string, private connectionString?: unknown, deserialize?: (data: string) => T) {
         this.deSerialize = deserialize || (data => (typeof data === 'string' ? data : JSON.parse(data)) as T)
     }
 
@@ -44,8 +44,8 @@ export class Stream<T> implements IStream<T> {
     }
     protected get redisStream() {
         if (this.connectionString) {
-            const conn = baseUtils.getRedisConfigFromConnectionString(this.connectionString)
-            this._redisStream = this._redisStream || RedisStream.createFromConnectionString(this._streamName, { host: conn.url, port: conn.port })
+            // const conn = baseUtils.getRedisConfigFromConnectionString(this.connectionString)
+            this._redisStream = this._redisStream || RedisStream.createFromConnectionString(this._streamName, this.connectionString)
             return this._redisStream
         } else {
             return this._redisStream = this._redisStream || new RedisStream(this._streamName)

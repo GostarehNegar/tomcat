@@ -11,6 +11,7 @@ import { BaseConstants } from "../infrastructure/base/baseconstants"
 import { HostBuilder } from "../infrastructure/hosting"
 import { IMeshService, matchService, MeshNode, ServiceCategories, ServiceDefinition, ServiceInformation, ServiceStatus } from "../infrastructure/mesh"
 import { DataSourceStreamEx } from "../streams"
+import "../extensions"
 
 // tomcat.config.infrastructure.data.redis.url = "redis://localhost:6379"
 export class DataService implements IMeshService {

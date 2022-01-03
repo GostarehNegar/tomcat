@@ -20,8 +20,10 @@ export default {
     * null: localhost.
     * 'redis://redis:6379': connect to redis in this container.
     */
-            url: null,
+            url: "redis://localhost:6379",
             publicUrl: null,
-        }
+        },
+        redisEx: {}
+
     },
 }
