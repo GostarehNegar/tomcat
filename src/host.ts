@@ -5,7 +5,7 @@ import tomcat from ".";
 tomcat.Infrastructure.Base.Logger.level = 'debug'
 tomcat.Infrastructure.Base.Logger.getLogger("WebSocketHub").level = 'info'
 const port = 8084;
-tomcat.config.infrastructure.messaging.transports.websocket.url = `http://localhost:${port}/hub`
+tomcat.config.infrastructure.messaging.transports.websocket.url = `http://172.16.2.10:${port}/hub`
 const hub = tomcat.getHostBuilder('hub')
     .addWebSocketHub()
     .buildWebHost('express')
@@ -14,7 +14,7 @@ const hub = tomcat.getHostBuilder('hub')
 const server = tomcat.getHostBuilder('server')
     .addMessageBus(cfg => {
         cfg.endpoint = 'server'
-        cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+        cfg.transports.websocket.url = `http://172.16.2.10:${port}/hub`;
     })
     .addMeshServer()
     .buildWebHost("express");
