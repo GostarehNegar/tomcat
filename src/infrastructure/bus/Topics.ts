@@ -6,6 +6,11 @@ export default class SystemTopics {
   public static reply = '#reply';
   public static reject = '#reject';
   public readonly reply = '#reply';
+  /**
+   * When a bus(node) goes down, (diconnects)
+   * the WebSocketHub reports it with this ropic.
+   */
+  public static busdown = '#busdown';
   public static readonly Internal = {
     publish: 'publish',
     subscribe: 'subscribe',

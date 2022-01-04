@@ -180,6 +180,8 @@ describe('clock', () => {
     });
     describe('datastream', () => {
         test('datastream', async () => {
+            const host = tomcat.getHostBuilder('test').build();
+
             type dataType = { tick: number, index: number };
             const name = utils.randomName('data-stream', 2);
             const data: dataType[] = [];
@@ -192,9 +194,9 @@ describe('clock', () => {
                 })
             }
 
-            const stream = tomcat.services
+            const stream = host.services
                 .getStoreFactory()
-                .createStore({ provider: 'redis' })
+                .createStore({ provider: 'redis', redis: { host: '172.16.6.56' } })
                 .getDataStream<dataType>(name);
             for (let i = 0; i < data.length; i++) {
                 try {

@@ -14,7 +14,7 @@ class myService implements IMeshService {
 jest.setTimeout(80000)
 describe('Mesh', () => {
     test('heartbeat', async () => {
-        const port = 8082;
+        const port = 8085;
         const hub = tomcat.getHostBuilder('hub')
             .addWebSocketHub()
             .buildWebHost();
@@ -29,7 +29,7 @@ describe('Mesh', () => {
         // const services: ServiceDefinition[] = [{ category: "data", parameters: { interval: "15m", exchange: "binance" } }]
         const client1 = tomcat.getHostBuilder('client1')
             .addMessageBus(cfg => {
-                cfg.endpoint = "clinet";
+                cfg.endpoint = "klient1";
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
             .addMeshService({ category: "data", parameters: { interval: "15m", exchange: "binance" } }, null)
@@ -39,9 +39,9 @@ describe('Mesh', () => {
             // })
             .build();
         // const services2: ServiceDefinition[] = [{ category: "data", parameters: { interval: "15m", exchange: "coinex" } }]
-        const client2 = tomcat.getHostBuilder('client2')
+        const client2 = tomcat.getHostBuilder('klient2')
             .addMessageBus(cfg => {
-                cfg.endpoint = "clinet2";
+                cfg.endpoint = "klinet2";
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
             .addMeshService({ category: "data", parameters: { interval: "15m", exchange: "coinex" } }, () => new myService())
@@ -62,9 +62,11 @@ describe('Mesh', () => {
         const discoveryService = server.services.getServiceDiscovery();
         expect(meshServer.meshState.runningNodes.size).toBe(2)
         expect((await discoveryService.discover({ 'category': "data", parameters: { interval: "15m" } })).length).toBe(1)
-        expect((await discoveryService.discover({ 'category': "data", parameters: {} })).length).toBe(2)
-        expect((await discoveryService.discover({ 'category': "data", parameters: { exchange: "binance" } })).length).toBe(1)
+        expect((await discoveryService.discover({ 'category': "data", parameters: {} })).length).toBe(1)
+        expect((await discoveryService.discover({ 'category': "data", parameters: { exchange: "binance" } })).length).toBe(0)
         expect((await discoveryService.discover({ 'category': 'strategy', parameters: {} })).length).toBe(0)
+        await client2.stop();
+        await tomcat.utils.delay(1000);
     });
     test('queryService', async () => {
         const port = 8081;

@@ -1,11 +1,12 @@
 //import { MessageBus, IMessageBus } from '../src/lib/bus'
 // import { IMessageBus } from '../src/lib/bus/_interfaces';
 import tomcat from "../../src"
+import SystemTopics from "../../src/infrastructure/bus/Topics";
 
 const MessageBus = tomcat.Infrastructure.Bus.MessageBus
 type IMessageBus = tomcat.Infrastructure.Bus.IMessageBus
 
-jest.setTimeout(2000);
+jest.setTimeout(20000);
 const bus = new MessageBus(cf => {
     cf.transports.websocket.diabled = true;
 }) as IMessageBus;
@@ -21,8 +22,48 @@ describe('MessageBus', () => {
         expect(message.message.topic).toBe("test");
         expect(message.message.payload).toBe(body);
     });
-    test('BABAK should publish messages to subscribers.', async () => {
+    test('busdown works', async () => {
+        const port = 8085;
+        const hub = tomcat.getHostBuilder('hub')
+            .addWebSocketHub()
+            .buildWebHost();
+        const server = tomcat.getHostBuilder('server')
+            .addMessageBus(cfg => {
+                cfg.endpoint = 'server'
+                cfg.transports.websocket.diabled = false;
+                cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+            })
+            .buildWebHost();
+        const client = tomcat.getHostBuilder('client')
+            .addMessageBus(cfg => {
+                cfg.endpoint = 'client'
+                cfg.transports.websocket.diabled = false;
+                cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+            })
+            .buildWebHost();
+        await server.bus.subscribe(SystemTopics.busdown, async (ctx) => {
 
+            (ctx);
+            await Promise.resolve();
+        })
+
+
+        await hub.listen(port);
+        await tomcat.utils.delay(3000);
+        await server.start();
+        await client.start();
+        await tomcat.utils.delay(3000);
+        await client.stop();
+        await tomcat.utils.delay(3000);
+
+
+
+
+
+
+
+    });
+    test('BABAK should publish messages to subscribers.', async () => {
         let called = null;
         let called_count = 0;
         bus.subscribe("topic", ctx => {

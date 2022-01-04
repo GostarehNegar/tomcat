@@ -6,7 +6,8 @@ export class MeshState {
     public runningNodes = new Map<string, contracts.NodeStatusPayload>()
     public logger = baseUtils.getLogger("MeshState")
     addNode(status: contracts.NodeStatusPayload, node: string) {
-        status.timestamp = Date.now()
+        status.last_seen = Date.now()
+        status.alive = true;
         if (!this.runningNodes.has(node)) {
             this.logger.info(`a new node was detected, name: ${node}`)
         }
@@ -17,7 +18,7 @@ export class MeshState {
         const res: ServiceInformation[] = []
         this.runningNodes.forEach((value) => {
             value.services?.forEach((x) => {
-                if (matchService(definition, x)) {
+                if (matchService(x, definition)) {
                     res.push(x)
                 }
             })

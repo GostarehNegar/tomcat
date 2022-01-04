@@ -1,5 +1,6 @@
 import { baseUtils, CancellationToken, ILogger, IServiceProvider } from "../base";
 import { IMessageBus, IMessageContext } from "../bus";
+import SystemTopics from "../bus/Topics";
 import * as contracts from '../contracts'
 import { BackgroundService, } from "../hosting";
 
@@ -102,6 +103,16 @@ export class MeshServer extends BackgroundService implements IServiceDiscovery {
         this.bus.subscribe(contracts.requireService(null).topic, async (ctx) => {
             await ctx.reply(await this.executeService(ctx.message.cast<ServiceDefinition>()))
         })
+        this.bus.subscribe(SystemTopics.busdown, async (ctx) => {
+            await Promise.resolve();
+            if (ctx.message && ctx.message.cast<any>().endpoint) {
+                this.logger.warn(
+                    "MessageBus reports that a connection has been lost!!!")
+
+            }
+
+
+        });
         await super.start();
     }
     async stop(): Promise<void> {

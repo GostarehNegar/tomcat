@@ -138,6 +138,8 @@ export class MessageBus extends BackgroundService implements IMessageBus {
       `MessageBus successfullys started at Endpoint:'${this.endpoint}'. Transports:'${success_names}' `);
   }
   async stop(): Promise<void> {
+    await this.createMessage(SystemTopics.busdown, { endpoint: this.endpoint })
+      .publish();
     const transports = this.getTransports();
     for (let i = 0; i < transports.length; i++) {
       await transports[i].close();

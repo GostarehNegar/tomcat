@@ -122,8 +122,6 @@ export class WebSocketHub implements IHostedService {
           }));
       }
     });
-
-
     return Promise.all(promises);
   }
   public start(): Promise<void> {
@@ -142,6 +140,12 @@ export class WebSocketHub implements IHostedService {
         (c);
         (r);
         const info = getConectionInfo(ws);
+        this.publish(ws,
+          {
+            topic: Topics.busdown,
+            from: info.endpoint,
+            payload: {}
+          });
         this.log.info(
           `WebSocket Connection Lost: ${info.endpoint}`);
       })

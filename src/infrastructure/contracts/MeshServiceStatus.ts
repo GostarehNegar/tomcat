@@ -5,7 +5,12 @@ import { Contract } from "./Contract"
 export type NodeStatusPayload = {
     alive: boolean,
     services: ServiceInformation[],
-    timestamp?: number
+    /**
+     * When the node has last seen in ticks.
+     * This is updated whenever a new status 
+     * is recieved by the MeshServer
+     */
+    last_seen?: number
 
 }
 export type queryServicePayload = {
@@ -53,4 +58,5 @@ export function requireService(serviceDefinition: ServiceDefinition): Contract<S
         payload: serviceDefinition
     }
 }
+
 
