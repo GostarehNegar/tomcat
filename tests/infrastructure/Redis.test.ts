@@ -37,5 +37,18 @@ describe('redis', () => {
         const key = tomcat.utils.randomName("key")
         await client.set(key, "babak");
         expect((await client.get(key))).toBe("babak");
+    });
+    test("redisAdapter", async () => {
+        const host = tomcat.getHostBuilder("test").build()
+        const adapter = new tomcat.Domain.Services.RedisProcessAdapter({ port: 6350 })
+        const containerInfo = await adapter.start()
+        const info = await host.services.getRedisFactory().getRedisInfo("localhost", containerInfo.port)
+        expect(containerInfo).not.toBeUndefined()
+        expect(info).not.toBe(null)
+    })
+    test("redisUtils", async () => {
+        await tomcat.Infrastructure.Services.RedisUtils.InstallRedis()
+        const a = await tomcat.Infrastructure.Services.RedisUtils.IsRedisServerInstalled()
+        console.log(a);
     })
 });

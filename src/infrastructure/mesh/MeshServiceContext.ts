@@ -1,9 +1,10 @@
 import { IServiceProvider } from "../base";
-import { IMeshService, IMeshServiceContext, ServiceDefinition, ServiceInformation } from ".";
-import { IMeshNode } from "./IMeshNode";
-
 import { IMessageBus } from "../bus";
 import { requireService } from "../contracts";
+
+import { IMeshNode } from "./IMeshNode";
+
+import { IMeshService, IMeshServiceContext, ServiceDefinition, ServiceInformation } from ".";
 
 
 
@@ -16,14 +17,10 @@ export class MeshServiceContext implements IMeshServiceContext {
     private getBus(): IMessageBus {
         return this.ServiceProvider.getBus();
     }
-    async require(definition: ServiceDefinition, timeOut: number = 10000): Promise<ServiceInformation> {
-        var result = await this.getBus().createMessage(requireService(definition))
+    async require(definition: ServiceDefinition, timeOut = 10000): Promise<ServiceInformation> {
+        const result = await this.getBus().createMessage(requireService(definition))
             .execute(undefined, timeOut, true);
         return result.cast<ServiceInformation>();
-
-
-
-
     }
 
 }

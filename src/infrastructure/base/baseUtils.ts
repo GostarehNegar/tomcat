@@ -1,10 +1,13 @@
 
+import { exec } from 'child_process';
+
 import HttpsProxyAgent from 'https-proxy-agent/dist/agent';
 import fetch from 'node-fetch';
 import { randomUUID } from 'node:crypto';
 import httpsAgent, { Agent } from 'node:https';
 import ping from 'ping'
 import port from 'portastic'
+import tcpPortUsed from 'tcp-port-used'
 
 import config from '../base/baseconfig';
 
@@ -141,20 +144,64 @@ export class BaseUtils {
   }
 
   public findPort(min: number, max: number) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this
     return new Promise<number>((resolve, reject) => {
       port.find({ min: min, max: max }, function (data, err) {
         if (err) {
           reject(err)
+        } else {
+          const checkNext = (idx) => {
+            if (idx >= data.length) {
+              reject("no available ports were found")
+              return
+            }
+            self.checkPortAvailability(data[idx]).then((res) => {
+              if (res) {
+                resolve(data[idx])
+                return
+              } else {
+                checkNext(idx + 1)
+              }
+            }).catch(() => {
+              checkNext(idx + 1)
+            })
+          }
+          checkNext(0)
         }
-        resolve(data[1])
       });
+    })
+  }
+  public createDir(path: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      exec(`mkdir ${path}`, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve("done");
+        }
+      });
+    });
+  }
+
+  public checkPortAvailability(port: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      tcpPortUsed.check(port).then((inUse) => {
+        if (inUse) {
+          resolve(false)
+        } else {
+          resolve(true)
+        }
+      }).catch((err) => {
+        reject(err)
+      })
     })
   }
   public randomName(name: string, numberOfRandoms = 3) {
     return name + "-" + Math.floor(Math.random() * Math.pow(10, numberOfRandoms))
   }
 
-  public timeout<T>(promise: Promise<T>, timeout: number = 60000, Throw = true): Promise<T> {
+  public timeout<T>(promise: Promise<T>, timeout = 60000, Throw = true): Promise<T> {
     const timeoutPromise = new Promise<T>((resolve, reject) => {
       setTimeout(() => {
         (Throw ? reject("time out") : resolve(null))

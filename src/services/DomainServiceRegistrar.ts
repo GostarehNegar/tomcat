@@ -1,6 +1,7 @@
 import Constants from "../constants";
 import { IServiceProvider } from "../infrastructure/base";
 import BaseRegistrar from "../infrastructure/base/BaseRegistrar";
+
 import { DomainServices } from "./DomainServices";
 import { UtilityService } from "./utility/UtilityService";
 const name = Constants.ServiceNames;

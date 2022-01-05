@@ -1,6 +1,12 @@
+import fs from 'fs';
+import path from 'path';
+
+
+
 import { BaseUtils } from '../infrastructure/base';
 
 import { Intervals, Symbols } from '.';
+
 
 export class Utils extends BaseUtils {
     roundTime(time: number, minutes: number): number {
@@ -47,6 +53,29 @@ export class Utils extends BaseUtils {
     }
     parseSymbol(sym: string): Symbols {
         return sym as Symbols
+    }
+
+    async ensureRedisWorkingSpace(): Promise<string> {
+        const workingDirectoryPath = path.resolve("workingDirectory")
+        if (!fs.existsSync(workingDirectoryPath)) {
+            await fs.promises.mkdir(workingDirectoryPath)
+        }
+        const dataDirectory = path.resolve("workingDirectory", "data")
+        if (!fs.existsSync(dataDirectory)) {
+            await fs.promises.mkdir(dataDirectory)
+        }
+        return dataDirectory
+    }
+    async getRedisDataDirectory(directoryName: string): Promise<string> {
+        const dataDirectory = await this.ensureRedisWorkingSpace()
+        if (dataDirectory) {
+            const redisContainerDirectory = path.resolve(dataDirectory, directoryName)
+            if (!fs.existsSync(redisContainerDirectory)) {
+                fs.mkdirSync(redisContainerDirectory)
+            }
+            return redisContainerDirectory
+        }
+        throw "was unable to create redis data directory"
     }
 }
 const utils = new Utils();

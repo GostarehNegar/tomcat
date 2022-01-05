@@ -1,8 +1,6 @@
-import { ILogger } from "@microsoft/signalr";
+
 import utils from "../../../common/Domain.Utils";
-
-
-import { baseUtils } from "../../base";
+import { baseUtils, ILogger } from "../../base";
 
 
 import { IRedisClientFactory } from "./IRedisClientFactory";
