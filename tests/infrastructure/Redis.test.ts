@@ -7,6 +7,13 @@ jest.setTimeout(80000)
 
 describe('redis', () => {
 
+    test('redis utils works', async () => {
+        const host = tomcat.getHostBuilder('test').build();
+        (host);
+        tomcat.Infrastructure.Services.RedisUtils.IsRedisServerInstalled();
+
+
+    });
     test('getRedisInfo works', async () => {
         const host = tomcat.getHostBuilder('test').build();
         const info = await host.services.getRedisFactory()
