@@ -76,7 +76,7 @@ describe('CoinEx', () => {
         const candles = new CandleStickCollection([]);
         let number_of_duplicates = 0;
 
-        await stream.play(async c => {
+        await stream.playCandle(async c => {
             await Promise.resolve();
             if (candles.find(c.openTime))
                 number_of_duplicates++;

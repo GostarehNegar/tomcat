@@ -2,7 +2,7 @@
 
 import { baseUtils, ILogger, IServiceProvider } from "../base";
 import { RedisClient } from "../services";
-import { RedisClientOptions } from "../services/RedisClientOptions";
+import { RedisClientOptions } from "../services/redis/RedisClientOptions";
 
 import { IRepository } from "./IRepository";
 
@@ -133,7 +133,7 @@ export class RedisRepository<T> implements IRepository<T>{
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         id = id || (val as any).id;
         if (typeof id !== 'string') {
-            baseUtils.Throw('unexpected', 'Id not Found');
+            baseUtils.Throw('Id not Found', 'unexpected');
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const key = this._getKey(id || (val as any).id);

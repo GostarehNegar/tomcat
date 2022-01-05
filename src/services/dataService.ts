@@ -9,7 +9,7 @@ import { baseUtils } from "../infrastructure/base"
 import baseconfig from "../infrastructure/base/baseconfig"
 import { BaseConstants } from "../infrastructure/base/baseconstants"
 import { HostBuilder } from "../infrastructure/hosting"
-import { IMeshService, matchService, MeshNode, ServiceCategories, ServiceDefinition, ServiceInformation, ServiceStatus } from "../infrastructure/mesh"
+import { IMeshService, IMeshServiceContext, matchService, MeshNode, ServiceCategories, ServiceDefinition, ServiceInformation, ServiceStatus } from "../infrastructure/mesh"
 import { DataSourceStreamEx } from "../streams"
 import "../extensions"
 
@@ -40,7 +40,8 @@ export class DataService implements IMeshService {
     getInformation(): ServiceInformation {
         return { category: 'data', parameters: { streamName: this.streamName, exchange: this.exchange, symbol: this.symbol, market: this.market, interval: this.interval, startTime: new Date(this.startTime).toISOString(), endTime: this.endTime ? new Date(this.endTime).toISOString() : null }, status: this.status }
     }
-    start(): Promise<unknown> {
+    start(ctx: IMeshServiceContext): Promise<unknown> {
+        (ctx)
         const data = new CCXTDataStream(this.exchange, this.symbol, this.market, this.interval)
         const stream = new DataSourceStreamEx(data);
         this.streamName = stream.name

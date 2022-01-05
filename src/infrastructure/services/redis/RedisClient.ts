@@ -1,7 +1,7 @@
 import ioredis from 'ioredis';
 
-import { ILogger } from "../base/ILogger";
-import { baseUtils } from "../base/baseUtils";
+import { ILogger } from "../../base/ILogger";
+import { baseUtils } from "../../base/baseUtils";
 
 import { RedisClientOptions } from "./RedisClientOptions";
 

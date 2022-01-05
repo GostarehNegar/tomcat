@@ -2,7 +2,7 @@
 
 import { baseUtils, IServiceProvider, Ticks } from "../base";
 import { ISerielizationService, RedisClient } from "../services";
-import { RedisClientOptions } from "../services/RedisClientOptions";
+import { RedisClientOptions } from "../services/redis/RedisClientOptions";
 
 import { IDataStream, IStreamInfo } from "./IDataSream";
 type decoded = {

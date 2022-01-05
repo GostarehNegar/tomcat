@@ -16,13 +16,14 @@ export const BaseConstants = {
         'WebSocketHub': 'WebSocketHub',
         'Router': 'Router',
         'Config': 'Config',
+        'baseConfig': 'baseConfig',
         'HttpServer': 'HttpServer',
         'IWebHost': 'IWebHost',
         'MeshServer': 'MeshServer',
         'MeshNode': 'MeshNode',
         'IServiceDiscovery': 'IServiceDiscovery',
         'ServiceDescriptor': 'ServiceDescriptor',
-        'INodeManagerService' : 'INodeManagerService'
+        'INodeManagerService': 'INodeManagerService'
 
 
     }

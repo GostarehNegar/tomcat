@@ -189,7 +189,7 @@ export class CCXTExchange implements IExchange {
     public async getCandlesAt(symbol: Symbols, interval: Intervals, startTime: Ticks, include_last_uncomplete = false) {
         const _startTime = utils.floorTime(
             utils.ticks(startTime), utils.toMinutes(interval));
-        const result = new CandleStickCollection([]);
+        const result = new CandleStickCollection([], interval);
         try {
             const coinex = await this.getExchange();
             const server_time = (await this.getCachedServerTime()).ticks;

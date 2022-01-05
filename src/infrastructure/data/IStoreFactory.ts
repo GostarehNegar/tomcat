@@ -1,4 +1,4 @@
-import { RedisClientOptions } from '../services/RedisClientOptions'
+import { RedisClientOptions } from '../services/redis/RedisClientOptions'
 
 import { IStore } from "./IStore";
 export type StoreProviders = 'redis' | 'sql'

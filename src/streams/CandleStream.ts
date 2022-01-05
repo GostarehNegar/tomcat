@@ -293,7 +293,7 @@ export class DataSourceStreamEx extends CandleStream implements ICandleStream {
         startTime = utils.ticks(startTime);
         startTime = startTime || lastCandle?.openTime;
         const interval = utils.toMinutes(this.dataSource.interval) * 60 * 1000;
-        await this.dataSource.playEx(async candles => {
+        await this.dataSource.play(async candles => {
             let populate_start = 0;
             if (candles.length > 0) {
                 populate_start = lastCandle

@@ -10,7 +10,7 @@ export interface IDataSource {
   get interval(): Intervals;
   get market(): Markets;
   get symbol(): Symbols;
-  playEx(cb: (candles: CandleStickCollection) => Promise<void>,
+  play(cb: (candles: CandleStickCollection) => Promise<void>,
     start?: Ticks,
     stop?: IStopCallBack): Promise<void>
 }

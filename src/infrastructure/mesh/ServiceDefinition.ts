@@ -1,12 +1,8 @@
+
 import { baseUtils } from "../base"
+import { IMeshService } from "./IMeshService"
 
-export type ServiceCategories = "data" | "indicator" | "strategy" | "telegram" | "proxy" | "redis"
-
-export interface IMeshService {
-    getInformation(): ServiceInformation
-    start(): Promise<unknown>
-    Id: string
-}
+export type ServiceCategories = "data" | "indicator" | "strategy" | "telegram" | "proxy" | "redis" | "helper"
 
 export interface ServiceConstructor {
     (serviceDefinition: ServiceDefinition): IMeshService

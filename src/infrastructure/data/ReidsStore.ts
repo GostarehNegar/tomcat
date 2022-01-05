@@ -1,5 +1,5 @@
 import { baseUtils, IServiceProvider } from "../base";
-import { RedisClientOptions } from "../services/RedisClientOptions";
+import { RedisClientOptions } from "../services/redis/RedisClientOptions";
 
 import { IDataStream } from "./IDataSream";
 import { IRepository } from "./IRepository";
@@ -11,7 +11,7 @@ export class ReidsStore implements IStore {
     constructor(public serviceProvider: IServiceProvider, public options: RedisClientOptions) {
     }
     getDataStream<T>(name: string): IDataStream<T> {
-        return new RedisDataStream<T>(name, undefined, this.serviceProvider);
+        return new RedisDataStream<T>(name, undefined, this.serviceProvider, this.options);
     }
     async getRepositoryAsync<T>(name: string | T): Promise<IRepository<T>> {
         if (typeof name !== 'string') {

@@ -1,8 +1,8 @@
 
-import { IDistributedCacheService } from "./ICacheService";
+import { IDistributedCacheService } from "../ICacheService";
 import { IRedisClientFactory } from "./IRedisClientFactory";
 
-import { RedisClient } from ".";
+import { RedisClient } from "..";
 
 export class RedisCacheService implements IDistributedCacheService {
 

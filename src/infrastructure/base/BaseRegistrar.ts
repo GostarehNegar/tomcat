@@ -2,12 +2,13 @@
 //import { IStopCallBack, IStopContext, StopTypes } from './stop'
 import { StoreFactory } from '../data';
 import { Clock, NodeManagerService, RedisClientFactory } from '../services';
-import { RedisCacheService } from '../services/RedisCacheService'
+import { RedisCacheService } from '../services/redis/RedisCacheService'
 import { SerializationService } from '../services/SerializationService'
 import { StopService } from '../services/stop'
 
 import provider, { IServiceProvider } from './ServiceProvider'
 import { BaseConstants } from './baseconstants';
+import baseconfig from './baseconfig';
 
 const names = BaseConstants.ServiceNames;
 
@@ -15,7 +16,8 @@ const names = BaseConstants.ServiceNames;
 const register = (services: IServiceProvider) => {
     const clock = new Clock();
     const stop = new StopService(services);
-    const redis = new RedisClientFactory();
+
+    const redis = new RedisClientFactory(baseconfig.data.redisEx);
     const store = new StoreFactory(services);
     const nodeManagerService = new NodeManagerService(services)
     services.register(names.IClock, () => clock, true);
@@ -24,7 +26,7 @@ const register = (services: IServiceProvider) => {
     services.register(names.IStoreFactory, () => store, true);
     services.register(names.IDistrubutedCache, (sp: IServiceProvider) => new RedisCacheService(sp.getService(names.IRedisClientFactory)), true);
     services.register(names.ISerializationService, (sp: IServiceProvider) => new SerializationService(sp), true);
-    services.register(names.INodeManagerService, () => nodeManagerService)
+    services.register(names.INodeManagerService, () => nodeManagerService, true)
 
 }
 class BaseServiceRegistrar {

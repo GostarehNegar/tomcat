@@ -196,7 +196,7 @@ describe('clock', () => {
 
             const stream = host.services
                 .getStoreFactory()
-                .createStore({ provider: 'redis', redis: { host: '172.16.6.56' } })
+                .createStore({ provider: 'redis', redis: { host: 'redis' } })
                 .getDataStream<dataType>(name);
             for (let i = 0; i < data.length; i++) {
                 try {

@@ -31,7 +31,7 @@ export class CCXTDataStream implements IDataSource {
     getLatestCandle(): Promise<ICandleStickData> {
         throw new Error("Method not implemented.");
     }
-    public async play(cb: (candle: CandleStickData) => Promise<void>,
+    public async playCandle(cb: (candle: CandleStickData) => Promise<void>,
         start?: Ticks,
         stop?: IStopCallBack) {
         const intervalMinutest = utils.toMinutes(this.interval);
@@ -124,7 +124,7 @@ export class CCXTDataStream implements IDataSource {
 
 
     }
-    public async playEx(cb: (candles: CandleStickCollection) => Promise<void>,
+    public async play(cb: (candles: CandleStickCollection) => Promise<void>,
         start?: Ticks,
         stop?: IStopCallBack) {
         const intervalMinutest = utils.toMinutes(this.interval);
@@ -135,8 +135,6 @@ export class CCXTDataStream implements IDataSource {
         let _number_of_failures = 0;
         let _last_error = null;
         let _last_candle = null;
-
-
         return new Promise<void>((resolve, reject) => {
             (resolve);
             (reject);
@@ -211,11 +209,6 @@ export class CCXTDataStream implements IDataSource {
             }, time_inter_val);
 
         });
-
-
-
-
-
     }
 
     public async playSync(cb: (candle: CandleStickData) => void,

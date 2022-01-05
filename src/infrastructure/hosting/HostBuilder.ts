@@ -46,7 +46,7 @@ export class HostBuilder implements IHostBuilder {
       config.internet = JSON.parse(conf).internet || config.internet
     }
     this._collection?.add(this._name, new Host(this._name, this.services));
-    this._config = JSON.parse(JSON.stringify(config));
+    this._config = config;// JSON.parse(JSON.stringify(config));
     this.services.register(serviceNames.Config, this._config);
   }
   addMessageBus(cf?: (c: typeof config.messaging) => void): IHostBuilder {

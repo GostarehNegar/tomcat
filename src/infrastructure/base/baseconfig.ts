@@ -23,7 +23,7 @@ export default {
             url: "redis://localhost:6379",
             publicUrl: null,
         },
-        redisEx: {}
+        redisEx: { host: "redis://localhost:6379" }
 
     },
 }

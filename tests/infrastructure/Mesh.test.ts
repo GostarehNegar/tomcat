@@ -1,4 +1,5 @@
 import tomcat from "../../src";
+import { KKKK } from "../../src/extensions";
 import { IMeshService, matchService, ServiceDefinition, ServiceInformation } from "../../src/infrastructure/mesh";
 
 
@@ -180,6 +181,66 @@ describe('Mesh', () => {
         const res = await server.services.getBus().createMessage(tomcat.Infrastructure.Contracts.requireService(service)).execute();
         (res)
         console.log("done");
+
+    })
+
+    test('redis mesh service', async () => {
+
+        const port = 8085;
+        tomcat.config.infrastructure.messaging.transports.websocket.url = `http://localhost:${port}/hub`
+        const hub = tomcat.getHostBuilder('hub')
+            .addWebSocketHub()
+            .buildWebHost();
+        const server = tomcat.getHostBuilder('server')
+            .addMessageBus(cfg => {
+                cfg.endpoint = 'server'
+                // cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+            })
+            .addMeshServer()
+            .buildWebHost();
+
+        const client = tomcat.getHostBuilder('client')
+            .addMessageBus(cfg => {
+                cfg.endpoint = 'client'
+                // cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+            })
+            .addMeshService({ category: 'strategy', parameters: {} }, (def) => {
+                (def)
+                return {
+                    getInformation: () => {
+                        var ret: ServiceInformation = {
+                            category: 'strategy',
+                            parameters: {
+                                name: 'babak'
+                            },
+                            status: "start"
+                        }
+                        return ret;
+                    },
+                    Id: "hhh",
+                    start: async (ctx) => {
+                        tomcat.Domain.Extenstions.getStore(ctx);
+
+
+
+
+                    },
+                }
+            })
+            .buildWebHost();
+        var info = await client.node.startService({ category: 'strategy', parameters: { name: 'babak' } })
+        console.log("**************", info);
+
+        await hub.listen(port);
+        await server.start();
+        await client.start();
+
+        await tomcat.utils.delay(3 * 1000);
+
+
+
+
+
 
     })
 });

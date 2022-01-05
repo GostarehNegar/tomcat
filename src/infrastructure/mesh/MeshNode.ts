@@ -8,6 +8,8 @@ import { BackgroundService } from "../hosting";
 import { ServiceDefinition, ServiceDescriptor } from "./ServiceDefinition";
 
 import { IMeshService, matchService, ServiceInformation } from ".";
+import { IMeshNode } from "./IMeshNode";
+import { MeshServiceContext } from "./MeshServiceContext";
 
 
 export interface queryService {
@@ -28,9 +30,6 @@ export interface MeshNodeConfiguration {
     queryService: queryService
 }
 
-export interface IMeshNode {
-    startService(serviceDefinition: ServiceDefinition): Promise<ServiceInformation>
-}
 export class MeshNode extends BackgroundService implements IMeshNode {
     public serviceDescriptors: ServiceDescriptor[] = []
     public runningServices: IMeshService[] = []
@@ -54,7 +53,7 @@ export class MeshNode extends BackgroundService implements IMeshNode {
                 this.logger.debug(`starting the first available service`)
                 try {
                     const service = availability[0].serviceConstructor(serviceDefinition)
-                    await service.start()
+                    await service.start(new MeshServiceContext(this.serviceProvider, this, service));
                     if (!this.runningServices.find(x => x.Id == service.Id)) {
                         this.runningServices.push(service)
                     }

@@ -14,7 +14,7 @@ export class BinanceDataSource implements IDataSource {
     public symbol: Symbols,
     public interval: Intervals
   ) { }
-  playEx(cb: (candles: CandleStickCollection) => Promise<void>, start?: Ticks, stop?: IStopCallBack): Promise<void> {
+  play(cb: (candles: CandleStickCollection) => Promise<void>, start?: Ticks, stop?: IStopCallBack): Promise<void> {
     (cb);
     (start);
     (stop);

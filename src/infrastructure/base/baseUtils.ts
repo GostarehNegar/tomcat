@@ -27,8 +27,11 @@ export class BaseUtils {
     }
     return { url: splitted[2].split(":")[0], port: Number(splitted[2].split(":")[1]), streamName: splitted.length == 4 ? splitted[3] : null }
   }
-  public Throw(exception: KnownExceptions, message: string, data: unknown = null) {
-    Exception.Throw(exception, message, data);
+  public Throw_Dprecated(exception: KnownExceptions, message: string, data: unknown = null) {
+    Exception.Throw_Deprecated(exception, message, data);
+  }
+  public Throw(message: string, category: KnownExceptions = 'unkown', name: string = null, data: unknown = null) {
+    Exception.Throw(message, category, name, data);
   }
   public toException(exception: KnownExceptions, message: string, data: unknown = null) {
     return Exception.create(exception, message, data)
@@ -151,6 +154,14 @@ export class BaseUtils {
     return name + "-" + Math.floor(Math.random() * Math.pow(10, numberOfRandoms))
   }
 
+  public timeout<T>(promise: Promise<T>, timeout: number = 60000, Throw = true): Promise<T> {
+    const timeoutPromise = new Promise<T>((resolve, reject) => {
+      setTimeout(() => {
+        (Throw ? reject("time out") : resolve(null))
+      }, timeout)
+    })
+    return Promise.race([timeoutPromise, promise])
+  }
 
   private _proxy: Agent;
   public getProxy(url = "https://youtube.com", max_trials = 10, dont_reject = true, interval = 5000, refersh = false): Promise<Agent> {

@@ -15,7 +15,9 @@ export const Constants = {
     Router: 'Router',
     Config: 'Config',
     IBot: 'IBot',
-    ICock: BaseConstants.ServiceNames.IClock
+    ICock: BaseConstants.ServiceNames.IClock,
+    IUtilityServices: 'IUtilityServices',
+    IDomainServices: "IDomainServices"
 
   },
   DataSources: {
