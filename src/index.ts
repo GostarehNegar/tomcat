@@ -24,6 +24,12 @@ namespace tomcat {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     export import Domain = _Domain
 
+    /**
+     * Retruns a host builder that can be used to build 
+     * a new host. Each tomcat node has a host.
+     * @param name the name of the host.
+     * @returns 
+     */
     export const getHostBuilder = (name: string): IHostBuilder => {
         var res = new HostBuilder(name, null)
         provider = res.services;

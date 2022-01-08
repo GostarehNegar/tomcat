@@ -36,8 +36,8 @@ export class BaseUtils {
   public Throw(message: string, category: KnownExceptions = 'unkown', name: string = null, data: unknown = null) {
     Exception.Throw(message, category, name, data);
   }
-  public toException(exception: KnownExceptions, message: string, data: unknown = null) {
-    return Exception.create(exception, message, data)
+  public toException(message: string, category: KnownExceptions = 'unkown', name: string = null, data: unknown = null) {
+    return Exception.create(message, category, name, data)
   }
   public getServiceProvider() {
     return ServiceProvider

@@ -17,8 +17,8 @@ export class Exception implements Error {
     public static Throw(message: string, category: KnownExceptions = 'unexpected', name: string = null, data: unknown = null) {
         throw new Exception(message, category, name, data);
     }
-    public static create(type: KnownExceptions, message: string, data: unknown = null) {
-        return new Exception(message, type, "", data);
+    public static create(message: string, category: KnownExceptions = 'unexpected', name: string = null, data: unknown = null) {
+        return new Exception(message, category, name, data);
     }
 
 }

@@ -3,8 +3,6 @@ import { RedisClientOptions } from "../../src/infrastructure/services/";
 
 jest.setTimeout(80000)
 
-
-
 describe('redis', () => {
 
     test('redis utils works', async () => {
@@ -25,7 +23,7 @@ describe('redis', () => {
 
 
         const options: RedisClientOptions = {
-            host: "redis",
+            host: "localhost",
             keyPrefix: "myperfix-",
             db: 12
         }
@@ -45,6 +43,19 @@ describe('redis', () => {
         const info = await host.services.getRedisFactory().getRedisInfo("localhost", containerInfo.port)
         expect(containerInfo).not.toBeUndefined()
         expect(info).not.toBe(null)
+    })
+
+    test("redisMeshService works", async () => {
+        const host = tomcat.getHostBuilder("test").build()
+
+        const target = tomcat.Domain.Services.RedisMeshService
+            .GetOrCreate({ category: 'redis', parameters: {} });
+        await target.start(null);
+        (host);
+        (target);
+
+
+
     })
     test("redisUtils", async () => {
         await tomcat.Infrastructure.Services.RedisUtils.InstallRedis()

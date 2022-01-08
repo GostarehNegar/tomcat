@@ -219,11 +219,10 @@ describe('Mesh', () => {
                     },
                     Id: "hhh",
                     start: async (ctx) => {
-                        tomcat.Domain.Extenstions.getStore(ctx);
-
-
-
-
+                        //tomcat.Domain.Extenstions.getStore(ctx);
+                        const store = await ctx.getHelper().getRedisStore();
+                        const repo = store.getRepository<{ id: string, name: string }>('test');
+                        repo.insert({ id: 'babak@gnco.ir', name: 'babak' });
                     },
                 }
             })

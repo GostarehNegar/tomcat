@@ -5,7 +5,8 @@ jest.setTimeout(20000);
 
 describe("redis service ", () => {
 
-    test('redis sevice works', async () => {
+    test('redis service works', async () => {
+
         // const target = new tomcat.Domain.Services.RedisProcessAdapter({ port: 0 });
         // target.start();
         // tomcat.services.getDomainServices();

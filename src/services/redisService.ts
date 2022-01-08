@@ -17,9 +17,14 @@ import { RedisMeshService } from './redis/RedisMeshService';
             cfg.endpoint = "redisservice";
             cfg.transports.websocket.url = "http://localhost:8084/hub";
         })
-        .addMeshService({ category: 'redis', parameters: {} }, (def) => new RedisMeshService(def))
+        .addMeshService({ category: 'redis', parameters: {} }, (def) => RedisMeshService.GetOrCreate(def))
         .build();
-    client1.bus.subscribe(Contracts.queryRedisContainer(null).topic, async (ctx) => {
+    client1.bus.subscribe(Contracts.queryRedisOptions(null).topic, async (ctx) => {
+
+        RedisMeshService.handle(ctx);
+
+
+
         // const meshNode = client1.services.getService<MeshNode>(BaseConstants.ServiceNames.MeshNode)
         // const payload = ctx.message.cast<Contracts.queryRedisContainerPayload>()
         await ctx.reply({ host: "localhost", port: 6379, db: "2" })

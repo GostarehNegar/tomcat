@@ -20,7 +20,7 @@ export class ServiceDefinitionBase<T extends IServiceDefinitionParameters> {
 export class ServiceDefinition extends ServiceDefinitionBase<IServiceDefinitionParameters> {
 }
 
-export type ServiceStatus = "start" | "stop" | "pause"
+export type ServiceStatus = "start" | "stop" | "pause" | 'unknown'
 export class ServiceInformation extends ServiceDefinition {
     public status: ServiceStatus
 }

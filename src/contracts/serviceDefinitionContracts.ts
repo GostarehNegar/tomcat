@@ -14,33 +14,21 @@ export interface IDataServiceParameters {
 }
 export class DataServiceDefinition extends ServiceDefinitionBase<IDataServiceParameters>{
     readonly category: ServiceCategories = 'data'
-    constructor(params : IDataServiceParameters){
-        super()
-        this.parameters = params
-    }
-}
-export interface IRedisServiceParameters {
-    [key: string]: unknown
-    "port"?: string
-    "dataPath"?: string
-    "name"?: string
-}
-export class redisServiceDefinition extends ServiceDefinitionBase<IRedisServiceParameters> {
-    readonly category: ServiceCategories = "redis"
-    constructor(params: IRedisServiceParameters) {
+    constructor(params: IDataServiceParameters) {
         super()
         this.parameters = params
     }
 }
 
-export const requireDataStream = async (bus:IMessageBus, exchange, interval, market, symbol, startTime, endTime?) => {
+
+export const requireDataStream = async (bus: IMessageBus, exchange, interval, market, symbol, startTime, endTime?) => {
     const service = new DataServiceDefinition({ exchange: exchange, interval: interval, market: market, symbol: symbol, startTime: startTime, endTime: endTime })
     await bus.createMessage(serviceOrder(service)).execute()
 }
 
 export class RPC {
-    static async requireDataStream(bus: IMessageBus, exchange, interval, market, symbol, startTime, endTime?)  {
-    const service = new DataServiceDefinition({ exchange: exchange, interval: interval, market: market, symbol: symbol, startTime: startTime, endTime: endTime })
-    await bus.createMessage(serviceOrder(service)).execute()
-}
+    static async requireDataStream(bus: IMessageBus, exchange, interval, market, symbol, startTime, endTime?) {
+        const service = new DataServiceDefinition({ exchange: exchange, interval: interval, market: market, symbol: symbol, startTime: startTime, endTime: endTime })
+        await bus.createMessage(serviceOrder(service)).execute()
+    }
 }
