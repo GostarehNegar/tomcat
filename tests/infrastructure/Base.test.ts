@@ -1,5 +1,4 @@
 import tomcat from "../../src";
-import utils from "../../src/common/Domain.Utils";
 import { Logger } from "../../src/infrastructure/base";
 
 //import '../../src/lib/extensions'

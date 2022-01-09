@@ -1,4 +1,6 @@
 import tomcat from "../../src"
+import utils from "../../src/common/Domain.Utils";
+import { MeshServiceContext } from "../../src/infrastructure/mesh/MeshServiceContext";
 import { RedisClientOptions } from "../../src/infrastructure/services/";
 
 jest.setTimeout(80000)
@@ -38,8 +40,8 @@ describe('redis', () => {
     });
     test("redisAdapter", async () => {
         const host = tomcat.getHostBuilder("test").build()
-        const adapter = new tomcat.Domain.Services.RedisProcessAdapter({ port: 6350 })
-        const containerInfo = await adapter.start()
+        const adapter = new tomcat.Domain.Services.RedisProcessAdapter({ port: 6350 }, host.services.getProcessManager())
+        const containerInfo = await adapter.start({ port: 6350 })
         const info = await host.services.getRedisFactory().getRedisInfo("localhost", containerInfo.port)
         expect(containerInfo).not.toBeUndefined()
         expect(info).not.toBe(null)
@@ -47,10 +49,11 @@ describe('redis', () => {
 
     test("redisMeshService works", async () => {
         const host = tomcat.getHostBuilder("test").build()
-
+        const ip = utils.ipAddress();
+        (ip);
         const target = tomcat.Domain.Services.RedisMeshService
             .GetOrCreate({ category: 'redis', parameters: {} });
-        await target.start(null);
+        await target.start(new MeshServiceContext(host.services, null, target));
         (host);
         (target);
 

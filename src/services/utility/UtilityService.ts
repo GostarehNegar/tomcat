@@ -1,13 +1,11 @@
-import { Utils } from "../../common";
-import { IServiceProvider } from "../../infrastructure/base";
 
-export class UtilityService extends Utils {
+import { IServiceProvider } from "../../infrastructure/base";
+import { BaseUtilityService } from "../../infrastructure/services/utility/BaseUtilityService";
+
+export class UtilityService extends BaseUtilityService {
 
     constructor(public ServiceProvider: IServiceProvider) {
-        super()
-    }
-    public getServiceProvider(): IServiceProvider {
-        return this.ServiceProvider;
+        super(ServiceProvider)
     }
 
 

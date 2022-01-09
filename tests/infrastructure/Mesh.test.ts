@@ -1,5 +1,7 @@
 import tomcat from "../../src";
-import { KKKK } from "../../src/extensions";
+import utils from "../../src/common/Domain.Utils";
+import { Contracts } from "../../src/infrastructure";
+
 import { IMeshService, matchService, ServiceDefinition, ServiceInformation } from "../../src/infrastructure/mesh";
 
 
@@ -194,7 +196,7 @@ describe('Mesh', () => {
         const server = tomcat.getHostBuilder('server')
             .addMessageBus(cfg => {
                 cfg.endpoint = 'server'
-                // cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+                cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
             .addMeshServer()
             .buildWebHost();
@@ -202,7 +204,7 @@ describe('Mesh', () => {
         const client = tomcat.getHostBuilder('client')
             .addMessageBus(cfg => {
                 cfg.endpoint = 'client'
-                // cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+                cfg.transports.websocket.url = `http://localhost:${8084}/hub`;
             })
             .addMeshService({ category: 'strategy', parameters: {} }, (def) => {
                 (def)
@@ -220,19 +222,29 @@ describe('Mesh', () => {
                     Id: "hhh",
                     start: async (ctx) => {
                         //tomcat.Domain.Extenstions.getStore(ctx);
-                        const store = await ctx.getHelper().getRedisStore();
+                        const store = await ctx.getHelper().getRedisStore('strategy-babak');
                         const repo = store.getRepository<{ id: string, name: string }>('test');
                         repo.insert({ id: 'babak@gnco.ir', name: 'babak' });
                     },
                 }
             })
             .buildWebHost();
+
+        await hub.listen(port);
+        await utils.delay(3000);
+        await server.start();
+        var c = Contracts.requireService({ category: 'redis', parameters: {} })
+        //await server.bus.subscribe('some-topic', async ctx => { await ctx.reply('pong') });
+        // await server.bus.subscribe(c.topic, async ctx => {
+        //     await ctx.reply('pong')
+        // });
+        await utils.delay(3000);
+        await client.start();
+        var result = await client.bus.createMessage(c).execute(undefined, 2 * 60 * 1000);
+        (result);
         var info = await client.node.startService({ category: 'strategy', parameters: { name: 'babak' } })
         console.log("**************", info);
 
-        await hub.listen(port);
-        await server.start();
-        await client.start();
 
         await tomcat.utils.delay(3 * 1000);
 

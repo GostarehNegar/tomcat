@@ -1,5 +1,6 @@
 import utils from "../common/Domain.Utils";
 import { queryRedisOptions, redisServiceDefinition } from "../contracts";
+import { Contracts } from "../infrastructure";
 
 import { IStore } from "../infrastructure/data";
 import { IMeshServiceContext, ServiceDefinition, ServiceInformation } from "../infrastructure/mesh";
@@ -17,7 +18,16 @@ export class MeshServiceHelper {
      */
     async require(definition: ServiceDefinition): Promise<ServiceInformation> {
         (definition)
-        throw utils.toException("Not Implemented");
+        var bus = this.context.ServiceProvider.getBus();
+        try {
+            var result = bus.createMessage(Contracts.requireService(definition)).execute(undefined, 2 * 60 * 1000);
+            (result);
+            await utils.delay(5000);
+            return null;
+        }
+        catch (err) {
+
+        }
         return null;
     }
 
@@ -30,13 +40,14 @@ export class MeshServiceHelper {
      * to persists data for this mesh service.
      */
 
-    async getRedisStore(type: 'exclusive' | 'shared' = 'shared'): Promise<IStore> {
-        await this.requireRedis();
+    async getRedisStore(name: string, type: 'exclusive' | 'shared' = 'shared'): Promise<IStore> {
+        const ggg = await this.requireRedis();
+        (ggg);
         let result: IStore = null;
         const bus = this.context.ServiceProvider.getBus();
         (bus);
-        var response = await bus.createMessage(queryRedisOptions({ repository_type: type }))
-            .execute();
+        var response = await bus.createMessage(queryRedisOptions({ name: name, repository_type: type }))
+            .execute(undefined, 20 * 1000, true);
         if (response) {
             const options = response.cast<RedisClientOptions>();
             result = this.context.ServiceProvider.getStoreFactory()

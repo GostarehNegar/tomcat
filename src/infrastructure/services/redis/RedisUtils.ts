@@ -3,12 +3,17 @@ import fs from "node:fs";
 
 export class RedisUtils {
 
-    static async IsRedisServerInstalled(): Promise<boolean> {
+    static IsRedisServerInstalled(): boolean {
         return fs.existsSync("/usr/local/bin/redis-server")
 
     }
+
     static async InstallRedis(): Promise<string> {
         return new Promise<string>((resolve, reject) => {
+            if (this.IsRedisServerInstalled()) {
+                resolve("/usr/local/bin/redis-server");
+                return;
+            }
             const script = `
             cd /tmp
             wget http://download.redis.io/redis-stable.tar.gz

@@ -23,7 +23,10 @@ export const BaseConstants = {
         'MeshNode': 'MeshNode',
         'IServiceDiscovery': 'IServiceDiscovery',
         'ServiceDescriptor': 'ServiceDescriptor',
-        'INodeManagerService': 'INodeManagerService'
+        'INodeManagerService': 'INodeManagerService',
+        'BaseUtilityService': 'BaseUtilityService',
+        'IDockerService': 'IDockerService',
+        'IProcessManager': 'IProcessManage',
 
 
     }

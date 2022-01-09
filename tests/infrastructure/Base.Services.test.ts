@@ -1,4 +1,5 @@
 import tomcat from "../../src";
+import utils from "../../src/common/Domain.Utils";
 
 jest.setTimeout(35 * 1000);
 describe('clock', () => {
@@ -155,6 +156,20 @@ describe('clock', () => {
             const last_item = await stream.getLast();
             expect(first_item.index).toBe(data[0].index);
             expect(last_item.index).toBe(data[data.length - 1].index);
+        });
+
+    });
+
+    describe('docker', () => {
+        test('dockerservice works', async () => {
+            const host = tomcat.getHostBuilder('test').build();
+            const indocker = utils.isInDocker();
+            const client = host.services.getDocker().createClient({});
+            const info = await client.test();
+            (info);
+            (indocker);
+
+
         });
 
     });

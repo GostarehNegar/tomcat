@@ -1,11 +1,13 @@
-import { ChildProcessWithoutNullStreams } from 'child_process';
+
 import { RedisProcessAdapter } from '.';
+import utils from '../../common/Domain.Utils';
 import { queryRedisOptionsPayload, redisServiceDefinition } from '../../contracts';
 
 import { baseUtils, ILogger } from '../../infrastructure/base';
 import { IMessageContext } from '../../infrastructure/bus';
 import { IMeshService, IMeshServiceContext, matchService, ServiceCategories, ServiceDefinition, ServiceInformation, ServiceStatus } from '../../infrastructure/mesh';
-import { RedisClientOptions } from '../../infrastructure/services';
+import { RedisClientOptions, RedisUtils } from '../../infrastructure/services';
+import { IProcess, IProcessManager } from '../../infrastructure/services/processManager/IProcessManager';
 
 export type redisInfo = {
     dataDrirectory: string,
@@ -18,7 +20,7 @@ export type redisInfo = {
  */
 
 export class RedisMeshService implements IMeshService {
-    public process: ChildProcessWithoutNullStreams;
+    public process: IProcess;
     public containerName: string;
     public portNumber: string;
     public dataDirectory: string;
@@ -36,23 +38,42 @@ export class RedisMeshService implements IMeshService {
         this.containerName = (this.def.parameters && this.def.parameters["name"]) as string || baseUtils.randomName("redis");
         this.portNumber = this.def.parameters && this.def["port"] as string;
         this.dataDirectory = (this.def.parameters && this.def["dataPath"]) || `/home/paria/Desktop/a/${this.containerName}`;
-        this._adapter = new RedisProcessAdapter();
+        this._adapter = null;
+    }
+    async startWithRedisServer(manager: IProcessManager, name: string, port: number, dir: string): Promise<IProcess> {
+        //var dir = await utils.getRedisDataDirectory(name);
+        const redis_server = await RedisUtils.InstallRedis();
+        this.process = manager.create(name)
+            .spawn(redis_server, ['--port', port.toString(), '--dir', dir]);
+        return this.process;
+    }
+    async startWithDocker(manager: IProcessManager, name: string, port: number, dir: string): Promise<IProcess> {
+        //var dir = await utils.getRedisDataDirectory(name);
+        this.process = manager.create(name)
+            .spawn("docker", ["run", "-d", "-p", `${port}:6379`, "-v", `${dir}:/data`, "--name", name, "redis"]);
+        return this.process;
     }
     async start(ctx?: IMeshServiceContext): Promise<unknown> {
         (ctx)
-        //if (this.status!= 'start')
         if (this.status !== 'start') {
             try {
-                await this._adapter.start({
-                    port: this.portNumber ? Number(this.portNumber) : null,
-                    containerName: this.containerName
-                });
+                const in_docker = await utils.isInDocker();
+                const port: number = parseInt(this.portNumber);
+                const name = this.containerName;
+                const dir = await utils.getRedisDataDirectory(name);
+                if (in_docker) {
+                    this.process = await this
+                        .startWithRedisServer(ctx.ServiceProvider.getProcessManager(), name, port, dir)
+                }
+                else {
+                    this.process = await this.startWithDocker(ctx.ServiceProvider.getProcessManager(), name, port, dir);
+
+                }
                 this.status = 'start';
             }
             catch (err) {
                 this.logger.error(
                     `An error occured while trying to spawn a new redis instance. Err:${err}`)
-
             }
         }
         return this.getInformation();
@@ -67,7 +88,8 @@ export class RedisMeshService implements IMeshService {
                 dataDir: this._adapter.containerInfo.dataDirectory,//  this.dataDirectory,
                 containerID: this._adapter.containerInfo.containerID,// this.containerId,
                 redisName: this._adapter.containerInfo.containerName,
-                connectionString: `redis://localhost:${this.portNumber}`
+                connectionString: `redis://localhost:${this.portNumber}`,
+                host: ''
             },
             status: this.status
         };
@@ -82,6 +104,10 @@ export class RedisMeshService implements IMeshService {
         (definition);
         (this._instances);
         let service: RedisMeshService = null;
+        const params = definition.parameters;
+        params.type = params.type || 'shared';
+        params.port = (params.port && isFinite(parseInt(params.port)) ? parseInt(params.port) : 3679).toString();
+        params.name = params.name || `redis-${params.port}`;
         // We should search thru _instances to find a 
         // corresponding service.
         for (let idx = 0; idx < this._instances.length; idx++) {
@@ -103,10 +129,46 @@ export class RedisMeshService implements IMeshService {
      * Handles a queryRedisOptions request and provides
      * @param request 
      */
-    public static handle(ctx: IMessageContext) {
+    public static async handle(ctx: IMessageContext) {
         var request = ctx.message.cast<queryRedisOptionsPayload>();
-        (request);
+        if (!request || !request.name || request.name === '') {
+            throw utils.toException('invalid request.')
+        }
+        let service: RedisMeshService = null;
+        switch (request.repository_type) {
+            case 'exclusive':
+                /// 
+                service = utils.from(this._instances)
+                    .firstOrDefault(x => x.definition.parameters.name === request.name);
+                if (!service) {
+                    service = this.GetOrCreate({
+                        category: 'redis',
+                        parameters: {
+                            name: request.name,
+                            port: (await utils.findPort(3600, 3800)).toString()
+                        }
+                    })
+                }
+
+                break;
+            case 'shared':
+                // 
+                service = this.GetOrCreate(
+                    {
+                        category: 'redis',
+                        parameters: {
+                            port: '3679',
+                            name: 'redis'
+                        }
+                    })
+                break;
+        }
+        var info = service.getInformation();
+
         var options: RedisClientOptions = {
+            host: info.parameters.host,
+            port: info.parameters.port,
+            keyPrefix: request.name + ':',
 
         };
 

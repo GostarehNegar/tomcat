@@ -5,6 +5,7 @@ import { ServiceCommandContract } from "./dataContracts"
 
 export interface IRedisServiceParameters {
     [key: string]: unknown
+    'type'?: 'exlusive' | 'shared'
     "port"?: string
     "dataPath"?: string
     "name"?: string
@@ -31,6 +32,7 @@ export type orderRedisServicePayload = {
  * 
  */
 export type queryRedisOptionsPayload = {
+    name: string;
     repository_type: 'shared' | 'exclusive';
 }
 

@@ -15,7 +15,7 @@ export class RedisDataStream<T> implements IDataStream<T>{
     private serializer: ISerielizationService;
     constructor(public name: string, private client?: RedisClient, private serviceProvider?: IServiceProvider,
         public options?: RedisClientOptions) {
-        this.serviceProvider = serviceProvider || baseUtils.getServiceProvider();
+        this.serviceProvider = serviceProvider;//|| baseUtils.getServiceProvider();
         this.client = client || this.serviceProvider.getRedisFactory().createClient(this.options);
         this.serializer = this.serviceProvider.getSerilizer();
 

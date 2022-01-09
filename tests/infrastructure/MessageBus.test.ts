@@ -15,13 +15,63 @@ afterAll(async () => {
 
 });
 describe('MessageBus', () => {
-    test('should create message', () => {
+    test('create message', () => {
         const body = { name: "babak" }
         const message = bus.createMessage("test", body);
         message.message.headers["on"] = Date.now().toString();
         expect(message.message.topic).toBe("test");
         expect(message.message.payload).toBe(body);
     });
+    test('interprocess bus works', async () => {
+        const port = 8085;
+
+        const hub = tomcat.getHostBuilder('hub')
+            .addWebSocketHub()
+            .buildWebHost();
+        const server = tomcat.getHostBuilder('server')
+            .addMessageBus(cfg => {
+                cfg.endpoint = 'server'
+                cfg.transports.websocket.diabled = false;
+                cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+            })
+            .buildWebHost();
+        const client = tomcat.getHostBuilder('client')
+            .addMessageBus(cfg => {
+                cfg.endpoint = 'client'
+                cfg.transports.websocket.diabled = false;
+                cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+            })
+            .buildWebHost();
+        await server.bus.subscribe(SystemTopics.busdown, async (ctx) => {
+
+            (ctx);
+            await Promise.resolve();
+        })
+        await server.bus.subscribe('some-topic', async (ctx) => {
+            ctx.reply('pong');
+
+        });
+
+
+
+        await hub.listen(port);
+        await tomcat.utils.delay(3000);
+        await server.start();
+        await client.start();
+        const res = await client.bus.createMessage('some-topic', {}).execute();
+        (res);
+        await tomcat.utils.delay(3000);
+        await client.stop();
+        await tomcat.utils.delay(3000);
+
+
+
+
+
+
+
+    });
+
     test('busdown works', async () => {
         const port = 8085;
         const hub = tomcat.getHostBuilder('hub')

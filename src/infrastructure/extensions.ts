@@ -5,6 +5,8 @@ import { IMessageBus } from './bus';
 import { IStoreFactory } from './data/IStoreFactory'
 import { IServiceDiscovery } from './mesh/IServiceDiscovery';
 import { IClock, IDistributedCacheService, INodeManagerService, IRedisClientFactory, ISerielizationService, IStopService } from './services'
+import { IDockerService } from './services/docker/IDockerServices';
+import { IProcessManager } from './services/processManager/IProcessManager';
 const names = BaseConstants.ServiceNames;
 type ServiceTypes = '1' | '2';
 declare module './base/ServiceProvider' {
@@ -19,6 +21,8 @@ declare module './base/ServiceProvider' {
         getBus(): IMessageBus;
         getServiceDiscovery(): IServiceDiscovery
         getNodeManagerService(): INodeManagerService
+        getDocker(): IDockerService;
+        getProcessManager(): IProcessManager;
     }
     interface IServiceProvider {
         getBaseService(s: ServiceTypes);
@@ -30,7 +34,10 @@ declare module './base/ServiceProvider' {
         getSerilizer(): ISerielizationService;
         getBus(): IMessageBus;
         getServiceDiscovery(): IServiceDiscovery
-        getNodeManagerService(): INodeManagerService
+        getNodeManagerService(): INodeManagerService;
+        getDocker(): IDockerService;
+        getProcessManager(): IProcessManager;
+
     }
 
 }
@@ -65,6 +72,12 @@ ServiceProvider.prototype.getServiceDiscovery = function (): IServiceDiscovery {
 };
 ServiceProvider.prototype.getNodeManagerService = function (): INodeManagerService {
     return (this as IServiceProvider).getService<INodeManagerService>(names.INodeManagerService);
+}
+ServiceProvider.prototype.getDocker = function (): IDockerService {
+    return (this as IServiceProvider).getService<IDockerService>(names.IDockerService);
+}
+ServiceProvider.prototype.getProcessManager = function (): IProcessManager {
+    return (this as IServiceProvider).getService<IProcessManager>(names.IProcessManager);
 }
 
 

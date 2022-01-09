@@ -21,21 +21,14 @@ import { RedisMeshService } from './redis/RedisMeshService';
         .build();
     client1.bus.subscribe(Contracts.queryRedisOptions(null).topic, async (ctx) => {
 
-        RedisMeshService.handle(ctx);
+        try {
+            const res = await RedisMeshService.handle(ctx);
+            await ctx.reply(res);
+        }
+        catch (err) {
+            await ctx.reject(err);
 
-
-
-        // const meshNode = client1.services.getService<MeshNode>(BaseConstants.ServiceNames.MeshNode)
-        // const payload = ctx.message.cast<Contracts.queryRedisContainerPayload>()
-        await ctx.reply({ host: "localhost", port: 6379, db: "2" })
-        // const service = (meshNode.runningServices as RedisService[]).find(x => x.containerName == payload.containerName)
-        // if (service && service.isReady) {
-        //     meshNode.logger.info(`container ${service.containerName} was found`)
-        //     await ctx.reply({ connectionString: `redis://localhost:${service.portNumber}` })
-        // } else {
-        //     meshNode.logger.warn(`no container by the name of ${payload.containerName} was found or service is not ready . ready :${service?.isReady}`)
-        //     await ctx.reply(null)
-        // }
+        }
     })
 
     await client1.start()

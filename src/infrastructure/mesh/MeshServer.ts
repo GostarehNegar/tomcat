@@ -110,9 +110,9 @@ export class MeshServer extends BackgroundService implements IServiceDiscovery {
                     "MessageBus reports that a connection has been lost!!!")
 
             }
-
-
         });
+        this.logger.info(
+            `MeshServer Started. ${this.name}`);
         await super.start();
     }
     async stop(): Promise<void> {

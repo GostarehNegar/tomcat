@@ -8,7 +8,7 @@ export interface ServiceConstructor {
     (serviceDefinition: ServiceDefinition): IMeshService
 }
 export interface IServiceDefinitionParameters {
-    [key: string]: unknown
+    [key: string]: any
 }
 export class ServiceDefinitionBase<T extends IServiceDefinitionParameters> {
     public category: ServiceCategories

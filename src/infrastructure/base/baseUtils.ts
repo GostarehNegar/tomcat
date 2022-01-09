@@ -13,15 +13,43 @@ import config from '../base/baseconfig';
 
 import { ILogger } from './ILogger';
 import provider from './ServiceProvider'
-import ServiceProvider from './ServiceProvider';
+
 import { Ticks, TimeEx, TimeSpan } from './TimeEx';
 import { Exception, KnownExceptions } from './exception'
 import { Logger } from './logger';
-
+import fs from 'node:fs';
+import Enumerable from 'linq'
+import ip from 'ip';
+let isDockerCached;
 (provider);
 export class BaseUtils {
   public test(): string {
     return 'test from 1';
+  }
+  public ipAddress() {
+    return ip.address()
+  }
+  public isRedisInstalled(): boolean {
+    return fs.existsSync("/usr/local/bin/redis-server")
+  }
+  public from<T>(source: T[]) {
+    return Enumerable.from(source);
+  }
+  public isInDocker(): boolean {
+    if (isDockerCached === undefined) {
+      try {
+        fs.statSync('./dockerenv')
+        isDockerCached = true;
+      } catch { }
+      if (isDockerCached == undefined) {
+        try {
+          isDockerCached = fs.readFileSync('/proc/self/cgroup', 'utf8').includes('docker');
+        } catch { }
+      }
+      if (isDockerCached == undefined)
+        isDockerCached = false;
+    }
+    return isDockerCached;
   }
   public getRedisConfigFromConnectionString(connectionString: string) {
     const splitted = connectionString.split('/');
@@ -39,9 +67,10 @@ export class BaseUtils {
   public toException(message: string, category: KnownExceptions = 'unkown', name: string = null, data: unknown = null) {
     return Exception.create(message, category, name, data)
   }
-  public getServiceProvider() {
-    return ServiceProvider
-  }
+
+  // public getServiceProvider() {
+  //   return ServiceProvider
+  // }
   public ticks(input: Date | number | TimeEx | string): number {
     if (input instanceof TimeEx) {
       return input.ticks
@@ -142,6 +171,7 @@ export class BaseUtils {
   public isValidUrl(url: string) {
     return url && url.length > 1;
   }
+
 
   public findPort(min: number, max: number) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
