@@ -5,6 +5,7 @@ import { MessageBus } from './MessageBus';
 import SystemTopics from './Topics';
 
 import { IMessage, IMessageContextHeader } from '.';
+import { IServiceProvider } from '../base';
 
 
 export class MessageContext implements IMessageContext {
@@ -16,6 +17,9 @@ export class MessageContext implements IMessageContext {
   }
   setScope(scope: 'local' | 'remote' | 'both'): void {
     this.headers['scope'] = scope;
+  }
+  get serviceProvider(): IServiceProvider {
+    return this._bus.serviceProvider;
   }
   get scope(): 'local' | 'remote' | 'both' | '' {
     return (this.headers['scope'] || '') as 'local' | 'remote' | 'both' | '';

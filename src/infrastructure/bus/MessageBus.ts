@@ -1,6 +1,6 @@
 
 import { Utils } from '../../common';
-import { CancellationToken, ILogger, Logger } from '../base';
+import { CancellationToken, ILogger, IServiceProvider, Logger } from '../base';
 import config from '../base/baseconfig';
 import { BackgroundService } from '../hosting';
 
@@ -47,6 +47,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
   private _logger: ILogger;
   private _alreadyProcessed = [];
   constructor(
+    public serviceProvider: IServiceProvider,
     cf?: (c: typeof config.messaging) => void,
     cfg?: typeof config.messaging
   ) {

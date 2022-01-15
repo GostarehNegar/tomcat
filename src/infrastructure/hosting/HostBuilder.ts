@@ -50,7 +50,7 @@ export class HostBuilder implements IHostBuilder {
     this.services.register(serviceNames.Config, this._config);
   }
   addMessageBus(cf?: (c: typeof config.messaging) => void): IHostBuilder {
-    const bus = new MessageBus(cf, this._config.messaging);
+    const bus = new MessageBus(this.services, cf, this._config.messaging);
     this.services.register(serviceNames.IHostedService, bus);
     this.services.register(serviceNames.IMessageBus, bus);
     return this;

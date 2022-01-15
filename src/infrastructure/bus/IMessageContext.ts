@@ -1,3 +1,4 @@
+import { IServiceProvider } from "../base";
 import { IMessage } from "./IMessage";
 export interface IMessageContextHeader {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,4 +36,5 @@ export interface IMessageContext {
     get scope(): 'local' | 'remote' | 'both' | '';
     set scope(value: 'local' | 'remote' | 'both' | '');
     toString(): string;
+    get serviceProvider(): IServiceProvider;
 }

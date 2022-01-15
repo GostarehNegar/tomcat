@@ -187,7 +187,6 @@ describe('Mesh', () => {
     })
 
     test('redis mesh service', async () => {
-
         const port = 8085;
         tomcat.config.infrastructure.messaging.transports.websocket.url = `http://localhost:${port}/hub`
         const hub = tomcat.getHostBuilder('hub')
@@ -200,11 +199,20 @@ describe('Mesh', () => {
             })
             .addMeshServer()
             .buildWebHost();
+        const redisBuilder = tomcat.getHostBuilder('redis')
+            .addMessageBus(cfg => {
+                cfg.endpoint = 'redis'
+                cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+            })
+        tomcat.Domain.Services.AddRedisService(redisBuilder);
+        const redisServer = redisBuilder.build();
+
+
 
         const client = tomcat.getHostBuilder('client')
             .addMessageBus(cfg => {
                 cfg.endpoint = 'client'
-                cfg.transports.websocket.url = `http://localhost:${8084}/hub`;
+                cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
             .addMeshService({ category: 'strategy', parameters: {} }, (def) => {
                 (def)
@@ -222,9 +230,9 @@ describe('Mesh', () => {
                     Id: "hhh",
                     start: async (ctx) => {
                         //tomcat.Domain.Extenstions.getStore(ctx);
-                        const store = await ctx.getHelper().getRedisStore('strategy-babak');
+                        const store = await ctx.getHelper().getRedisStore('strategy-babak',);
                         const repo = store.getRepository<{ id: string, name: string }>('test');
-                        repo.insert({ id: 'babak@gnco.ir', name: 'babak' });
+                        await repo.insert({ id: 'babak@gnco.ir', name: 'babak' });
                     },
                 }
             })
@@ -233,6 +241,10 @@ describe('Mesh', () => {
         await hub.listen(port);
         await utils.delay(3000);
         await server.start();
+        const _info = await server.services.getRedisFactory().getRedisInfo('redis', 6379);
+        (_info);
+
+        await redisServer.start();
         var c = Contracts.requireService({ category: 'redis', parameters: {} })
         //await server.bus.subscribe('some-topic', async ctx => { await ctx.reply('pong') });
         // await server.bus.subscribe(c.topic, async ctx => {
@@ -240,7 +252,10 @@ describe('Mesh', () => {
         // });
         await utils.delay(3000);
         await client.start();
+        await utils.delay(5000);
         var result = await client.bus.createMessage(c).execute(undefined, 2 * 60 * 1000);
+        await utils.delay(5000);
+
         (result);
         var info = await client.node.startService({ category: 'strategy', parameters: { name: 'babak' } })
         console.log("**************", info);

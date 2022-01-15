@@ -32,7 +32,7 @@ export class MeshServiceHelper {
     }
 
     async requireRedis(): Promise<ServiceDefinition> {
-        return this.require(new redisServiceDefinition({}));
+        return this.require(new redisServiceDefinition({ schema: "test", server_name: '' }));
     }
 
     /**
@@ -40,13 +40,13 @@ export class MeshServiceHelper {
      * to persists data for this mesh service.
      */
 
-    async getRedisStore(name: string, type: 'exclusive' | 'shared' = 'shared'): Promise<IStore> {
+    async getRedisStore(schema: string, server_name?: string): Promise<IStore> {
         const ggg = await this.requireRedis();
         (ggg);
         let result: IStore = null;
         const bus = this.context.ServiceProvider.getBus();
         (bus);
-        var response = await bus.createMessage(queryRedisOptions({ name: name, repository_type: type }))
+        var response = await bus.createMessage(queryRedisOptions({ schema: schema, server_name: server_name }))
             .execute(undefined, 20 * 1000, true);
         if (response) {
             const options = response.cast<RedisClientOptions>();

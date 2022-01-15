@@ -1,11 +1,12 @@
 
-import { RedisProcessAdapter } from '.';
+
 import utils from '../../common/Domain.Utils';
-import { queryRedisOptionsPayload, redisServiceDefinition } from '../../contracts';
+import { IRedisServiceInformationParameters, queryRedisOptionsPayload, redisServiceDefinition } from '../../contracts';
 
 import { baseUtils, ILogger } from '../../infrastructure/base';
 import { IMessageContext } from '../../infrastructure/bus';
 import { IMeshService, IMeshServiceContext, matchService, ServiceCategories, ServiceDefinition, ServiceInformation, ServiceStatus } from '../../infrastructure/mesh';
+import { MeshServiceContext } from '../../infrastructure/mesh/MeshServiceContext';
 import { RedisClientOptions, RedisUtils } from '../../infrastructure/services';
 import { IProcess, IProcessManager } from '../../infrastructure/services/processManager/IProcessManager';
 
@@ -21,24 +22,17 @@ export type redisInfo = {
 
 export class RedisMeshService implements IMeshService {
     public process: IProcess;
-    public containerName: string;
-    public portNumber: string;
-    public dataDirectory: string;
-    public containerId: string;
     public isReady: boolean;
     public status: ServiceStatus = 'unknown';
     public Id: string = baseUtils.UUID();
     public logger: ILogger;
     private static _instances: RedisMeshService[] = [];
     public definition: redisServiceDefinition;
-    private _adapter: RedisProcessAdapter;
+    private info: IRedisServiceInformationParameters = { schema: '' };
+
     constructor(public def: ServiceDefinition) {
         this.definition = def as redisServiceDefinition;
         this.logger = baseUtils.getLogger("RedisService");
-        this.containerName = (this.def.parameters && this.def.parameters["name"]) as string || baseUtils.randomName("redis");
-        this.portNumber = this.def.parameters && this.def["port"] as string;
-        this.dataDirectory = (this.def.parameters && this.def["dataPath"]) || `/home/paria/Desktop/a/${this.containerName}`;
-        this._adapter = null;
     }
     async startWithRedisServer(manager: IProcessManager, name: string, port: number, dir: string): Promise<IProcess> {
         //var dir = await utils.getRedisDataDirectory(name);
@@ -57,19 +51,64 @@ export class RedisMeshService implements IMeshService {
         (ctx)
         if (this.status !== 'start') {
             try {
+                this.logger.info(
+                    `Trying to provision redis service. Params:${this.definition.parameters}`
+                )
                 const in_docker = await utils.isInDocker();
-                const port: number = parseInt(this.portNumber);
-                const name = this.containerName;
-                const dir = await utils.getRedisDataDirectory(name);
-                if (in_docker) {
-                    this.process = await this
-                        .startWithRedisServer(ctx.ServiceProvider.getProcessManager(), name, port, dir)
+                const exclusive = this.definition.parameters.server_name;
+                if (exclusive && exclusive != "") {
+                    // We should spin up a new instance of
+                    // redis.
+                    this.info.port = (await utils.findPort(6300, 6400));
+                    this.info.schema = this.definition.parameters.schema;
+                    this.info.dataPath = await utils.getRedisDataDirectory(this.definition.parameters.server_name);
+                    this.info.server_name = this.definition.parameters.server_name;
                 }
                 else {
-                    this.process = await this.startWithDocker(ctx.ServiceProvider.getProcessManager(), name, port, dir);
+                    // We do not need a new instance of redis if there
+                    // exists one.
+                    this.info.port = 6379;
+                    this.info.dataPath = await utils.getRedisDataDirectory('redis');
+                    this.info.schema = this.definition.parameters.schema || 'default-perfix';
+                    this.info.server_name = "redis-default-server"
+                }
+                ///
+                /// At this point we know that we need redis
+                /// localhost:port
+                /// if we have this redis instance we do not need
+                /// a new one.
+                var redis_factory = ctx.ServiceProvider.getRedisFactory();
+                const process_name = this.info.server_name;
+                const processManager = ctx.ServiceProvider.getProcessManager();
+                this.process = processManager.getChilds().firstOrDefault(x => x.name == process_name);
+                if (!this.process) {
+                    if (in_docker) {
+                        // We are in docker.
+                        let redis_info = await redis_factory.getRedisInfo('redis', this.info.port);
+                        if (!redis_info) {
+                            redis_info = await redis_factory.getRedisInfo('localhost', this.info.port);
+                            if (!redis_info) {
+                                this.process = await this
+                                    .startWithRedisServer(processManager, process_name, this.info.port, this.info.dataPath);
+                            }
+                            this.info.host = utils.ipAddress();
+                        }
+                        else {
+                            /// We are in a docker environment
+                            /// where redis is exposed as a service.
+                            this.info.host = 'redis';
+                        }
+                    }
+                    else {
+                        this.process = await this.startWithDocker(processManager, process_name, this.info.port,
+                            this.info.dataPath);
 
+                    }
                 }
                 this.status = 'start';
+                this.logger.info(
+                    `redis service successfully provisioned. Info:${this.getInformation()}`
+                )
             }
             catch (err) {
                 this.logger.error(
@@ -82,15 +121,7 @@ export class RedisMeshService implements IMeshService {
     getInformation(): ServiceInformation {
         return {
             category: "redis" as ServiceCategories,
-            parameters:
-            {
-                port: this._adapter.info.port, // this.portNumber,
-                dataDir: this._adapter.containerInfo.dataDirectory,//  this.dataDirectory,
-                containerID: this._adapter.containerInfo.containerID,// this.containerId,
-                redisName: this._adapter.containerInfo.containerName,
-                connectionString: `redis://localhost:${this.portNumber}`,
-                host: ''
-            },
+            parameters: this.info,
             status: this.status
         };
     }
@@ -104,16 +135,9 @@ export class RedisMeshService implements IMeshService {
         (definition);
         (this._instances);
         let service: RedisMeshService = null;
-        const params = definition.parameters;
-        params.type = params.type || 'shared';
-        params.port = (params.port && isFinite(parseInt(params.port)) ? parseInt(params.port) : 3679).toString();
-        params.name = params.name || `redis-${params.port}`;
-        // We should search thru _instances to find a 
-        // corresponding service.
         for (let idx = 0; idx < this._instances.length; idx++) {
             const _service = this._instances[idx];
-            //const matches = _service.definition.parameters.name == definition.parameters.name;
-            const matches = matchService(_service.definition, definition);
+            const matches = matchService(_service.getInformation(), definition);
             if (matches) {
                 service = _service;
                 break;
@@ -131,47 +155,27 @@ export class RedisMeshService implements IMeshService {
      */
     public static async handle(ctx: IMessageContext) {
         var request = ctx.message.cast<queryRedisOptionsPayload>();
-        if (!request || !request.name || request.name === '') {
+        if (!request || !request.schema || request.schema === '') {
             throw utils.toException('invalid request.')
         }
-        let service: RedisMeshService = null;
-        switch (request.repository_type) {
-            case 'exclusive':
-                /// 
-                service = utils.from(this._instances)
-                    .firstOrDefault(x => x.definition.parameters.name === request.name);
-                if (!service) {
-                    service = this.GetOrCreate({
-                        category: 'redis',
-                        parameters: {
-                            name: request.name,
-                            port: (await utils.findPort(3600, 3800)).toString()
-                        }
-                    })
-                }
 
-                break;
-            case 'shared':
-                // 
-                service = this.GetOrCreate(
-                    {
-                        category: 'redis',
-                        parameters: {
-                            port: '3679',
-                            name: 'redis'
-                        }
-                    })
-                break;
+        // let service: RedisMeshService = null;
+        var service = this.GetOrCreate({
+            category: 'redis',
+            parameters: {
+                schema: request.schema,
+                server_name: request.server_name
+            }
+        })
+        if (!service) {
+            throw utils.toException("Unexpcted Error: Failed to add the required redis-service'");
         }
-        var info = service.getInformation();
-
+        await service.start(new MeshServiceContext(ctx.serviceProvider, null, service))
         var options: RedisClientOptions = {
-            host: info.parameters.host,
-            port: info.parameters.port,
-            keyPrefix: request.name + ':',
-
+            host: service.info.host,
+            port: service.info.port,
+            keyPrefix: service.info.schema + ':'
         };
-
         return options;
 
 
