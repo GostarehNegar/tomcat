@@ -1,0 +1,29 @@
+version: '3.3'
+
+services:
+  redis:
+    image: redis
+    # ports:
+    #   - 6379:6379
+    networks:
+      - internal
+  # tor:
+  #   image: dperson/torproxy
+  #   ports:
+  #     - 8120:8118
+  #  networks:
+  #      - internal
+  hub:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile.hub
+    image: tomcat-hub
+    env_file: docker-compose.env
+    ports:
+      - 8084:8084
+    depends_on:
+      - redis
+    networks:
+      - internal
+networks:
+  internal: {}  

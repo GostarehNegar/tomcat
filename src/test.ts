@@ -1,5 +1,21 @@
-import tomcat from ".";
+import fs from "fs";
 
-const host = tomcat.getHostBuilder("NodeManager").build()
-const node = host.services.getNodeManagerService()
-node.startNode({ name: "paria", jsFileName: "../tomcat-bot-hosting/build/main/services/dataService.js" })
+const script =
+    `
+[Unit]
+Description=hello_env.js - making your environment variables rad
+Documentation=https://example.com
+After=network.target
+
+[Service]
+Environment=NODE_PORT=3001
+Type=simple
+User=ubuntu
+ExecStart=/usr/bin/node /home/ubuntu/hello_env.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+`
+fs.writeFileSync('/lib/systemd/system/tomcat-hub.service', script);
