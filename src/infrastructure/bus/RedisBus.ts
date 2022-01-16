@@ -1,6 +1,5 @@
 import redis from 'redis'
-
-import tomcat from '../../';
+import baseconfig from '../base/baseconfig';
 import { createPublicRedistClient } from '../data';
 (createPublicRedistClient);
 export class RedisMessage {
@@ -31,7 +30,7 @@ export class RedisBus {
     private _subscriber: redis.RedisClient;
 
     private createRedisClient() {
-        return createPublicRedistClient() || redis.createClient(tomcat.config.data.redis.publicUrl);
+        return createPublicRedistClient() || redis.createClient(baseconfig.data.redis.publicUrl);
     }
     private subscriber() {
         return this.createRedisClient();

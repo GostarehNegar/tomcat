@@ -6,6 +6,7 @@ import * as _Domain from './domain'
 import * as _Infrastructure from "./infrastructure"
 import { ServiceProvider } from './infrastructure/base';
 import './extensions'
+import fs from "fs"
 
 
 
@@ -30,8 +31,14 @@ namespace tomcat {
      * @param name the name of the host.
      * @returns 
      */
-    export const getHostBuilder = (name: string): IHostBuilder => {
-        var res = new HostBuilder(name, null)
+    export const getHostBuilder = (name: string, configure?: (cfg: typeof _config) => void): IHostBuilder => {
+        if (fs.existsSync("./config.json")) {
+            const conf = JSON.parse(fs.readFileSync("./config.json").toString()) as typeof _config;
+            _config.infrastructure = conf.infrastructure;
+        }
+        if (configure)
+            configure(_config);
+        var res = new HostBuilder(name)
         provider = res.services;
         RegsiterDomainServices(res.services);
         return res;

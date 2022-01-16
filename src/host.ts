@@ -5,7 +5,10 @@ import tomcat from ".";
 tomcat.Infrastructure.Base.Logger.level = 'debug'
 tomcat.Infrastructure.Base.Logger.getLogger("WebSocketHub").level = 'info'
 const port = 8084;
-tomcat.config.infrastructure.messaging.transports.websocket.url = `http://172.16.2.10:${port}/hub`
+const ip = tomcat.utils.ipAddress();
+//const url = `http://${ip}:${port}/hub`;
+tomcat.config.setServer(ip, port);
+//tomcat.config.infrastructure.messaging.transports.websocket.url = url;
 const hub = tomcat.getHostBuilder('hub')
     .addWebSocketHub()
     .buildWebHost('express')
@@ -13,13 +16,13 @@ const hub = tomcat.getHostBuilder('hub')
 
 const server = tomcat.getHostBuilder('server')
     .addMessageBus(cfg => {
-        cfg.endpoint = 'server'
-        cfg.transports.websocket.url = `http://172.16.2.10:${port}/hub`;
+        (cfg);
+        // cfg.endpoint = 'server'
+        // cfg.transports.websocket.url = url;
     })
     .addMeshServer()
     .buildWebHost("express");
 
-// hub.get()
 const app = hub.expressApp
 app.get("/ping", (req, res) => {
     (req);

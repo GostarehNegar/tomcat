@@ -6,18 +6,19 @@ import { HostBuilder } from '../infrastructure/hosting';
 
 import "../extensions"
 import { RedisMeshService } from './redis/RedisMeshService';
+import { redisServiceDefinition } from '../contracts';
 // tomcat.Infrastructure.Base.Logger.level = 'debug'
 
 
 
 
 (async () => {
-    const client1 = new HostBuilder('redisservice', null)
+    const client1 = new HostBuilder('redisservice')
         .addMessageBus(cfg => {
             cfg.endpoint = "redisservice";
             cfg.transports.websocket.url = "http://localhost:8084/hub";
         })
-        .addMeshService({ category: 'redis', parameters: {} }, (def) => RedisMeshService.GetOrCreate(def))
+        .addMeshService({ category: 'redis', parameters: {} }, (def) => RedisMeshService.GetOrCreate(def as redisServiceDefinition))
         .build();
     client1.bus.subscribe(Contracts.queryRedisOptions(null).topic, async (ctx) => {
 

@@ -80,7 +80,6 @@
     "set-interval-async": "^2.0.3",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
-    "talib": "^1.1.4",
     "tcp-port-used": "^1.0.2",
     "ts-jest": "^27.0.5"
   },

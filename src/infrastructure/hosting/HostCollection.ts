@@ -22,7 +22,7 @@ export class HostCollection implements IHostCollection {
   }
   public getHostBuilder(name: string): IHostBuilder {
     name;
-    return new HostBuilder(name, this);
+    return new HostBuilder(name);
   }
 }
 export const hosts = new HostCollection();

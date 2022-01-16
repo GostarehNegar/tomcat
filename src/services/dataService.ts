@@ -61,7 +61,7 @@ export class DataService implements IMeshService {
 const dataServices: DataService[] = [];
 
 (async () => {
-    const client1 = new HostBuilder('dataservice', null)
+    const client1 = new HostBuilder('dataservice')
         .addMessageBus(cfg => {
             cfg.endpoint = "dataservice";
         })

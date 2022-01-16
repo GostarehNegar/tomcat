@@ -1,4 +1,4 @@
-import fs from "fs"
+//import fs from "fs"
 import http from 'http';
 
 import { IServiceProvider, ServiceProvider } from '../base';
@@ -15,7 +15,6 @@ import ExpressWebHost from './ExpressWebHost';
 import { Host } from './Host';
 import { IHost } from './IHost';
 import { IHostBuilder } from './IHostBuilder';
-import { IHostCollection } from './IHostCollection';
 import { IHttpHandler } from './IHttpHandler';
 import { IWebHost } from './IWebHost';
 //import { serviceNames } from './ServerBuilder';
@@ -30,7 +29,7 @@ export class HostBuilder implements IHostBuilder {
   private handlers: IHttpHandler[] = [];
 
   public services: IServiceProvider;
-  constructor(private _name?: string, private _collection?: IHostCollection) {
+  constructor(private _name?: string) {
     this._name = _name || `host-${Math.random()}`;
     this.services = new ServiceProvider();
     registrar.registerServices(this.services);
@@ -39,13 +38,13 @@ export class HostBuilder implements IHostBuilder {
     /// replaced with the actual one, so that there is
     /// a current host
     ///
-    if (fs.existsSync("./config.json")) {
-      const conf = fs.readFileSync("./config.json").toString()
-      config.messaging = JSON.parse(conf).messaging || config.messaging
-      config.data = JSON.parse(conf).data || config.data
-      config.internet = JSON.parse(conf).internet || config.internet
-    }
-    this._collection?.add(this._name, new Host(this._name, this.services));
+    // if (fs.existsSync("./config.json")) {
+    //   const conf = fs.readFileSync("./config.json").toString()
+    //   config.messaging = JSON.parse(conf).messaging || config.messaging
+    //   config.data = JSON.parse(conf).data || config.data
+    //   config.internet = JSON.parse(conf).internet || config.internet
+    // }
+    //this._collection?.add(this._name, new Host(this._name, this.services));
     this._config = config;// JSON.parse(JSON.stringify(config));
     this.services.register(serviceNames.Config, this._config);
   }
@@ -106,7 +105,7 @@ export class HostBuilder implements IHostBuilder {
     }
 
 
-    this._collection?.add(this._name, result);
+    //this._collection?.add(this._name, result);
 
     this.handlers.map((h) => result.use(h));
     return result;
@@ -144,7 +143,7 @@ export class HostBuilder implements IHostBuilder {
   }
   public build(): IHost {
     const result = new Host(this._name, this.services);
-    this._collection?.add(this._name, result);
+    //this._collection?.add(this._name, result);
     return result;
   }
   public addHostedService(
