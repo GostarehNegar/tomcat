@@ -1,4 +1,4 @@
-import { Contracts } from "./infrastructure";
+
 import tomcat from ".";
 tomcat.Infrastructure.Base.Logger.level = 'debug'
 tomcat.Infrastructure.Base.Logger.getLogger("WebSocketHub").level = 'info'

@@ -8,6 +8,9 @@
   "repository": "https://github.com/BabakMahmoudi/tomcatlib",
   "license": "MIT",
   "keywords": [],
+  "bin": {
+    "say-hello": "./build/main/cli.js"
+  },
   "scripts": {
     "run": "run-s build && node ./build/main/host.js",
     "api": "run-s build && node ./build/main/api.js",
