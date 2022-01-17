@@ -9,10 +9,12 @@
   "license": "MIT",
   "keywords": [],
   "bin": {
-    "say-hello": "./build/main/cli.js"
+    "say-hello": "./build/main/cli.js",
+    "run-hub": "./build/main/hub.js",
+    "run-host": "./build/main/host.js"
   },
   "scripts": {
-    "run": "run-s build && node ./build/main/host.js",
+    "run": "run-s build && node ./build/main/hub.js",
     "api": "run-s build && node ./build/main/api.js",
     "wallet": "run-s build && node ./build/main/run.js",
     "data": "run-s build && node ./build/main/dataFetch.js",
