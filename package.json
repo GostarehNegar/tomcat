@@ -11,7 +11,7 @@
   "bin": {
     "say-hello": "./build/main/cli.js",
     "run-hub": "./build/main/hub.js",
-    "run-host": "./build/main/host.js"
+    "run-api": "./build/main/api.js"
   },
   "scripts": {
     "run": "run-s build && node ./build/main/hub.js",
