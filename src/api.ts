@@ -4,17 +4,17 @@ import { ServiceCategories } from "./infrastructure/mesh";
 import tomcat from ".";
 tomcat.Infrastructure.Base.Logger.level = 'debug'
 tomcat.Infrastructure.Base.Logger.getLogger("WebSocketHub").level = 'info'
-const port = 8084;
-const ip = tomcat.utils.ipAddress();
+// const port = 8084;
+// const ip = tomcat.utils.ipAddress();
 //const url = `http://${ip}:${port}/hub`;
-tomcat.config.setServer(ip, port);
+tomcat.config.setServer("172.16.2.10", 8084)
 //tomcat.config.infrastructure.messaging.transports.websocket.url = url;
 // const hub = tomcat.getHostBuilder('hub')
 //     .addWebSocketHub()
 //     .buildWebHost('express')
 
 
-const server = tomcat.getHostBuilder('server')
+const server = tomcat.getHostBuilder('api-server')
     .addMessageBus(cfg => {
         (cfg);
         // cfg.endpoint = 'server'
@@ -23,7 +23,7 @@ const server = tomcat.getHostBuilder('server')
     .addMeshServer()
     .buildWebHost("express");
 
-const app = hub.expressApp
+const app = server.expressApp
 app.get("/ping", (req, res) => {
     (req);
     res.send(Date.now().toString())
@@ -100,5 +100,5 @@ app.get(`/start/:serviceName`, async (req, res) => {
     res.end()
 })
 
-hub.listen(port)
-server.start()
+
+server.listen(80)

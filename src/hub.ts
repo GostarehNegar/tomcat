@@ -10,4 +10,14 @@ tomcat.config.setServer(ip, port);
 const hub = tomcat.getHostBuilder('hub')
     .addWebSocketHub()
     .buildWebHost('express')
+const server = tomcat.getHostBuilder('mesh-server')
+    .addMessageBus(cfg => {
+        (cfg);
+        // cfg.endpoint = 'server'
+        // cfg.transports.websocket.url = url;
+    })
+    .addMeshServer()
+    .build();
+
 hub.listen(port)
+server.start();
