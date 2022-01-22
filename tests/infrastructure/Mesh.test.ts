@@ -271,6 +271,7 @@ describe('Mesh', () => {
     })
     test('node controller', async () => {
 
+        tomcat.config.setServer("localhost", 8084);
         const host = tomcat.getHostBuilder('test')
             .build();
         const target = new tomcat.Infrastructure.Mesh.MeshNodeController(host.services);

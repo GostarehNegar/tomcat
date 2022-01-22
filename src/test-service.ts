@@ -35,6 +35,10 @@ try {
     console.log(JSON.stringify(tomcat.config));
     console.log('test-service');
     srv.start();
+    srv.bus.subscribe('kkkkk', async () => {
+
+
+    });
 
 }
 catch (err) {
