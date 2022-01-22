@@ -32,9 +32,20 @@ namespace tomcat {
      * @returns 
      */
     export const getHostBuilder = (name: string, configure?: (cfg: typeof _config) => void): IHostBuilder => {
-        if (fs.existsSync("./config.json")) {
-            const conf = JSON.parse(fs.readFileSync("./config.json").toString()) as typeof _config;
-            _config.infrastructure = conf.infrastructure;
+
+        let config_file_name = './config.json';
+        if (process.argv) {
+            var f_name = process.argv[process.argv.length - 1];
+            if (f_name.endsWith('.cfg') || f_name.endsWith('.json')) {
+                config_file_name = f_name
+            }
+        }
+        if (fs.existsSync(config_file_name)) {
+            try {
+                const conf = JSON.parse(fs.readFileSync(config_file_name).toString()) as typeof _config;
+                Object.assign(_config, conf);
+            }
+            catch { }
         }
         if (configure)
             configure(_config);

@@ -45,6 +45,7 @@ export class MeshNode extends BackgroundService implements IMeshNode {
         this.config = this.config || { executeservice: null, queryService: null, runningServices: null, serviceCapability: null, serviceDefinitions: null, serviceFactory: null }
         this.options.heartBeatInSeconds = this.options.heartBeatInSeconds || 5;
 
+
     }
     async startService(serviceDefinition: ServiceDefinition): Promise<ServiceInformation> {
         const stringifiedServiceDefinition = JSON.stringify(serviceDefinition)
@@ -111,6 +112,11 @@ export class MeshNode extends BackgroundService implements IMeshNode {
                 }
             }
         })
+        const start_definition = baseconfig.start_args.service_definition as ServiceDefinition;
+        if (start_definition && start_definition.category) {
+            /// There is a service definition within the start_args
+            await this.startService(start_definition);
+        }
         await super.start();
         this.logger.info(`a new mesh node is spawning, name : ${this.nodeName}, which provides these services:`)
         this.serviceDescriptors.forEach(x => {

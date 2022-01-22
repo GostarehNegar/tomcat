@@ -229,7 +229,9 @@ export class BaseUtils {
     })
   }
   public randomName(name: string, numberOfRandoms = 3) {
-    return name + "-" + Math.floor(Math.random() * Math.pow(10, numberOfRandoms))
+    return path.parse(name).name
+      + "-" + Math.floor(Math.random() * Math.pow(10, numberOfRandoms))
+      + path.parse(name).ext
   }
 
   public timeout<T>(promise: Promise<T>, timeout = 60000, Throw = true): Promise<T> {

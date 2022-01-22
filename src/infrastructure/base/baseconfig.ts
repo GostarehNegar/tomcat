@@ -1,5 +1,7 @@
 export default {
-
+    start_args: {
+        service_definition: {}
+    },
     internet: {
         proxy: {
             url: ''
@@ -16,8 +18,6 @@ export default {
     },
     mesh: {
         heartBeatInSeconds: 5,
-
-
     },
     data: {
         redis: { /**

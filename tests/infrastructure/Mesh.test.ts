@@ -279,7 +279,7 @@ describe('Mesh', () => {
         (id);
         const description = await target.register(
             {
-                dir: 'tomcat1',
+                dir: 'tomcat',
                 repo: 'https://github.com/GostarehNegar/tomcat.git',
                 definition: { category: 'miscelaneous', parameters: { name: 'babak' } },
                 main: 'build/main/test-service.js',
@@ -291,7 +291,7 @@ describe('Mesh', () => {
         (description);
         const p = desc.process;
         (p);
-        await tomcat.utils.delay(1000);
+        await tomcat.utils.delay(5000);
 
 
 

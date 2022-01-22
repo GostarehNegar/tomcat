@@ -1,7 +1,8 @@
 export const BaseConstants = {
     Internals:
     {
-        '_ON_NEW_SERVICE_PROVIDER_': '_ON_NEW_SERVICE_PROVIDER_'
+        '_ON_NEW_SERVICE_PROVIDER_': '_ON_NEW_SERVICE_PROVIDER_',
+        'start_args': 'start_args',
     },
     ServiceNames: {
         'IClock': 'IClock',
@@ -27,7 +28,5 @@ export const BaseConstants = {
         'BaseUtilityService': 'BaseUtilityService',
         'IDockerService': 'IDockerService',
         'IProcessManager': 'IProcessManage',
-
-
     }
 }
