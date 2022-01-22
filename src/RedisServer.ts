@@ -5,7 +5,7 @@ const builder = tomcat
     .addMessageBus();
 const host = tomcat.Domain.Services.AddRedisService(builder).build();
 host.start();
-
+host.node.startService({ category: 'redis', parameters: { schema: 'redis-server' } });
 
 
 

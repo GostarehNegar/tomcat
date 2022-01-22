@@ -1,4 +1,4 @@
-import { ChildProcess } from "child_process";
+import { ChildProcess, SpawnOptions } from "child_process";
 import { IEnumerable } from "linq";
 
 export type ProcessInfo = {
@@ -27,8 +27,9 @@ export interface IProcess {
     get name(): string;
     get file(): string;
     exec(cmd: string): Promise<IProcess>;
-    spawn(cmd: string, args: string[]): IProcess;
+    spawn(cmd: string, args: string[], options?: SpawnOptions): IProcess;
     onExit(callBack: (code: number) => void): IProcess;
     isExited(): boolean;
+    get stdout(): string;
 
 }

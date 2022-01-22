@@ -2,7 +2,7 @@
 import { baseUtils } from "../base"
 import { IMeshService } from "./IMeshService"
 
-export type ServiceCategories = "data" | "indicator" | "strategy" | "telegram" | "proxy" | "redis" | "helper"
+export type ServiceCategories = "data" | "indicator" | "strategy" | "telegram" | "proxy" | "redis" | "helper" | "miscelaneous"
 
 export interface ServiceConstructor {
     (serviceDefinition: ServiceDefinition): IMeshService
@@ -29,6 +29,18 @@ export class ServiceDescriptor {
     public serviceConstructor: ServiceConstructor
 }
 
+export class ServiceDefinitionHelper {
+    constructor(public definition: ServiceDefinition) {
+
+    }
+    public get name(): string {
+        let result = `${this.definition.category}`;
+        for (const key in this.definition.parameters) {
+            result += `-${key}:${this.definition.parameters[key]}`
+        }
+        return result;
+    }
+}
 
 
 export const matchService = (description: ServiceDefinition, pattern: ServiceDefinition): boolean => {

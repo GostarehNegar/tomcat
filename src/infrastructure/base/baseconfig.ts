@@ -14,6 +14,11 @@ export default {
             },
         },
     },
+    mesh: {
+        heartBeatInSeconds: 5,
+
+
+    },
     data: {
         redis: { /**
     * The url to redis server.

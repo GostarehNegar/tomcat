@@ -2,6 +2,7 @@ import { baseUtils } from '../base'
 import * as contracts from '../contracts'
 
 import { matchService, ServiceDefinition, ServiceInformation } from '.'
+import baseconfig from '../base/baseconfig'
 export class MeshState {
     public runningNodes = new Map<string, contracts.NodeStatusPayload>()
     public logger = baseUtils.getLogger("MeshState")
@@ -26,17 +27,21 @@ export class MeshState {
         return res
     }
     disposeNode() {
-        //implement
-    }
-    // match(a: ServiceDefinition, b: ServiceDefinition) {
+        const inactive_nodes = [];
+        let heartBeat = (baseconfig.mesh.heartBeatInSeconds || 5) * 5;
+        if (!Number.isFinite(heartBeat))
+            heartBeat = 5 * 5;
+        this.runningNodes.forEach((x, k) => {
+            if (Date.now() - x.last_seen > heartBeat * 1000) {
+                x.alive = false;
+                inactive_nodes.push(k);
+                this.logger.info(
+                    `Disposing a node because it's not seen recently name: ${k}, heartBeat:${heartBeat}`)
+            }
+        });
+        inactive_nodes.forEach(k => {
 
-    //     if (a.category == b.category) {
-    //         let result = true
-    //         for (const key in b.parameters) {
-    //             result = result && a.parameters[key] == b.parameters[key]
-    //         }
-    //         return result
-    //     }
-    //     return false
-    // }
+            this.runningNodes.delete(k);
+        });
+    }
 }

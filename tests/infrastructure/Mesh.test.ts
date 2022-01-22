@@ -269,4 +269,36 @@ describe('Mesh', () => {
 
 
     })
+    test('node controller', async () => {
+
+        const host = tomcat.getHostBuilder('test')
+            .build();
+        const target = new tomcat.Infrastructure.Mesh.MeshNodeController(host.services);
+        const id = tomcat.Domain.Extenstions.getServiceDefintionExtentions({ category: 'miscelaneous', parameters: { name: 'babak' } })
+            .name;
+        (id);
+        const description = await target.register(
+            {
+                dir: 'tomcat1',
+                repo: 'https://github.com/GostarehNegar/tomcat.git',
+                definition: { category: 'miscelaneous', parameters: { name: 'babak' } },
+                main: 'build/main/test-service.js',
+            }
+        )
+        const desc = await target.findByName(description.name);
+        await desc.spawn(tomcat.config);
+        (desc);
+        (description);
+        const p = desc.process;
+        (p);
+        await tomcat.utils.delay(1000);
+
+
+
+
+
+
+
+
+    });
 });

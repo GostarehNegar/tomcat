@@ -1,5 +1,5 @@
 
-import { exec } from 'child_process';
+import { ChildProcess, exec, ExecOptions } from 'child_process';
 
 import HttpsProxyAgent from 'https-proxy-agent/dist/agent';
 import fetch from 'node-fetch';
@@ -20,6 +20,7 @@ import { Logger } from './logger';
 import fs from 'node:fs';
 import Enumerable from 'linq'
 import ip from 'ip';
+import path from 'path';
 let isDockerCached;
 (provider);
 export class BaseUtils {
@@ -286,6 +287,46 @@ export class BaseUtils {
 
     });
 
+  }
+  public getWorkingDirectory(folder: string) {
+    let result = path.resolve("workingDirectory")
+    if (!fs.existsSync(result)) {
+      fs.mkdirSync(result)
+    }
+    if (folder && folder !== "") {
+      result = path.resolve(result, folder);
+      if (!fs.existsSync(result)) {
+        fs.mkdirSync(result)
+      }
+    }
+    return result;
+  }
+  public getTempFolder(): string {
+    return this.getWorkingDirectory('tmp');
+  }
+  public getTempFile(n: string): string {
+    return path.resolve(this.getTempFolder(), this.randomName(n, 10));
+
+  }
+  public getHomeDirectory() {
+    let result = path.resolve("../")
+    return result;
+  }
+  public execute(cmd: string, options: ExecOptions = null): Promise<{ process: ChildProcess, stdout: string, stderr: string }> {
+    return new Promise<any>((resolve, reject) => {
+      const result = exec(cmd, options, (err, stdout, stderr) => {
+        (stdout);
+        (stderr);
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve({ process: result, stdout: stdout, stderr: stderr });
+        }
+
+      });
+
+    });
   }
 }
 

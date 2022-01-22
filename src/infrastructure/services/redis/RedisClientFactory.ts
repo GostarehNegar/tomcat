@@ -22,7 +22,7 @@ export class RedisClientFactory implements IRedisClientFactory {
         try {
             result = await utils.timeout(
                 this
-                    .createClient({ host: host, port: port })
+                    .createClient({ host: host, port: port, password: 'tomcat_p@ssw0rd' })
                     .info(), timeout);
 
         }

@@ -10,6 +10,7 @@ import { ServiceDefinition, ServiceDescriptor } from "./ServiceDefinition";
 import { IMeshService, matchService, ServiceInformation } from ".";
 import { IMeshNode } from "./IMeshNode";
 import { MeshServiceContext } from "./MeshServiceContext";
+import baseconfig from "../base/baseconfig";
 
 
 export interface queryService {
@@ -36,11 +37,14 @@ export class MeshNode extends BackgroundService implements IMeshNode {
     private _bus: IMessageBus;
     public nodeName: string;
     public logger: ILogger
+    public options = baseconfig.mesh;
     constructor(private serviceProvider: IServiceProvider, private config: MeshNodeConfiguration) {
         super();
         this.logger = baseUtils.getLogger("MeshNode")
         this.serviceDescriptors = this.serviceProvider.getServices<ServiceDescriptor>(BaseConstants.ServiceNames.ServiceDescriptor)
         this.config = this.config || { executeservice: null, queryService: null, runningServices: null, serviceCapability: null, serviceDefinitions: null, serviceFactory: null }
+        this.options.heartBeatInSeconds = this.options.heartBeatInSeconds || 5;
+
     }
     async startService(serviceDefinition: ServiceDefinition): Promise<ServiceInformation> {
         const stringifiedServiceDefinition = JSON.stringify(serviceDefinition)
@@ -69,7 +73,7 @@ export class MeshNode extends BackgroundService implements IMeshNode {
     }
     protected async run(token: CancellationToken): Promise<void> {
         while (!token.isCancelled) {
-            await baseUtils.delay(3 * 1000);
+            await baseUtils.delay(this.options.heartBeatInSeconds * 1000);
             await this._bus.createMessage(
                 contracts.NodeStatusEvent(this.nodeName, {
                     alive: true,

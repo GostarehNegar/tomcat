@@ -1,4 +1,4 @@
-import { ChildProcess, exec, spawn } from "child_process";
+import { ChildProcess, exec, spawn, SpawnOptions } from "child_process";
 import find from "find-process";
 import { IEnumerable } from "linq";
 import { baseUtils } from "../../base";
@@ -50,8 +50,8 @@ export class Process implements IProcess {
     get file(): string {
         return this.process.spawnfile;
     }
-    spawn(cmd: string, args: string[]) {
-        this.process = spawn(cmd, args);
+    spawn(cmd: string, args: string[], options: SpawnOptions = null) {
+        this.process = spawn(cmd, args, options);
         this.process.stdout.on('data', data => {
             this.stdout = (this.stdout || '') + data.toString();
         })
