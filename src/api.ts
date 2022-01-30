@@ -1,5 +1,5 @@
 import { Contracts } from "./infrastructure";
-import { ServiceCategories } from "./infrastructure/mesh";
+import { ServiceCategories, ServiceDefinition } from "./infrastructure/mesh";
 
 import tomcat from ".";
 tomcat.Infrastructure.Base.Logger.level = 'debug'
@@ -7,7 +7,7 @@ tomcat.Infrastructure.Base.Logger.getLogger("WebSocketHub").level = 'info'
 // const port = 8084;
 // const ip = tomcat.utils.ipAddress();
 //const url = `http://${ip}:${port}/hub`;
-tomcat.config.setServer("172.16.2.10", 8084)
+tomcat.config.setServer("localhost", 8084)
 //tomcat.config.infrastructure.messaging.transports.websocket.url = url;
 // const hub = tomcat.getHostBuilder('hub')
 //     .addWebSocketHub()
@@ -90,15 +90,33 @@ app.get("/redis", async (req, res) => {
 })
 app.get(`/start/:serviceName`, async (req, res) => {
     const bus = server.services.getBus()
+    let result: tomcat.Infrastructure.Bus.IMessage;
     try {
-        await bus.createMessage(Contracts.serviceOrder({ category: req.params.serviceName as ServiceCategories, parameters: req.query })).execute()
-
+        const def: ServiceDefinition = { category: req.params.serviceName as ServiceCategories, parameters: req.query };
+        result = await bus.createMessage(Contracts.requireService(def)).execute(undefined, 5 * 60 * 1000, true)
     } catch (err) {
         console.error(err);
     }
-    res.send("done!")
+    res.send(result)
     res.end()
 })
+app.get('/services/register', async (req, res) => {
+    let result = null;
+    try {
+        let service_registry: tomcat.Infrastructure.Contracts.ServiceRegistrationPayload = JSON.parse(req.query.data as string);
+        result = await server.bus.createMessage(tomcat.Infrastructure.Contracts.registerService(service_registry)).execute();
+        (service_registry);
+        res.send(result);
+    }
+    catch (err) {
+        res.send(err);
+    }
+
+
+
+});
+
+
 
 
 server.listen(80)

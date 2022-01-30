@@ -103,6 +103,16 @@ export class MeshServer extends BackgroundService implements IServiceDiscovery {
         this.bus.subscribe(contracts.requireService(null).topic, async (ctx) => {
             await ctx.reply(await this.executeService(ctx.message.cast<ServiceDefinition>()))
         })
+        this.bus.subscribe(contracts.registerService(null).topic, async (ctx) => {
+            const manager = this.serviceProvider.getNodeManagerService();
+            const repl = await manager.register(ctx.message.cast<any>());
+            await ctx.reply(repl);
+
+
+
+
+
+        });
         this.bus.subscribe(SystemTopics.busdown, async (ctx) => {
             await Promise.resolve();
             if (ctx.message && ctx.message.cast<any>().endpoint) {

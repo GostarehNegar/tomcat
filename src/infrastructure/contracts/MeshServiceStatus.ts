@@ -58,5 +58,18 @@ export function requireService(serviceDefinition: ServiceDefinition): Contract<S
         payload: serviceDefinition
     }
 }
+export type ServiceRegistrationPayload = {
+    dir: string,
+    repo: string,
+    definition: ServiceDefinition
+
+}
+export function registerService(serviceDefinition: ServiceRegistrationPayload): Contract<ServiceRegistrationPayload> {
+    return {
+        topic: ServiceCommandContract("register"),
+        payload: serviceDefinition
+    }
+}
+
 
 
