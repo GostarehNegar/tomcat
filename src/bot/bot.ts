@@ -142,7 +142,7 @@ export class Strategy {
     candle: CandleStickData
 }
 
-export class Bot {
+export class Bot_Deprecated {
     public wallet: Wallet
     constructor() {
         this.wallet = new Wallet(1000, null, 'BTCUSDT')

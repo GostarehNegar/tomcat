@@ -29,7 +29,7 @@ export class HostBuilder implements IHostBuilder {
   private handlers: IHttpHandler[] = [];
 
   public services: IServiceProvider;
-  constructor(private _name?: string) {
+  constructor(protected _name?: string) {
     this._name = _name || `host-${Math.random()}`;
     this.services = new ServiceProvider();
     registrar.registerServices(this.services);

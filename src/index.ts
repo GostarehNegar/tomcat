@@ -1,4 +1,4 @@
-import { BotHost, IBotHost } from './bot/botHost';
+import { Bot, BotBuilder, IBot, IBotBuilder } from './bot/botHost';
 import _utils from './common/Domain.Utils'
 import { config as _config, readConfig } from './config'
 import { Constants } from './constants'
@@ -6,12 +6,6 @@ import * as _Domain from './domain'
 import * as _Infrastructure from "./infrastructure"
 import { ServiceProvider } from './infrastructure/base';
 import './extensions'
-
-
-
-
-
-
 import { HostBuilder, IHostBuilder } from './infrastructure/hosting';
 import { RegsiterDomainServices } from './services';
 
@@ -22,7 +16,7 @@ namespace tomcat {
     export const config = _config;
     export const services = () => provider;
     // export const hosts = _Infrastructure.Hosting.hosts;
-    export const createBot = (name: string): IBotHost => { return new BotHost(name, new ServiceProvider()) }
+    export const createBot = (name: string): IBot => { return new Bot(name, new ServiceProvider()) }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     export import Infrastructure = _Infrastructure
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,10 +32,16 @@ namespace tomcat {
         readConfig();
         if (configure)
             configure(_config);
-        var res = new HostBuilder(name);
+        const res = new HostBuilder(name);
         provider = res.services;
         RegsiterDomainServices(res.services);
         return res;
+    }
+    export const getBotBuilder = (name: string): IBotBuilder => {
+        const res = new BotBuilder(name)
+        provider = res.services
+        RegsiterDomainServices(res.services)
+        return res
     }
 
 }

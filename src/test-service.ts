@@ -1,5 +1,6 @@
-import tomcat from ".";
 import { ServiceDefinition } from "./infrastructure/mesh";
+
+import tomcat from ".";
 export class SampleService implements tomcat.Infrastructure.Mesh.IMeshService {
     constructor(public def: ServiceDefinition) {
 

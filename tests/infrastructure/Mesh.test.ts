@@ -1,7 +1,6 @@
 import tomcat from "../../src";
 import utils from "../../src/common/Domain.Utils";
 import { Contracts } from "../../src/infrastructure";
-
 import { IMeshService, matchService, ServiceDefinition, ServiceInformation } from "../../src/infrastructure/mesh";
 
 
@@ -218,7 +217,7 @@ describe('Mesh', () => {
                 (def)
                 return {
                     getInformation: () => {
-                        var ret: ServiceInformation = {
+                        const ret: ServiceInformation = {
                             category: 'strategy',
                             parameters: {
                                 name: 'babak'
@@ -245,7 +244,7 @@ describe('Mesh', () => {
         (_info);
 
         await redisServer.start();
-        var c = Contracts.requireService({ category: 'redis', parameters: {} })
+        const c = Contracts.requireService({ category: 'redis', parameters: {} })
         //await server.bus.subscribe('some-topic', async ctx => { await ctx.reply('pong') });
         // await server.bus.subscribe(c.topic, async ctx => {
         //     await ctx.reply('pong')
@@ -253,22 +252,15 @@ describe('Mesh', () => {
         await utils.delay(3000);
         await client.start();
         await utils.delay(5000);
-        var result = await client.bus.createMessage(c).execute(undefined, 2 * 60 * 1000);
+        const result = await client.bus.createMessage(c).execute(undefined, 2 * 60 * 1000);
         await utils.delay(5000);
 
         (result);
-        var info = await client.node.startService({ category: 'strategy', parameters: { name: 'babak' } })
+        const info = await client.node.startService({ category: 'strategy', parameters: { name: 'babak' } })
         console.log("**************", info);
-
-
         await tomcat.utils.delay(3 * 1000);
-
-
-
-
-
-
     })
+
     test('node controller', async () => {
 
         tomcat.config.setServer("localhost", 8084);
@@ -293,13 +285,5 @@ describe('Mesh', () => {
         const p = desc.process;
         (p);
         await tomcat.utils.delay(5000);
-
-
-
-
-
-
-
-
     });
 });

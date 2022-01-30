@@ -1,10 +1,10 @@
-
-import { IDataSource } from ".";
 import { CandleStickData } from "../common";
 import utils from "../common/Domain.Utils";
 import { IStopCallBack } from "../common/IStopCallBack";
 import { ILogger, Ticks } from "../infrastructure/base";
 import { IDataStream } from "../infrastructure/data/IDataSream";
+
+import { IDataSource } from ".";
 
 export class CandleStreamWriter {
 
@@ -13,7 +13,7 @@ export class CandleStreamWriter {
 
     }
     async start(startTime?: Ticks, stop?: IStopCallBack) {
-        let lastCandle = await this.stream.getLast();
+        const lastCandle = await this.stream.getLast();
         startTime = utils.ticks(startTime);
         startTime = startTime || lastCandle?.openTime;
         const interval = utils.toMinutes(this.source.interval) * 60 * 1000;
