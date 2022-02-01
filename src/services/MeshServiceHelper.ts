@@ -32,7 +32,8 @@ export class MeshServiceHelper {
     }
 
     async requireRedis(): Promise<ServiceDefinition> {
-        return this.require(new redisServiceDefinition({ schema: "test", server_name: '' }));
+        var res = await this.require(new redisServiceDefinition({ schema: "test", server_name: '' }));
+        return res.definition;
     }
 
     /**

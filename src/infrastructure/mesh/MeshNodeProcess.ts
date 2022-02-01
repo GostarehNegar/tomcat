@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { ServiceDefinitionHelper } from ".";
+
 import { baseUtils, ILogger, IServiceProvider } from "../base";
 import { IProcess } from "../services/processManager/IProcessManager";
 
@@ -15,17 +15,17 @@ export interface MeshNodeProcessData {
 
 }
 export class MeshNodeProcess {
-    public definition: ServiceDefinitionHelper;
+    public definition: ServiceDefinition;
     public process: IProcess;
     public lastError: any;
     private logger: ILogger;
     constructor(public serviceProvider: IServiceProvider, public data: MeshNodeProcessData) {
-        this.definition = new ServiceDefinitionHelper(data.definition);
+        this.definition = baseUtils.extend(new ServiceDefinition(), data.definition);
         this.logger = baseUtils.getLogger(baseUtils.getClassName(this));
 
     }
     public get name(): string {
-        return this.definition.name;
+        return this.definition.getName();
     }
     public async spawn(config: any): Promise<void> {
         const description = this.data;

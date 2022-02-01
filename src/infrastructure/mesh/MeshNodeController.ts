@@ -5,7 +5,7 @@ import { baseUtils, ILogger, IServiceProvider } from "../base";
 import { MeshNodeProcessData } from "./MeshNodeProcess";
 import { MeshNodeProcess } from "./MeshNodeProcess";
 import { IMeshNodeController } from "./IMeshNodeController";
-import { ServiceDefinition, ServiceDefinitionHelper } from ".";
+import { ServiceDefinition } from ".";
 export class MeshNodeRegistryData {
     nodes: MeshNodeProcessData[];
 }
@@ -39,8 +39,8 @@ export class MeshNodeController implements IMeshNodeController {
         return result;
     }
     public async findByDef(def: ServiceDefinition): Promise<MeshNodeProcess> {
-        var helper = new ServiceDefinitionHelper(def);
-        const result = (await this.getRegistry()).nodes.find(x => x.name == helper.name);
+        var helper = baseUtils.extend(new ServiceDefinition(), def).getName();
+        const result = (await this.getRegistry()).nodes.find(x => x.name == helper);
         return result;
     }
 

@@ -6,7 +6,7 @@ import { IHostBuilder, IHostedService } from "../../infrastructure/hosting";
 import { RedisMeshService } from "./RedisMeshService";
 
 export function AddRedisService(host: IHostBuilder): IHostBuilder {
-    host.addMeshService({ category: 'redis', parameters: { schema: '' } }, (def) => {
+    host.addMeshService_deprecated({ category: 'redis', parameters: { schema: '' } }, (def) => {
         return RedisMeshService.GetOrCreate(def as redisServiceDefinition);
     });
     host.addHostedService(sp => new RedisService(sp));

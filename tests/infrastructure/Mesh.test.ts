@@ -1,20 +1,152 @@
+
 import tomcat from "../../src";
 import utils from "../../src/common/Domain.Utils";
 import { Contracts } from "../../src/infrastructure";
-import { IMeshService, matchService, ServiceDefinition, ServiceInformation } from "../../src/infrastructure/mesh";
+import { baseUtils } from "../../src/infrastructure/base";
+import { IMeshService, matchService, ServiceDefinition } from "../../src/infrastructure/mesh";
 
 
 class myService implements IMeshService {
-    Id: string;
-    getInformation(): ServiceInformation {
-        return { category: "data", parameters: { interval: "15m", exchange: "coinex" }, status: 'start' }
-    }
-    async start() {
-        return null
+    run(ctx?: tomcat.Infrastructure.Mesh.IMeshServiceContext): Promise<unknown> {
+        (ctx);
+        throw new Error("Method not implemented.");
     }
 }
 jest.setTimeout(80000)
+
+const setup = async () => {
+    const port = await baseUtils.findPort(8000, 8800);
+    const hub = tomcat.getHostBuilder('hub')
+        .addWebSocketHub()
+        .buildWebHost();
+    const server = tomcat.getHostBuilder('server')
+        .addMessageBus(cfg => {
+            cfg.endpoint = 'server'
+            cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+        })
+        .addMeshServer()
+        .buildWebHost();
+    await hub.listen(port);
+    await server.start();
+    return {
+        hub: hub,
+        server: server,
+        url: `http://localhost:${port}/hub`,
+        getBuilder: (name: string) => {
+            return tomcat.getHostBuilder(name)
+                .addMessageBus(cfg => {
+                    cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+                })
+
+        },
+        stop: async () => {
+            await server.stop();
+            await hub.stop();
+        }
+    }
+}
+
 describe('Mesh', () => {
+    test('01-ready: services will start just once', async () => {
+        const port = 8085;
+        let no_services = 0;
+        const def: ServiceDefinition = {
+            category: 'miscelaneous',
+            parameters: { name: 'client1-service' }
+        }
+        const hub = tomcat.getHostBuilder('hub')
+            .addWebSocketHub()
+            .buildWebHost();
+        const server = tomcat.getHostBuilder('server')
+            .addMessageBus(cfg => {
+                cfg.endpoint = 'server'
+                cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+            })
+            .addMeshServer()
+            .buildWebHost();
+        const client1 = tomcat.getHostBuilder('client1')
+            .addMessageBus(cfg => {
+                cfg.endpoint = "client1";
+                cfg.transports.websocket.url = `http://localhost:${port}/hub`;
+            })
+            .addMeshService(s => s.useRunMethod(def, {}, async ctx => {
+                (ctx);
+                no_services++;
+            }))
+            .build();
+        await hub.listen(port);
+        await server.start();
+        await client1.start();
+        await client1.node.startService(def);
+        await client1.node.startService(def);
+        expect(no_services).toBe(1);
+        await client1.stop()
+        await server.stop()
+        await hub.stop();
+    })
+    test('02-ready: started services will be discovered', async () => {
+        const _setup = await setup();
+        const client = _setup.getBuilder('test')
+            .addMeshService(s => s.useRunMethod(
+                { category: 'miscelaneous', parameters: { 'name': 'test' } },
+                {},
+                async () => {
+
+
+                }
+            ))
+            .build();
+        await client.start();
+        await client.node.startService({ category: 'miscelaneous', parameters: { 'name': 'test' } });
+        await client.services.getUtility().delay(5000);
+        const discovery = await _setup.server.services
+            .getServiceDiscovery()
+            .discover({ category: 'miscelaneous', parameters: { 'name': 'test' } });
+        expect(discovery).not.toBeNull();
+        expect(discovery.length).toBe(1);
+        const discovered_def = baseUtils.extend(new ServiceDefinition(), discovery[0].definition);
+        const service_def = baseUtils.extend(new ServiceDefinition(), { category: 'miscelaneous', parameters: { 'name': 'test' } });
+        expect(discovered_def.getName()).toEqual(service_def.getName())
+
+    })
+    test('03-ready: meshservices can be stopped', async () => {
+        const fixture = await setup();
+        let stopped = false;
+        baseUtils.disableLogs();
+        const def: ServiceDefinition = { category: 'miscelaneous', parameters: { 'name': 'test' } }
+        const client = fixture.getBuilder('test')
+            .addMeshService(s => s.useRunMethod(
+                def,
+                {},
+                async (ctx) => {
+                    while (!ctx.stop()) {
+                        await utils.delay(10);
+                    }
+                    ctx.service.getInformation().status = 'stop'
+                    stopped = true;
+                }
+            ))
+            .build();
+        await client.start();
+        const request_def = baseUtils.extend(new ServiceDefinition(), def);
+        let info = await client.node.startService(request_def);
+        expect(info.isRunning()).toBe(true);
+        expect(client.node.getRunnigServices().length).toBe(1);
+
+        info = await client.node.stopService(request_def);
+        expect(stopped).toBe(true);
+        expect(info.isRunning()).toBe(false);
+        expect(client.node.getRunnigServices().length).toBe(0);
+        await client.stop();
+        await fixture.stop();
+        await utils.delay(2000);
+
+
+
+
+
+
+    })
     test('heartbeat', async () => {
         const port = 8085;
         const hub = tomcat.getHostBuilder('hub')
@@ -26,7 +158,6 @@ describe('Mesh', () => {
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
             .addMeshServer()
-
             .buildWebHost();
         // const services: ServiceDefinition[] = [{ category: "data", parameters: { interval: "15m", exchange: "binance" } }]
         const client1 = tomcat.getHostBuilder('client1')
@@ -34,7 +165,10 @@ describe('Mesh', () => {
                 cfg.endpoint = "klient1";
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
-            .addMeshService({ category: "data", parameters: { interval: "15m", exchange: "binance" } }, null)
+            .addMeshService(s => s.useRunMethod({ category: 'miscelaneous', parameters: {} }, {}, async ctx => {
+                (ctx);
+
+            }))
             // .addMeshNode((cfg) => {
             //     cfg.queryService = () => services
 
@@ -46,10 +180,10 @@ describe('Mesh', () => {
                 cfg.endpoint = "klinet2";
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
-            .addMeshService({ category: "data", parameters: { interval: "15m", exchange: "coinex" } }, () => new myService())
-            // .addMeshNode((cfg) => {
-            //     cfg.queryService = () => services2
-            // })
+            .addMeshService(s =>
+                s.userServiceConstructor(
+                    { category: "data", parameters: { interval: "15m", exchange: "coinex" } }, {},
+                    () => new myService()))
             .build();
         client2.node.startService({ category: "data", parameters: { interval: "15m", exchange: "coinex" } })
 
@@ -213,28 +347,28 @@ describe('Mesh', () => {
                 cfg.endpoint = 'client'
                 cfg.transports.websocket.url = `http://localhost:${port}/hub`;
             })
-            .addMeshService({ category: 'strategy', parameters: {} }, (def) => {
-                (def)
-                return {
-                    getInformation: () => {
-                        const ret: ServiceInformation = {
-                            category: 'strategy',
-                            parameters: {
-                                name: 'babak'
-                            },
-                            status: "start"
-                        }
-                        return ret;
-                    },
-                    Id: "hhh",
-                    start: async (ctx) => {
-                        //tomcat.Domain.Extenstions.getStore(ctx);
-                        const store = await ctx.getHelper().getRedisStore('strategy-babak',);
-                        const repo = store.getRepository<{ id: string, name: string }>('test');
-                        await repo.insert({ id: 'babak@gnco.ir', name: 'babak' });
-                    },
-                }
-            })
+            // .addMeshService_deprecated({ category: 'strategy', parameters: {} }, (def) => {
+            //     (def)
+            //     return {
+            //         getInformation: () => {
+            //             const ret: ServiceInformation = {
+            //                 category: 'strategy',
+            //                 parameters: {
+            //                     name: 'babak'
+            //                 },
+            //                 status: "start"
+            //             }
+            //             return ret;
+            //         },
+            //         Id: "hhh",
+            //         start: async (ctx) => {
+            //             //tomcat.Domain.Extenstions.getStore(ctx);
+            //             const store = await ctx.getHelper().getRedisStore('strategy-babak',);
+            //             const repo = store.getRepository<{ id: string, name: string }>('test');
+            //             await repo.insert({ id: 'babak@gnco.ir', name: 'babak' });
+            //         },
+            //     }
+            // })
             .buildWebHost();
 
         await hub.listen(port);

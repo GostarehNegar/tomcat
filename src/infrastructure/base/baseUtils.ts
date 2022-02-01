@@ -133,6 +133,9 @@ export class BaseUtils {
       setTimeout(resolve, ms);
     });
   }
+  public disableLogs() {
+    Logger.disabled = true;
+  }
   public wildCardMatch(str, rule) {
     if (!rule) {
       return false
@@ -329,6 +332,10 @@ export class BaseUtils {
       });
 
     });
+  }
+  public extend<T>(a: T, b: any) {
+
+    return Object.assign(a, b) as T;
   }
 }
 

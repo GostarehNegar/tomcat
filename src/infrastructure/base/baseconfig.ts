@@ -28,7 +28,13 @@ export default {
             url: "redis://localhost:6379",
             publicUrl: null,
         },
-        redisEx: { host: "redis://localhost:6379" }
+        /**
+         * Default options for redis client. See 'ioredis' 
+         * client options for details.
+         * This is used by RedisClientFactory to create a
+         * redis client.
+         */
+        redisOptions: { host: "redis://localhost:6379" }
 
     },
 }

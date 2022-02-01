@@ -1,4 +1,4 @@
-import { ServiceDefinition } from "./infrastructure/mesh";
+import { ServiceDefinition, ServiceInformation } from "./infrastructure/mesh";
 
 import tomcat from ".";
 export class SampleService implements tomcat.Infrastructure.Mesh.IMeshService {
@@ -7,15 +7,17 @@ export class SampleService implements tomcat.Infrastructure.Mesh.IMeshService {
     }
     getInformation(): tomcat.Infrastructure.Mesh.ServiceInformation {
         return {
-            'category': this.def.category,
-            parameters: this.def.parameters,
+            definition: {
+                'category': this.def.category,
+                parameters: this.def.parameters
+            },
             status: 'start'
         }
     }
-    async start(ctx?: tomcat.Infrastructure.Mesh.IMeshServiceContext): Promise<unknown> {
+    async run(ctx?: tomcat.Infrastructure.Mesh.IMeshServiceContext): Promise<ServiceInformation> {
         (ctx);
         console.log("started.........");
-        return this;
+        return this.getInformation();
 
 
     }
@@ -29,7 +31,7 @@ export class SampleService implements tomcat.Infrastructure.Mesh.IMeshService {
 try {
     const srv = tomcat.getHostBuilder('test-service')
         .addMessageBus()
-        .addMeshService(SampleService.definition, (def) => {
+        .addMeshService_deprecated(SampleService.definition, (def) => {
             return new SampleService(def);
         })
         .build();

@@ -2,7 +2,7 @@
 
 import { IServiceProvider } from '../base';
 import config from '../base/baseconfig';
-import { MeshNodeConfiguration, ServiceConstructor, ServiceDefinition } from '../mesh';
+import { IServiceDescriptor, MeshNodeConfiguration, ServiceConstructor, ServiceDefinition, ServiceDescriptor } from '../mesh';
 
 import { IHost } from './IHost';
 import { IHostedService } from "./IHostedService";
@@ -40,9 +40,12 @@ export interface IHostBuilder {
     addWebSocketHub(path?: string): IHostBuilder;
     addMeshServer(): IHostBuilder;
     addMeshNode(cb: (cfg: MeshNodeConfiguration) => void): IHostBuilder;
-    addMeshService(serviceDefinition: ServiceDefinition, ctor: ServiceConstructor): IHostBuilder
+    addMeshService_deprecated(serviceDefinition: ServiceDefinition, ctor: ServiceConstructor): IHostBuilder
+    addMeshService(configure: ((descriptor: IServiceDescriptor) => void) | ServiceDescriptor): IHostBuilder;
+
     addHttp(): IHostBuilder;
     addExpress();
     addMessageBus(cf?: (c: typeof config.messaging) => void): IHostBuilder;
     addBinance(): IHostBuilder;
+
 }

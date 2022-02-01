@@ -20,7 +20,7 @@ const register = (services: IServiceProvider) => {
     const clock = new Clock();
     const stop = new StopService(services);
 
-    const redis = new RedisClientFactory(baseconfig.data.redisEx);
+    const redis = new RedisClientFactory(baseconfig.data.redisOptions);
     const store = new StoreFactory(services);
     const nodeManagerService = new NodeManagerService(services)
     const utility = new BaseUtilityService(services);

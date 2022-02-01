@@ -1,5 +1,5 @@
 //import fs from "fs";
-import { IMeshService, ServiceDefinition } from "./infrastructure/mesh";
+import { IMeshService, ServiceDefinition, ServiceInformation } from "./infrastructure/mesh";
 
 import tomcat from ".";
 
@@ -30,12 +30,14 @@ export class MyService implements IMeshService {
     }
     getInformation(): tomcat.Infrastructure.Mesh.ServiceInformation {
         return {
-            category: 'strategy',
-            parameters: {},
+            definition: {
+                category: 'strategy',
+                parameters: {}
+            },
             status: 'start'
         }
     }
-    async start(ctx?: tomcat.Infrastructure.Mesh.IMeshServiceContext): Promise<unknown> {
+    async run(ctx?: tomcat.Infrastructure.Mesh.IMeshServiceContext): Promise<ServiceInformation> {
         (ctx);
         const store = await ctx.getHelper().getRedisStore("my_service");
         const repo = store.getRepository<{ id: string, name: string }>('test');
@@ -48,7 +50,7 @@ export class MyService implements IMeshService {
 }
 const node = tomcat.getHostBuilder('some-service')
     .addMessageBus()
-    .addMeshService({ category: 'strategy', parameters: { name: 'babak' } }, (def) => new MyService(def))
+    .addMeshService_deprecated({ category: 'strategy', parameters: { name: 'babak' } }, (def) => new MyService(def))
     .build();
 
 

@@ -1,18 +1,27 @@
-import { IServiceProvider } from "../base";
+import { CancellationTokenSource, IServiceProvider } from "../base";
 import { IMessageBus } from "../bus";
 import { requireService } from "../contracts";
 
 import { IMeshNode } from "./IMeshNode";
 
 import { IMeshService, IMeshServiceContext, ServiceDefinition, ServiceInformation } from ".";
+import { MeshServiceHelper } from "../../services";
 
 
 
 export class MeshServiceContext implements IMeshServiceContext {
 
 
-    constructor(public ServiceProvider: IServiceProvider, public node: IMeshNode, public service: IMeshService) {
+    constructor(public ServiceProvider: IServiceProvider, public node: IMeshNode,
+        public service: IMeshService, public cancellationToken: CancellationTokenSource) {
 
+    }
+    stop(): boolean {
+        return this.cancellationToken.isCancelled;
+    }
+
+    getHelper(): MeshServiceHelper {
+        throw new Error("Method not implemented.");
     }
     private getBus(): IMessageBus {
         return this.ServiceProvider.getBus();

@@ -6,7 +6,7 @@ import registrar from '../base/BaseRegistrar'
 import config from '../base/baseconfig';
 import { BaseConstants } from '../base/baseconstants';
 import { MessageBus } from '../bus';
-import { ServiceConstructor, ServiceDefinition } from '../mesh';
+import { ServiceConstructor, ServiceDefinition, ServiceDescriptor } from '../mesh';
 import { MeshNode, MeshNodeConfiguration } from '../mesh/MeshNode';
 import { MeshServer } from '../mesh/MeshServer';
 
@@ -29,6 +29,7 @@ export class HostBuilder implements IHostBuilder {
   private handlers: IHttpHandler[] = [];
 
   public services: IServiceProvider;
+
   constructor(protected _name?: string) {
     this._name = _name || `host-${Math.random()}`;
     this.services = new ServiceProvider();
@@ -58,13 +59,32 @@ export class HostBuilder implements IHostBuilder {
     this.services.register(serviceNames.IMessageBus, bus);
     return this;
   }
-  addMeshService(serviceDefinition: ServiceDefinition, ctor: ServiceConstructor) {
-    this.services.register(serviceNames.ServiceDescriptor, { serviceDefinition: serviceDefinition, serviceConstructor: ctor })
-    const mesh = new MeshNode(this.services, null);
-    this.services.register(serviceNames.MeshNode, mesh);
-    this.services.register(serviceNames.IHostedService, mesh);
+  addMeshService_deprecated(serviceDefinition: ServiceDefinition, ctor: ServiceConstructor) {
+    return this.addMeshService(d => {
+      d.serviceDefinition = serviceDefinition;
+      d.serviceConstructor = ctor;
+
+    });
+  }
+  addMeshService(configure: ((descriptor: ServiceDescriptor) => void) | ServiceDescriptor) {
+    (configure);
+    if (this.services.getService(serviceNames.MeshNode) == null) {
+      const mesh = new MeshNode(this.services, null);
+      this.services.register(serviceNames.MeshNode, mesh);
+      this.services.register(serviceNames.IHostedService, mesh);
+    }
+    let _descriptor: ServiceDescriptor = null;
+    if (typeof configure == 'function') {
+      _descriptor = new ServiceDescriptor();
+      configure(_descriptor);
+    }
+    else {
+      _descriptor = configure;
+    }
+    this.services.register(serviceNames.ServiceDescriptor, _descriptor.build());
     return this
   }
+
   addMeshServer(): IHostBuilder {
     const server = new MeshServer(this.services);
     this.services.register(serviceNames.IHostedService, server);

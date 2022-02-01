@@ -50,7 +50,7 @@ export class RedisMeshService implements IMeshService {
             .spawn("docker", ["run", "-d", "-p", `${port}:6379`, "-v", `${dir}:/data`, "--name", name, "redis"]);
         return this.process;
     }
-    async start(ctx?: IMeshServiceContext): Promise<unknown> {
+    async run(ctx?: IMeshServiceContext): Promise<ServiceInformation> {
         (ctx)
         if (this.status !== 'start') {
             try {
@@ -125,8 +125,10 @@ export class RedisMeshService implements IMeshService {
     }
     getInformation(): ServiceInformation {
         return {
-            category: "redis" as ServiceCategories,
-            parameters: this.info,
+            definition: {
+                category: "redis" as ServiceCategories,
+                parameters: this.info
+            },
             status: this.status
         };
     }
@@ -142,7 +144,7 @@ export class RedisMeshService implements IMeshService {
         let service: RedisMeshService = null;
         for (let idx = 0; idx < this._instances.length; idx++) {
             const _service = this._instances[idx];
-            const matches = matchService(_service.getInformation(), definition);
+            const matches = matchService(_service.getInformation().definition, definition);
             if (matches) {
                 service = _service;
                 break;
@@ -175,7 +177,7 @@ export class RedisMeshService implements IMeshService {
         if (!service) {
             throw utils.toException("Unexpcted Error: Failed to add the required redis-service'");
         }
-        await service.start(new MeshServiceContext(ctx.serviceProvider, null, service))
+        await service.run(new MeshServiceContext(ctx.serviceProvider, null, service, null))
         var options: RedisClientOptions = {
             host: service.info.host,
             port: service.info.port,

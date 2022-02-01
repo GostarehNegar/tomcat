@@ -19,7 +19,7 @@ export class MeshState {
         const res: ServiceInformation[] = []
         this.runningNodes.forEach((value) => {
             value.services?.forEach((x) => {
-                if (matchService(x, definition)) {
+                if (matchService(x.definition, definition)) {
                     res.push(x)
                 }
             })

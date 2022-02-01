@@ -18,7 +18,7 @@ import { redisServiceDefinition } from '../contracts';
             cfg.endpoint = "redisservice";
             cfg.transports.websocket.url = "http://localhost:8084/hub";
         })
-        .addMeshService({ category: 'redis', parameters: {} }, (def) => RedisMeshService.GetOrCreate(def as redisServiceDefinition))
+        .addMeshService_deprecated({ category: 'redis', parameters: {} }, (def) => RedisMeshService.GetOrCreate(def as redisServiceDefinition))
         .build();
     client1.bus.subscribe(Contracts.queryRedisOptions(null).topic, async (ctx) => {
 

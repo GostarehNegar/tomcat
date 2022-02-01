@@ -38,9 +38,9 @@ export class DataService implements IMeshService {
         //     : null
     }
     getInformation(): ServiceInformation {
-        return { category: 'data', parameters: { streamName: this.streamName, exchange: this.exchange, symbol: this.symbol, market: this.market, interval: this.interval, startTime: new Date(this.startTime).toISOString(), endTime: this.endTime ? new Date(this.endTime).toISOString() : null }, status: this.status }
+        return { definition: { category: 'data', parameters: { streamName: this.streamName, exchange: this.exchange, symbol: this.symbol, market: this.market, interval: this.interval, startTime: new Date(this.startTime).toISOString(), endTime: this.endTime ? new Date(this.endTime).toISOString() : null } }, status: this.status }
     }
-    start(ctx: IMeshServiceContext): Promise<unknown> {
+    run(ctx: IMeshServiceContext): Promise<ServiceInformation> {
         (ctx)
         const data = new CCXTDataStream(this.exchange, this.symbol, this.market, this.interval)
         const stream = new DataSourceStreamEx(data);
@@ -54,7 +54,7 @@ export class DataService implements IMeshService {
             //     return false
             // }
         )
-        return Promise.resolve()
+        return Promise.resolve(this.getInformation())
     }
 }
 
@@ -65,20 +65,20 @@ const dataServices: DataService[] = [];
         .addMessageBus(cfg => {
             cfg.endpoint = "dataservice";
         })
-        .addMeshService({ category: 'data' as ServiceCategories, parameters: {} }, (def) => {
-            let service = dataServices.find(x => matchService(x.getInformation(), def))
+        .addMeshService_deprecated({ category: 'data' as ServiceCategories, parameters: {} }, (def) => {
+            let service = dataServices.find(x => matchService(x.getInformation().definition, def))
             if (!service) {
                 service = new DataService(def)
                 dataServices.push(service)
             }
-            return service
+            return service;
         })
         .build();
 
     client1.bus.subscribe(Contracts.queryDataStreamName(null).topic, async (ctx) => {
         const meshNode = client1.services.getService<MeshNode>(BaseConstants.ServiceNames.MeshNode)
         const payload = ctx.message.cast<Contracts.queryDataStreamNamePayload>()
-        const service = (meshNode.runningServices as DataService[]).find(x => x.exchange == payload.exchange && x.symbol == payload.symbol && x.interval == payload.interval && x.market == payload.market)
+        const service = (meshNode.runningServices as any as DataService[]).find(x => x.exchange == payload.exchange && x.symbol == payload.symbol && x.interval == payload.interval && x.market == payload.market)
         if (service) {
             await ctx.reply({ connectionString: baseconfig.data.redis.url + `/${service.streamName}` })
         } else {

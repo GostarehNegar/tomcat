@@ -1,3 +1,3 @@
-export * from "./Ibot"
-export * from "./bot"
+export * from "./Ibothost_deprecated"
+export * from "./bot-deprecated"
 export * from './botHost'
