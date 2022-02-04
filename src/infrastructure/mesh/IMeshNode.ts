@@ -13,5 +13,5 @@ export interface IMeshNode {
      */
     startService(serviceDefinition: ServiceDefinition): Promise<ServiceInformation>;
     stopService(serviceDefinition: ServiceDefinition): Promise<ServiceInformation>;
-    getRunnigServices(): ServiceInformation[];
+    getServices(): ServiceInformation[];
 }

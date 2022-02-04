@@ -16,10 +16,13 @@ export class MeshServiceContext implements IMeshServiceContext {
         public service: IMeshService, public cancellationToken: CancellationTokenSource) {
 
     }
-    stop(): boolean {
-        return this.cancellationToken.isCancelled;
+    shouldStop(wait = 1): Promise<boolean> {
+        return new Promise((resolve) => {
+            //setImmediate(() => resolve(this.cancellationToken.isCancelled))
+            setTimeout(() => resolve(this.cancellationToken.isCancelled), wait);
+        })
+        throw new Error("Method not implemented.");
     }
-
     getHelper(): MeshServiceHelper {
         throw new Error("Method not implemented.");
     }

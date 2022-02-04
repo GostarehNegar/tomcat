@@ -22,22 +22,16 @@ export class DataService implements IMeshService {
     public startTime
     public endTime
     public streamName;
-    public status: ServiceStatus = 'start'
+    public status: ServiceStatus = 'started'
     public Id: string = baseUtils.UUID()
     constructor(public def: ServiceDefinition) {
         this.exchange = this.def.parameters["exchange"] as Exchanges
         this.symbol = this.def.parameters["symbol"] as Symbols
         this.market = this.def.parameters["market"] as Markets
         this.interval = this.def.parameters["interval"] as Intervals
-        // this.startTime = tomcat.utils.toTimeEx(new Date(this.def.parameters["startTime"] as string))
-        // this.startTime = typeof (this.def.parameters["startTime"]) == "string" ? tomcat.utils.toTimeEx(new Date(this.def.parameters["startTime"] as string)) : tomcat.utils.toTimeEx(this.def.parameters["startTime"]["ticks"])
-        // this.endTime = this.def.parameters["endTime"] ?
-        //     typeof (this.def.parameters["endTime"]) == "string" ?
-        //         tomcat.utils.toTimeEx(new Date(this.def.parameters["endTime"] as string))
-        //         : this.def.parameters["endTime"]["ticks"]
-        //     : null
+
     }
-    getInformation(): ServiceInformation {
+    get info(): ServiceInformation {
         return { definition: { category: 'data', parameters: { streamName: this.streamName, exchange: this.exchange, symbol: this.symbol, market: this.market, interval: this.interval, startTime: new Date(this.startTime).toISOString(), endTime: this.endTime ? new Date(this.endTime).toISOString() : null } }, status: this.status }
     }
     run(ctx: IMeshServiceContext): Promise<ServiceInformation> {
@@ -54,7 +48,7 @@ export class DataService implements IMeshService {
             //     return false
             // }
         )
-        return Promise.resolve(this.getInformation())
+        return Promise.resolve(this.info)
     }
 }
 
@@ -66,7 +60,7 @@ const dataServices: DataService[] = [];
             cfg.endpoint = "dataservice";
         })
         .addMeshService_deprecated({ category: 'data' as ServiceCategories, parameters: {} }, (def) => {
-            let service = dataServices.find(x => matchService(x.getInformation().definition, def))
+            let service = dataServices.find(x => matchService(x.info.definition, def))
             if (!service) {
                 service = new DataService(def)
                 dataServices.push(service)

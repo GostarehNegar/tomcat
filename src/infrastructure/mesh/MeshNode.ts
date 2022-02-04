@@ -37,17 +37,19 @@ class MeshServiceEntry {
     }
     public context: MeshServiceContext;
     public promise: Promise<unknown>;
+    public unique_id = baseUtils.UUID();
     public cancellationToken: CancellationTokenSource = new CancellationTokenSource();
-    public getId() {
-        return this.service.getId();
-    }
-    public getInformation(): ServiceInformation {
+    // public getId() {
+    //     return this.service.getId();
+    // }
+    public get getInformation(): ServiceInformation {
 
-        return this.service.getInformation();
+        return this.service.info
     }
     public getDefinition(): ServiceDefinition {
-        return this.getInformation().definition;
+        return this.getInformation.definition;
     }
+
 
 }
 
@@ -65,22 +67,25 @@ export class MeshNode extends BackgroundService implements IMeshNode {
         this.config = this.config || { executeservice: null, queryService: null, runningServices: null, serviceCapability: null, serviceDefinitions: null, serviceFactory: null }
         this.options.heartBeatInSeconds = this.options.heartBeatInSeconds || 5;
     }
-    getRunnigServices(): ServiceInformation[] {
-        return this.runningServices.filter(x => x.getInformation().isRunning())
-            .map(x => x.getInformation());
+    getServices(): ServiceInformation[] {
+        return this.runningServices //.filter(x => x.getInformation().isRunning())
+            .map(x => x.getInformation);
     }
 
     find(def: ServiceDefinition): MeshServiceEntry {
-        return this.runningServices.find(x => matchService(x.getInformation().definition, def))
+        return this.runningServices.find(x => matchService(x.getInformation.definition, def))
 
+    }
+    removeEntry(entry: MeshServiceEntry) {
+        this.runningServices.filter(x => x.unique_id == entry.unique_id);
     }
     async stopService(serviceDefinition: ServiceDefinition): Promise<ServiceInformation> {
         const service = this.find(serviceDefinition);
-        if (service && service.getInformation().status === 'start') {
+        if (service && service.getInformation.status === 'started') {
             service.cancellationToken.cancel();
             try {
                 await baseUtils.timeout(service.promise, 2000, true);
-                service.getInformation().status = 'stop';
+                service.getInformation.status = 'stop';
                 this.runningServices = this.runningServices
                     .filter(x => matchService(x.getDefinition(), serviceDefinition));
             }
@@ -88,14 +93,14 @@ export class MeshNode extends BackgroundService implements IMeshNode {
 
             }
         }
-        return service.getInformation();
+        return service.getInformation;
     }
     async startService(serviceDefinition: ServiceDefinition): Promise<ServiceInformation> {
         serviceDefinition = baseUtils.extend(new ServiceDefinition(), serviceDefinition);
         const stringifiedServiceDefinition = serviceDefinition.getName();
         this.logger.debug(`a new service order is recieved for ${stringifiedServiceDefinition}`)
-        let startServiceResult: ServiceInformation = this.find(serviceDefinition)?.getInformation();
-        if (startServiceResult && startServiceResult.status === 'start') {
+        let startServiceResult: ServiceInformation = this.find(serviceDefinition)?.getInformation;
+        if (startServiceResult && startServiceResult.status === 'started') {
             // Service already started....
             this.logger.info(
                 `Service is alreadys started ${serviceDefinition.getName()}`);
@@ -106,19 +111,32 @@ export class MeshNode extends BackgroundService implements IMeshNode {
             if (availability.length > 0) {
                 this.logger.debug(`starting the first available service`)
                 try {
-                    const service = availability[0].serviceConstructor(serviceDefinition)
+                    let service = availability[0].serviceConstructor(serviceDefinition)
+                    if (!service.info) {
+                        service.info = service.info || new ServiceInformation(serviceDefinition);
+                    }
+
+
                     const entry = new MeshServiceEntry(service);
                     //service.getId() = new ServiceDefinitionHelper(serviceDefinition).name;
-                    service.getInformation().status = 'start';
+                    service.info.status = 'started'
                     entry.context = new MeshServiceContext(this.serviceProvider, this, service, entry.cancellationToken);
-                    entry.promise = service.run(entry.context);
+                    entry.promise = service.run(entry.context)
+                        .then(() => {
+                            entry.getInformation.status = 'stop';
+                            //this.removeEntry(entry);
+                        })
+                        .catch((err) => {
+                            entry.getInformation.lastError = err;
+                            entry.getInformation.status = 'error';
+                        })
                     await baseUtils.delay(100);
-                    startServiceResult = service.getInformation()
+                    startServiceResult = service.info
                     // var f = new ServiceDefinitionHelper(serviceDefinition);
                     // const id = f.name;
-                    if (startServiceResult.status === 'start' && !this.runningServices.find(x => x.getId() == service.getId())) {
-                        this.runningServices.push(entry);
-                    }
+                    //if (startServiceResult.status === 'started' && !this.runningServices.find(x => x.getId() == service.getId())) {
+                    this.runningServices.push(entry);
+                    //}
                     //startServiceResult = service.getInformation()
                 } catch (err) {
                     this.logger.error(`an error occoured while trying to start service error: ${err}`)
@@ -136,7 +154,9 @@ export class MeshNode extends BackgroundService implements IMeshNode {
             await this._bus.createMessage(
                 contracts.NodeStatusEvent(this.nodeName, {
                     alive: true,
-                    services: this.runningServices?.map(x => x.getInformation())
+                    services: this
+                        .runningServices?.filter(x => x.getInformation.isRunning())
+                        .map(x => x.getInformation)
                 }))
                 .publish();
         }

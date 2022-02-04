@@ -3,10 +3,13 @@ import tomcat from "../../src";
 import utils from "../../src/common/Domain.Utils";
 import { Contracts } from "../../src/infrastructure";
 import { baseUtils } from "../../src/infrastructure/base";
-import { IMeshService, matchService, ServiceDefinition } from "../../src/infrastructure/mesh";
+import { IMeshService, IMeshServiceContext, matchService, ServiceDefinition, ServiceInformation } from "../../src/infrastructure/mesh";
 
 
 class myService implements IMeshService {
+    get info(): tomcat.Infrastructure.Mesh.ServiceInformation {
+        throw new Error("Method not implemented.");
+    }
     run(ctx?: tomcat.Infrastructure.Mesh.IMeshServiceContext): Promise<unknown> {
         (ctx);
         throw new Error("Method not implemented.");
@@ -32,6 +35,7 @@ const setup = async () => {
         hub: hub,
         server: server,
         url: `http://localhost:${port}/hub`,
+        port: port,
         getBuilder: (name: string) => {
             return tomcat.getHostBuilder(name)
                 .addMessageBus(cfg => {
@@ -50,6 +54,7 @@ describe('Mesh', () => {
     test('01-ready: services will start just once', async () => {
         const port = 8085;
         let no_services = 0;
+        let calls = 0;
         const def: ServiceDefinition = {
             category: 'miscelaneous',
             parameters: { name: 'client1-service' }
@@ -72,6 +77,9 @@ describe('Mesh', () => {
             .addMeshService(s => s.useRunMethod(def, {}, async ctx => {
                 (ctx);
                 no_services++;
+                while (! await ctx.shouldStop()) {
+                    calls++;
+                }
             }))
             .build();
         await hub.listen(port);
@@ -80,6 +88,9 @@ describe('Mesh', () => {
         await client1.node.startService(def);
         await client1.node.startService(def);
         expect(no_services).toBe(1);
+        await baseUtils.delay(1000);
+        calls++;
+        (calls);
         await client1.stop()
         await server.stop()
         await hub.stop();
@@ -90,8 +101,10 @@ describe('Mesh', () => {
             .addMeshService(s => s.useRunMethod(
                 { category: 'miscelaneous', parameters: { 'name': 'test' } },
                 {},
-                async () => {
+                async (ctx) => {
+                    while (! await ctx.shouldStop()) {
 
+                    }
 
                 }
             ))
@@ -107,22 +120,22 @@ describe('Mesh', () => {
         const discovered_def = baseUtils.extend(new ServiceDefinition(), discovery[0].definition);
         const service_def = baseUtils.extend(new ServiceDefinition(), { category: 'miscelaneous', parameters: { 'name': 'test' } });
         expect(discovered_def.getName()).toEqual(service_def.getName())
-
     })
     test('03-ready: meshservices can be stopped', async () => {
         const fixture = await setup();
         let stopped = false;
         baseUtils.disableLogs();
         const def: ServiceDefinition = { category: 'miscelaneous', parameters: { 'name': 'test' } }
+        def.parameters
         const client = fixture.getBuilder('test')
             .addMeshService(s => s.useRunMethod(
                 def,
                 {},
                 async (ctx) => {
-                    while (!ctx.stop()) {
-                        await utils.delay(10);
+                    while (!await ctx.shouldStop()) {
+                        //await utils.delay(10);
                     }
-                    ctx.service.getInformation().status = 'stop'
+                    ctx.service.info.status = 'stop'
                     stopped = true;
                 }
             ))
@@ -131,20 +144,35 @@ describe('Mesh', () => {
         const request_def = baseUtils.extend(new ServiceDefinition(), def);
         let info = await client.node.startService(request_def);
         expect(info.isRunning()).toBe(true);
-        expect(client.node.getRunnigServices().length).toBe(1);
+        expect(client.node.getServices().filter(x => x.isRunning()).length).toBe(1);
 
         info = await client.node.stopService(request_def);
         expect(stopped).toBe(true);
         expect(info.isRunning()).toBe(false);
-        expect(client.node.getRunnigServices().length).toBe(0);
+        expect(client.node.getServices().filter(x => x.isRunning()).length).toBe(0);
         await client.stop();
         await fixture.stop();
         await utils.delay(2000);
 
+    })
+    test('04-ready it is possible to use a mesh service class.', async () => {
 
+        const fixture = await setup();
+        const def = new ServiceDefinition('miscelaneous', {})
+        const client = fixture.getBuilder("test")
+            .addMeshService(s => s.userServiceConstructor(def, {}, (def => ({
+                info: new ServiceInformation(def),
+                run: async (ctx?: IMeshServiceContext) => {
+                    (ctx);
+                    (def);
 
+                }
 
-
+            }))))
+            .build();
+        await client.start();
+        const info = await client.node.startService(new ServiceDefinition('miscelaneous', { 'name': 'test' }));
+        expect(def.match(info.definition)).toBe(true);
 
     })
     test('heartbeat', async () => {
@@ -396,8 +424,9 @@ describe('Mesh', () => {
     })
 
     test('node controller', async () => {
+        const fixture = await setup();
 
-        tomcat.config.setServer("localhost", 8084);
+        tomcat.config.setServer("localhost", fixture.port);
         const host = tomcat.getHostBuilder('test')
             .build();
         const target = new tomcat.Infrastructure.Mesh.MeshNodeController(host.services);

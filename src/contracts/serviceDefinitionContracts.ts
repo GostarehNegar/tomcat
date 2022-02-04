@@ -12,6 +12,9 @@ export interface IDataServiceParameters {
     "startTime"?: number
     "endTime"?: number
 }
+export function getStreamName(exchange: Exchanges, symbol: Symbols, market: Markets, interval: Intervals) {
+    return `${exchange}-${symbol}-${market}-${interval}`;
+}
 export class DataServiceDefinition extends ServiceDefinitionBase<IDataServiceParameters>{
     readonly category: ServiceCategories = 'data'
     constructor(params: IDataServiceParameters) {

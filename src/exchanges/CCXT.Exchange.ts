@@ -103,7 +103,7 @@ export class CCXTExchange implements IExchange {
     private async getExchange(refresh = false) {
         if (!this._ccxt_exchange || refresh) {
             this._ccxt_exchange = getExchange(this._exchange_name, this._market);
-            this._ccxt_exchange.httpsAgent = await utils.getProxy();
+            this._ccxt_exchange.httpsAgent = await utils.getProxy("https://api.binance.com/api/v1/time");
             await this._ccxt_exchange.loadMarkets();
             // TODO correct noonce
             //var noonce = await binance_nooce();

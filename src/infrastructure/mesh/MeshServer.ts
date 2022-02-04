@@ -26,7 +26,7 @@ export class MeshServer extends BackgroundService implements IServiceDiscovery {
         const serviceDefinitionString = JSON.stringify(serviceDefinition)
         try {
             this.logger.debug(`a service was required with definition of ${serviceDefinitionString}`)
-            const discovered = await (await this.discover(serviceDefinition)).filter(x => x.status == "start")
+            const discovered = await (await this.discover(serviceDefinition)).filter(x => x.status == "started")
             if (discovered.length == 0) {
                 this.logger.debug(`no services was discoverd, trying to query service capability`)
                 const capabilities = await this.queryServiceCapability(serviceDefinition)
@@ -55,7 +55,7 @@ export class MeshServer extends BackgroundService implements IServiceDiscovery {
                 }
             } else {
                 this.logger.debug(`service ${serviceDefinitionString} was already available, returning information...`)
-                executeServiceResult = discovered.find(x => x.status == "start")
+                executeServiceResult = discovered.find(x => x.status == "started")
             }
         } catch (err) {
             this.logger.error(`an error occured while trying to execute service definition ${serviceDefinitionString}\n${err}`)

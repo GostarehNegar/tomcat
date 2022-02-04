@@ -15,7 +15,15 @@ export interface IMeshServiceContext {
      * should continue until this token is cancelled.
      */
     cancellationToken: CancellationToken;
-    stop(): boolean;
+    /**
+     * designed to be used in service run method to
+     * wait for stop. Typically in a 'while(! await ctx.shouldStop()){}'
+     * loop. Note that a service run method should keep running
+     * until a stop request is recieved.
+     * @param wait 
+     */
+    shouldStop(wait?: number): Promise<boolean>;
+
 
 
 

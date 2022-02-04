@@ -6,7 +6,7 @@ const TimeEx = tomcat.Infrastructure.Base.TimeEx
 jest.setTimeout(20000000)
 describe('BinanceExchange', () => {
 
-    test('should get server time', async () => {
+    test('01- should get server time', async () => {
         // const target = new BinanceExchange();
         const target = new BinanceExchange();
         const curren_time = await target.getServerTime();

@@ -28,13 +28,13 @@ export class MyService implements IMeshService {
     constructor(public definition: ServiceDefinition) {
 
     }
-    getInformation(): tomcat.Infrastructure.Mesh.ServiceInformation {
+    get info(): tomcat.Infrastructure.Mesh.ServiceInformation {
         return {
             definition: {
                 category: 'strategy',
                 parameters: {}
             },
-            status: 'start'
+            status: 'started'
         }
     }
     async run(ctx?: tomcat.Infrastructure.Mesh.IMeshServiceContext): Promise<ServiceInformation> {

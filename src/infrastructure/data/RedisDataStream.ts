@@ -30,7 +30,8 @@ export class RedisDataStream<T> implements IDataStream<T>{
         // a single element. See more: https://redis.io/commands/xread#return-value
         //const client = await this._getClient();
         await client.ensureConnection();
-        const results = await client.duplicate().xread("block", 0, "STREAMS", this.name, lastId);
+        //const results = await client.duplicate().xread("block", 0, "STREAMS", this.name, lastId);
+        const results = await client.xread("block", 0, "STREAMS", this.name, lastId);
         const [key, messages] = results[0]; // `key` equals to "mystream"
         (key);
         const data = this.decode(messages);
@@ -43,6 +44,7 @@ export class RedisDataStream<T> implements IDataStream<T>{
         }
         // Pass the last id of the results to the next round.
         await this._listenForMessage(messages[messages.length - 1][0], cb, client);
+
     }
     async play(cb: (item: T, time: Ticks) => boolean, start?: Ticks): Promise<unknown> {
         start = start === 0 ? 1 : start;
@@ -215,6 +217,9 @@ export class RedisDataStream<T> implements IDataStream<T>{
 
         }
         return result;
+    }
+    async has(time: Ticks): Promise<boolean> {
+        return await this.getAt(time) != null;
     }
 
 

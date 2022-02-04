@@ -13,12 +13,21 @@ export interface IServiceDefinitionParameters {
 }
 export interface IServiceDefinitionBase<T extends IServiceDefinitionParameters> {
     category: ServiceCategories;
+    /**
+     * key value parameters to define and
+     * configure a service.
+     */
     parameters: T;
 
 }
 export class ServiceDefinitionBase<T extends IServiceDefinitionParameters> implements IServiceDefinitionBase<T> {
     public category: ServiceCategories
     public parameters: T = {} as T
+    constructor(cat?: ServiceCategories, params?: T) {
+        this.category = cat;
+        this.parameters = params || ({} as T);
+
+    }
     toString() {
         return JSON.stringify(this)
     }
@@ -30,7 +39,8 @@ export class ServiceDefinitionBase<T extends IServiceDefinitionParameters> imple
         return result;
     }
     match?: (other: IServiceDefinition) => boolean = (pattern) => {
-        if (this.category == pattern.category) {
+
+        if (pattern && this.category == pattern.category) {
             for (const key in pattern.parameters) {
                 if (this.parameters[key] && !baseUtils.wildCardMatch(this.parameters[key], pattern.parameters[key])) {
                     return false
@@ -58,19 +68,34 @@ export interface IServiceDefinition extends IServiceDefinitionBase<IServiceDefin
 
 }
 
+/**
+ * defines a service by providing a catagory identity
+ * together with a set of parameters.
+ */
 
 export class ServiceDefinition extends ServiceDefinitionBase<IServiceDefinitionParameters> {
+
 
 }
 
 
-export type ServiceStatus = "start" | "stop" | "pause" | 'unknown'
+export type ServiceStatus =
+    /**
+     * started
+     */
+    "started" | "stop" | "pause" | 'unknown' | 'error';
+
+
 export class ServiceInformation {
+    constructor(def?: ServiceDefinition) {
+        this.definition = def;
+    }
     public definition: ServiceDefinition
     public status: ServiceStatus
+    public lastError?: any
     public info?: { [key: string]: string; } = {}
     isRunning?= () => {
-        return this.status && this.status === 'start';
+        return this.status && this.status === 'started';
     }
 
 }

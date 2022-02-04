@@ -9,7 +9,7 @@
   "license": "MIT",
   "keywords": [],
   "bin": {
-    "say-hello": "./build/main/cli.js",
+    "tomcat-cli": "./build/main/bin/tomcat-cli.js",
     "run-hub": "./build/main/hub.js",
     "run-api": "./build/main/api.js"
   },
@@ -79,7 +79,7 @@
     "lowdb": "^3.0.0",
     "nan": "^2.14.2",
     "node": "^16.4.1",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "ping": "^0.4.1",
     "portastic": "^1.0.1",
     "set-interval-async": "^2.0.3",

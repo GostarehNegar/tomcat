@@ -1,13 +1,14 @@
 import tomcat from '../src'
-import { CandleStickCollection, Markets, Symbols } from '../src/common';
+import { CandleStickCollection, CandleStickData, Markets, Symbols } from '../src/common';
 import utils from '../src/common/Domain.Utils';
 import config from '../src/config';
+import { CandleStreamWriter } from '../src/data';
 import { CCXTExchange } from '../src/exchanges';
 import { Pipeline } from '../src/pipes';
 import { DataSourceStreamEx } from '../src/streams';
 
-//config.proxy.url = "http://localhost:2395";
-config.proxy.url = "http://localhost:1080";
+config.infrastructure.internet.proxy.url = "http://localhost:2395";
+//config.proxy.url = "http://localhost:1080";
 (config);
 jest.setTimeout(20000000)
 describe('CoinEx', () => {
@@ -21,7 +22,7 @@ describe('CoinEx', () => {
 
 
     });
-    test('binance getdata works', async () => {
+    test('01-ready binance getdata works', async () => {
         const market: Markets = 'future';
         const exchange = new tomcat.Domain.Exchange.CCXTExchange('binance', market);
         const interval = '1h'
@@ -48,6 +49,30 @@ describe('CoinEx', () => {
         expect(data.items[0].openTime).toBe(start.floorToMinutes(minutes).ticks);
     });
 
+    test('02-dev candlewriter works', async () => {
+        const host = tomcat.getBotBuilder('test')
+            .build();
+
+        const source = new tomcat.Domain.Exchange.CCXTDataStream('binance', 'BTC/USDT', 'future', '1m')
+        const stream = host.services.getStoreFactory().createStore({
+            provider: 'redis', redis: {
+                host: 'localhost'
+
+            }
+        })
+            .getDataStream<CandleStickData>('test');
+        const writer = new CandleStreamWriter(stream, source);
+        let count = 0;
+        await writer.start(utils.toTimeEx().addMinutes(-100), (ctx) => {
+            (ctx);
+            count++;
+            return count > 10;
+
+        });
+
+
+
+    })
     test('okex getdata works', async () => {
         const market: Markets = 'spot';
         const exchange = new tomcat.Domain.Exchange.CCXTExchange('okeex', market);

@@ -28,7 +28,7 @@ export class RedisMeshService implements IMeshService {
     public logger: ILogger;
     private static _instances: RedisMeshService[] = [];
     public definition: redisServiceDefinition;
-    private info: IRedisServiceInformationParameters = { schema: '' };
+    private _info: IRedisServiceInformationParameters = { schema: '' };
 
     constructor(public def: ServiceDefinition) {
         this.definition = def as redisServiceDefinition;
@@ -52,7 +52,7 @@ export class RedisMeshService implements IMeshService {
     }
     async run(ctx?: IMeshServiceContext): Promise<ServiceInformation> {
         (ctx)
-        if (this.status !== 'start') {
+        if (this.status !== 'started') {
             try {
                 this.logger.info(
                     `Trying to provision redis service. Params:${this.definition.parameters}`
@@ -62,19 +62,19 @@ export class RedisMeshService implements IMeshService {
                 if (exclusive && exclusive != "") {
                     // We should spin up a new instance of
                     // redis.
-                    this.info.port = (await utils.findPort(6300, 6400));
-                    this.info.schema = this.definition.parameters.schema;
-                    this.info.dataPath = await utils.getRedisDataDirectory(this.definition.parameters.server_name);
-                    this.info.server_name = this.definition.parameters.server_name;
+                    this._info.port = (await utils.findPort(6300, 6400));
+                    this._info.schema = this.definition.parameters.schema;
+                    this._info.dataPath = await utils.getRedisDataDirectory(this.definition.parameters.server_name);
+                    this._info.server_name = this.definition.parameters.server_name;
                 }
                 else {
                     // We do not need a new instance of redis if there
                     // exists one.
-                    this.info.port = 6379;
-                    this.info.dataPath = await utils.getRedisDataDirectory('redis');
-                    this.info.schema = this.definition.parameters.schema || 'default-perfix';
-                    this.info.server_name = "redis-default-server"
-                    this.info.host = utils.ipAddress();
+                    this._info.port = 6379;
+                    this._info.dataPath = await utils.getRedisDataDirectory('redis');
+                    this._info.schema = this.definition.parameters.schema || 'default-perfix';
+                    this._info.server_name = "redis-default-server"
+                    this._info.host = utils.ipAddress();
                 }
                 ///
                 /// At this point we know that we need redis
@@ -82,7 +82,7 @@ export class RedisMeshService implements IMeshService {
                 /// if we have this redis instance we do not need
                 /// a new one.
                 var redis_factory = ctx.ServiceProvider.getRedisFactory();
-                const process_name = this.info.server_name;
+                const process_name = this._info.server_name;
                 const processManager = ctx.ServiceProvider.getProcessManager();
                 this.process = processManager.getChilds().firstOrDefault(x => x.name == process_name);
 
@@ -91,28 +91,28 @@ export class RedisMeshService implements IMeshService {
                         // We are in docker.
                         let redis_info = null;// await redis_factory.getRedisInfo('redis', this.info.port);
                         if (!redis_info) {
-                            redis_info = await redis_factory.getRedisInfo('localhost', this.info.port);
+                            redis_info = await redis_factory.getRedisInfo('localhost', this._info.port);
                             if (!redis_info) {
                                 this.process = await this
-                                    .startWithRedisServer(processManager, process_name, this.info.port, this.info.dataPath);
+                                    .startWithRedisServer(processManager, process_name, this._info.port, this._info.dataPath);
                             }
-                            this.info.host = utils.ipAddress();
+                            this._info.host = utils.ipAddress();
                         }
                         else {
                             /// We are in a docker environment
                             /// where redis is exposed as a service.
-                            this.info.host = 'redis';
+                            this._info.host = 'redis';
                         }
                     }
                     else {
-                        this.process = await this.startWithDocker(processManager, process_name, this.info.port,
-                            this.info.dataPath);
+                        this.process = await this.startWithDocker(processManager, process_name, this._info.port,
+                            this._info.dataPath);
 
                     }
                 }
-                this.status = 'start';
+                this.status = 'started';
                 this.logger.info(
-                    `redis service successfully provisioned. Info:${this.getInformation()}`
+                    `redis service successfully provisioned. Info:${this.info}`
                 )
             }
             catch (err) {
@@ -120,10 +120,10 @@ export class RedisMeshService implements IMeshService {
                     `An error occured while trying to spawn a new redis instance. Err:${err}`)
             }
         }
-        return this.getInformation();
+        return this.info;
 
     }
-    getInformation(): ServiceInformation {
+    get info(): ServiceInformation {
         return {
             definition: {
                 category: "redis" as ServiceCategories,
@@ -144,7 +144,7 @@ export class RedisMeshService implements IMeshService {
         let service: RedisMeshService = null;
         for (let idx = 0; idx < this._instances.length; idx++) {
             const _service = this._instances[idx];
-            const matches = matchService(_service.getInformation().definition, definition);
+            const matches = matchService(_service.info.definition, definition);
             if (matches) {
                 service = _service;
                 break;
@@ -179,9 +179,9 @@ export class RedisMeshService implements IMeshService {
         }
         await service.run(new MeshServiceContext(ctx.serviceProvider, null, service, null))
         var options: RedisClientOptions = {
-            host: service.info.host,
-            port: service.info.port,
-            keyPrefix: service.info.schema + ':',
+            host: service._info.host,
+            port: service._info.port,
+            keyPrefix: service._info.schema + ':',
             password: 'tomcat_p@ssw0rd'
 
         };

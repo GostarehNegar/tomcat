@@ -10,8 +10,8 @@ export class GenericMeshService extends MeshServiceBase implements IMeshService 
         super(def);
 
     }
-    run(ctx?: IMeshServiceContext): Promise<unknown> {
-        return this.m(ctx);
+    async run(ctx?: IMeshServiceContext): Promise<unknown> {
+        return await this.m(ctx);
 
     }
 

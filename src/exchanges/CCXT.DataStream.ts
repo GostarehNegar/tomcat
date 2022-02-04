@@ -16,6 +16,10 @@ export class CCXTDataStream implements IDataSource {
     private _ccxt_exchange: CCXTExchange = null;
     private logger: ILogger;
     public name: string;
+    public getStartTime() {
+        const d = new Date(2021, 0, 1);
+        return utils.toTimeEx(d);
+    }
     constructor(public exchange: Exchanges, public symbol: Symbols, public market: Markets, public interval: Intervals) {
         this._ccxt_exchange = new CCXTExchange(exchange, market);
         this.name = `DataStream.${exchange}.${symbol}`;

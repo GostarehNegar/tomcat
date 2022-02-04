@@ -15,7 +15,7 @@ export class CandleStreamWriter {
     async start(startTime?: Ticks, stop?: IStopCallBack) {
         const lastCandle = await this.stream.getLast();
         startTime = utils.ticks(startTime);
-        startTime = startTime || lastCandle?.openTime;
+        startTime = lastCandle?.openTime || startTime
         const interval = utils.toMinutes(this.source.interval) * 60 * 1000;
         let should_stop = false;
         await this.source.play(async candles => {
@@ -30,7 +30,8 @@ export class CandleStreamWriter {
                     let success = false;
                     while (!success) {
                         try {
-                            await this.stream.add(candle, candle.openTime);
+                            if (!await this.stream.has(candle.openTime))
+                                await this.stream.add(candle, candle.openTime);
                             success = true;
                         }
                         catch (err) {

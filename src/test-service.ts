@@ -5,19 +5,19 @@ export class SampleService implements tomcat.Infrastructure.Mesh.IMeshService {
     constructor(public def: ServiceDefinition) {
 
     }
-    getInformation(): tomcat.Infrastructure.Mesh.ServiceInformation {
+    get info(): tomcat.Infrastructure.Mesh.ServiceInformation {
         return {
             definition: {
                 'category': this.def.category,
                 parameters: this.def.parameters
             },
-            status: 'start'
+            status: 'started'
         }
     }
     async run(ctx?: tomcat.Infrastructure.Mesh.IMeshServiceContext): Promise<ServiceInformation> {
         (ctx);
         console.log("started.........");
-        return this.getInformation();
+        return this.info;
 
 
     }

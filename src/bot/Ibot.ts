@@ -4,7 +4,7 @@ export interface IBot extends IMeshService {
 
 }
 export class Bot implements IBot {
-    getInformation(): ServiceInformation {
+    get info(): ServiceInformation {
         throw new Error("Method not implemented.");
     }
     run(ctx?: IMeshServiceContext): Promise<ServiceInformation> {
