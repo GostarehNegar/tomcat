@@ -80,6 +80,7 @@
     "nan": "^2.14.2",
     "node": "^16.4.1",
     "node-fetch": "^2.6.7",
+    "node-tcp-proxy": "^0.0.26",
     "ping": "^0.4.1",
     "portastic": "^1.0.1",
     "set-interval-async": "^2.0.3",

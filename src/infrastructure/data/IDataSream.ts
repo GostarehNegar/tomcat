@@ -13,7 +13,7 @@ export interface IDataStream<T> {
     reverse(start?: Ticks, end?: Ticks, count?: number): AsyncGenerator<T>
 
     toArray(predicate?: (item: T) => boolean, start?: Ticks, end?: Ticks, count?: number): Promise<T[]>;
-    play(cb: (item: T, time: Ticks) => boolean, start?: Ticks): Promise<unknown>;
+    play(cb: (item: T, time: Ticks) => Promise<boolean>, start?: Ticks): Promise<unknown>;
     getInfo(): Promise<IStreamInfo>;
     getFirst(): Promise<T>;
     getLast(): Promise<T>;

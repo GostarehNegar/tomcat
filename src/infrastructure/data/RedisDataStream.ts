@@ -24,7 +24,7 @@ export class RedisDataStream<T> implements IDataStream<T>{
     dispose() {
         this.client.quit()
     }
-    async _listenForMessage(lastId = "$", cb: (item: T, time: Ticks) => boolean, client: RedisClient) {
+    async _listenForMessage(lastId = "$", cb: (item: T, time: Ticks) => Promise<boolean>, client: RedisClient) {
         // `results` is an array, each element of which corresponds to a key.
         // Because we only listen to one key (mystream) here, `results` only contains
         // a single element. See more: https://redis.io/commands/xread#return-value
@@ -38,7 +38,7 @@ export class RedisDataStream<T> implements IDataStream<T>{
         for (let i = 0; i < data.length; i++) {
             const val = this.serializer.deserialize<T>(data[i].value);
             const tick = parseInt(data[i].id);
-            if (cb && cb(val, tick)) {
+            if (cb && await cb(val, tick)) {
                 return;
             }
         }
@@ -46,7 +46,7 @@ export class RedisDataStream<T> implements IDataStream<T>{
         await this._listenForMessage(messages[messages.length - 1][0], cb, client);
 
     }
-    async play(cb: (item: T, time: Ticks) => boolean, start?: Ticks): Promise<unknown> {
+    async play(cb: (item: T, time: Ticks) => Promise<boolean>, start?: Ticks): Promise<unknown> {
         start = start === 0 ? 1 : start;
         const _lastId = start ? baseUtils.ticks(start).toString() : '$'
         const client = (await this._getClient()).Duplicate();
