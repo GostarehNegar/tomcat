@@ -25,7 +25,15 @@ export type playDataStreamRequest = {
     interval: Intervals,
     market: Markets,
     channel?: string,
+    //headers: ([key: string]=>string)
     'start': Ticks
+
+}
+export type playDataStreamReply = {
+    channel: string;
+}
+export type dataStreamPayload = {
+    candels: any[];
 
 }
 

@@ -1,5 +1,5 @@
 import tomcat from "../src";
-import { CandleStickData } from "../src/common";
+import { CandleStickCollection, CandleStickData } from "../src/common";
 import utils from "../src/common/Domain.Utils";
 import { DataServiceDefinition, getStreamName, queryDataStreamNameReply } from "../src/contracts";
 import TestFixture from './TestFixture'
@@ -92,28 +92,27 @@ describe('Data Tests', () => {
 
         const channelName = utils.randomName('data-channel')
         const start = utils.toTimeEx(new Date(2021, 0, 5));
-        let count = 0;
         const client1 = fixture.getBuilder('test')
             .build();
-        await client1.start()
-
-        await client1.bus.subscribe(channelName, async ctx => {
+        (client1);
+        await client.start()
+        const collection = new CandleStickCollection([]);
+        let done = false;
+        await client.bus.subscribe(channelName, async ctx => {
             (ctx);
-            count++;
-            //await utils.delay(1);
-            if (count < 1000)
+            if (ctx.message.from === client.bus.endpoint)
+                await utils.delay(1);
+            console.log(collection.length);
+            collection.add(CandleStickData.from(ctx.message.cast<CandleStickData>()));
+            //const candle = ctx.message.cast<CandleStickData>();
+            if (collection.length < 1000)
                 await ctx.reply('ok');
             else {
-                ctx.reject("done");
+                done = true;
+                await ctx.reject("done");
             }
-            const b = start;
-            (b);
-
-
-
         });
-
-        const reply = await client1.bus.createMessage(tomcat.Domain.Contracts.requestDataStreamPlay({
+        const reply = await client.bus.createMessage(tomcat.Domain.Contracts.requestDataStreamPlay({
             exchange: 'binance',
             'interval': '1m',
             'market': 'future',
@@ -122,9 +121,17 @@ describe('Data Tests', () => {
             start: start.ticks
 
         })).execute();
+        tomcat.Domain.Extenstions.requestDataReply(client.bus, 'binance', '1m', 'BTC/USDT', 'future', channelName);
         (reply);
+        while (!done) {
 
-        await utils.delay(60 * 10000);
+            await utils.delay(10000);
+        }
+
+        const missed = collection.getMissingCandles(collection.firstCandle.openTime, collection.lastCandle.openTime);
+        (missed)
+
+
     })
 
 })

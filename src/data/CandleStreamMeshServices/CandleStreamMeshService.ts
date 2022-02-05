@@ -1,6 +1,6 @@
 import { CandleStickData } from "../../common";
 import utils from "../../common/Domain.Utils";
-import { DataServiceDefinition, getStreamName, IDataServiceParameters, playDataStreamRequest, queryDataStreamNamePayload, queryDataStreamNameReply } from "../../contracts";
+import { DataServiceDefinition, dataStreamPayload, getStreamName, IDataServiceParameters, playDataStreamReply, playDataStreamRequest, queryDataStreamNamePayload, queryDataStreamNameReply } from "../../contracts";
 import { Contracts } from "../../domain";
 import { CCXTDataStream } from "../../exchanges";
 import { CancellationToken, CancellationTokenSource, IServiceProvider } from "../../infrastructure/base";
@@ -24,23 +24,28 @@ class CandleStreamMeshServiceHelper {
     startPlay(token: CancellationToken, stream: IDataStream<CandleStickData>, options: playDataStreamRequest, to: string) {
         const bus = this.serviceProvider.getBus();
         (to);
-        let count = 0;
+        let failed = 0;
+        let failed_once = 0;
         stream.play(async (c, i) => {
             (c);
             (i);
-            let failed = 0;
             try {
-                const reply = await bus.createMessage(options.channel, c, to).execute();
-                //await utils.delay(10);
-                count++;
-                console.log(count);
-
+                await utils.delay(failed_once * 10 + failed * 10);
+                const payload: dataStreamPayload = {
+                    candels: [],
+                }
+                payload.candels.push(c);
+                const reply = await bus.createMessage(options.channel, payload, to).execute();
+                if (failed > 0)
+                    failed--;
                 (reply)
 
             }
             catch (err) {
                 (err)
                 failed++;
+                failed_once = 1;
+
             }
 
             return token.isCancelled || failed > 3;
@@ -72,6 +77,7 @@ class CandleStreamMeshServiceHelper {
     }
     async handlePlay(ctx: IMessageContext) {
         const query = ctx.message.cast<playDataStreamRequest>();
+        const reply: playDataStreamReply = null;
         (query)
         const service = this.services
             .find(s => s.params.exchange === query.exchange &&
@@ -84,7 +90,8 @@ class CandleStreamMeshServiceHelper {
                 .getDataStream<CandleStickData>(service.getStreamName())
 
             this.startPlay(this.token, stream, query, ctx.message.from);
-            await ctx.reply("ok");
+            reply.channel = query.channel;
+            ctx.reply(reply);
 
         }
         else {

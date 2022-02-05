@@ -6,6 +6,7 @@ import { IServiceProvider, ServiceProvider } from '../infrastructure/base/Servic
 import { UtilityService } from '../services/utility/UtilityService';
 import { IDomainServices } from '../services/IDomainServices';
 export * from './MeshServiceContextExtensions'
+export * from './DataServiceExtensions'
 export * from '../infrastructure/extensions'
 
 //import {IMessageBus} from './infrastructure/bus/IMessageBus'

@@ -52,7 +52,6 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     cfg?: typeof config.messaging
   ) {
     super();
-
     this._config = cfg || config.messaging;
     if (cf) cf(this._config);
     this._logger = Logger.getLogger('tomcat.MessageBus');
@@ -251,7 +250,6 @@ export class MessageBus extends BackgroundService implements IMessageBus {
       this._subscriptions
         .publish(context)
         .then(() => {
-          //console.warn(context.message)
           this.publishToTransports(context)
             .then(resolve)
             .catch((err) => reject(err));
