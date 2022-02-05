@@ -121,11 +121,11 @@ describe('Data Tests', () => {
             start: start.ticks
 
         })).execute();
-        tomcat.Domain.Extenstions.requestDataReply(client.bus, 'binance', '1m', 'BTC/USDT', 'future', channelName);
+
         (reply);
         while (!done) {
 
-            await utils.delay(10000);
+            await utils.delay(1000);
         }
 
         const missed = collection.getMissingCandles(collection.firstCandle.openTime, collection.lastCandle.openTime);

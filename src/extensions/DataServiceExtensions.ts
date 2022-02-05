@@ -18,9 +18,10 @@ export async function requestDataReply(bus: IMessageBus,
         start: startTime
 
     })).execute();
+    (callback)
 
     await bus.subscribe(channelName, async (ctx) => {
-
+        (ctx)
 
 
     })

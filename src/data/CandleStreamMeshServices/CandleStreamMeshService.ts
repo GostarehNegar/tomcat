@@ -77,7 +77,7 @@ class CandleStreamMeshServiceHelper {
     }
     async handlePlay(ctx: IMessageContext) {
         const query = ctx.message.cast<playDataStreamRequest>();
-        const reply: playDataStreamReply = null;
+        const reply: playDataStreamReply = { channel: '' };
         (query)
         const service = this.services
             .find(s => s.params.exchange === query.exchange &&
