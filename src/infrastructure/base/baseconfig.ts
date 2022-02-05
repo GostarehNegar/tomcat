@@ -25,7 +25,7 @@ export default {
     * null: localhost.
     * 'redis://redis:6379': connect to redis in this container.
     */
-            url: "redis://localhost:6379",
+            url: "localhost",
             publicUrl: null,
         },
         /**
@@ -34,7 +34,7 @@ export default {
          * This is used by RedisClientFactory to create a
          * redis client.
          */
-        redisOptions: { host: "redis://localhost:6379" }
+        redisOptions: { host: "localhost" }
 
     },
 }

@@ -1,9 +1,10 @@
-import { ServiceInformation } from "./ServiceDefinition";
+import { baseUtils } from "../base";
+
 import { IMeshServiceContext } from "./IMeshServiceContext";
+import { ServiceInformation } from "./ServiceDefinition";
 
 import { ServiceDefinition } from ".";
 
-import { baseUtils } from "../base";
 //import { ServiceDefinition } from ".";
 export interface IMeshServiceMain {
     (ctx?: IMeshServiceContext): Promise<unknown>;

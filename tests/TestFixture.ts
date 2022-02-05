@@ -16,6 +16,7 @@ export default class TestFixture {
             .buildWebHost();
         await hub.listen(port);
         await server.start();
+        await tomcat.utils.delay(5000)
         return {
             hub: hub,
             server: server,

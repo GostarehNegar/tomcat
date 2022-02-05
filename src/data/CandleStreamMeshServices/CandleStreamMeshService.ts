@@ -160,7 +160,6 @@ export class CandleStreamMeshService extends MeshServiceBase {
     }
 
     async run(ctx?: IMeshServiceContext): Promise<unknown> {
-        (ctx);
         const helper = CandleStreamMeshServiceHelper.getInstance(this, ctx);
         (helper);
         await helper.start();

@@ -42,6 +42,10 @@ export class Pipeline implements IPipeline {
         this.candleStream = CandleStream.ctreatFromUrl(connection.streamName, { host: connection.url, port: connection.port })
         return this
     }
+    fromStream2(streamName: string) {
+        this.candleStream = CandleStream.ctreatFromUrl(streamName, {})
+        return this
+    }
     stop(): Promise<unknown> {
         this.filters.map((x) => x._stop = true)
         return Promise.resolve()
@@ -116,6 +120,11 @@ export class Pipeline implements IPipeline {
 
             });
         }
+        // else {
+        //     this.candleStream.play(async (candle) => {
+        //         return stop && stop({ lastCandle: candle });
+        //     }, startTime)
+        // }
         for (let i = 0; i < promises.length; i++) {
             try {
                 await promises[i];

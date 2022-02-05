@@ -2,15 +2,16 @@ import tomcat from "../src";
 import { CandleStickCollection, CandleStickData } from "../src/common";
 import utils from "../src/common/Domain.Utils";
 import { DataServiceDefinition, getStreamName, queryDataStreamNameReply } from "../src/contracts";
+
 import TestFixture from './TestFixture'
 (utils);
 
 (tomcat)
-jest.setTimeout(60 * 1000);
+jest.setTimeout(60 * 10000);
 describe('Data Tests', () => {
     test('01-ready DataServices should read data and store in stream. ', async () => {
         tomcat.config.infrastructure.data.redisOptions = { host: 'localhost' };
-        tomcat.config.infrastructure.internet.proxy.url = "http://localhost:2395";
+        tomcat.config.infrastructure.internet.proxy.url = "http://172.16.6.56:8080";
         const fixture = await TestFixture.setup();
         const client = fixture.getBuilder('test')
             .addMeshService(s => s.userServiceConstructor({ category: 'data', parameters: {} }, {},
@@ -25,9 +26,9 @@ describe('Data Tests', () => {
         const stream = client.services.getStoreFactory()
             .createStore({ 'provider': 'redis' })
             .getDataStream<CandleStickData>(stream_name);
-        var info1 = await stream.getInfo();
+        const info1 = await stream.getInfo();
         await tomcat.utils.delay(10000);
-        var info2 = await stream.getInfo();
+        const info2 = await stream.getInfo();
         expect(info2.length).toBeGreaterThan(info1.length);
 
     })
@@ -131,6 +132,26 @@ describe('Data Tests', () => {
         const missed = collection.getMissingCandles(collection.firstCandle.openTime, collection.lastCandle.openTime);
         (missed)
 
+
+    })
+    test("04", async () => {
+        tomcat.config.infrastructure.data.redisOptions = { host: 'localhost' };
+        tomcat.config.infrastructure.internet.proxy.url = "http://172.16.6.56:8080";
+        const fixture = await TestFixture.setup();
+        const client = fixture.getBuilder('test')
+            .addMeshService(s => s.userServiceConstructor({ category: 'data', parameters: {} }, {},
+                def => new tomcat.Domain.Data.CandleStreamMeshService(def as DataServiceDefinition)))
+            .build();
+        await client.start();
+        await tomcat.utils.delay(10000);
+        const stream_name = getStreamName('coinex', 'BTC/USDT', 'future', '1m')
+        const stream = client.services.getStoreFactory()
+            .createStore({ 'provider': 'redis' })
+            .getDataStream<CandleStickData>(stream_name);
+        for (let i = 1; i < 1000002; i++) {
+            // await tomcat.utils.delay(10)
+            await stream.add(new CandleStickData(i, i, i, i, i, i, i))
+        }
 
     })
 
