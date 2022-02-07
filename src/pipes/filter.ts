@@ -1,5 +1,4 @@
-import { Intervals } from "../common";
-import { CandleStickCollectionScaler } from "../indicators";
+import { CandleStickCollectionScaler, Intervals } from "../common";
 import { baseUtils, IServiceProvider, ServiceProvider, Ticks } from "../infrastructure/base";
 import { CandleStream } from "../streams";
 
