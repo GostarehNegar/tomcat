@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+
 import tomcat from "../src";
 import { ApiServiceNode } from "../src/infrastructure/apipipes/apipipeline"
 
@@ -13,7 +14,13 @@ describe('API', () => {
         const port3 = 3003; // await tomcat.utils.findPort(5000, 6000);
         const node1 = tomcat.getBotBuilder('node1')
             .addHostedService((s) => new ApiServiceNode(s,
-                [{ name: 'service1', params: {} }]
+                [{ name: 'service1', params: {} },
+                {
+                    name: 'indicator', params: { name: "rsa" }, handler: async x => {
+                        x.data.logs.push(x.data.memory["paria"])
+                        return x
+                    }
+                }]
 
             ))
             .buildWebHost('express');
@@ -51,8 +58,9 @@ describe('API', () => {
         })).text();
         (resp1);
         await tomcat.utils.delay(3000);
-        const target = node1.services.getService<ApiServiceNode>("ApiServiceNode");
-        const _resp = await target.call('service2', { 'param1': 'value1' }, {});
+        const target = node2.services.getService<ApiServiceNode>("ApiServiceNode");
+
+        const _resp = await target.call('indicator', { 'name': 'rsa' }, { memory: { paria: "mahmoudi" } });
         (target);
         (_resp);
 

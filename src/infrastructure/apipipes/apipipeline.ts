@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import { CandleStickCollectionScaler, CandleStickData, Intervals } from "../../common";
 import { baseUtils, CancellationToken, IServiceProvider } from "../base"
 import { BaseConstants } from "../base/baseconstants";
 import { BackgroundService, IWebHost } from "../hosting"
@@ -11,7 +12,10 @@ export interface ApiDefinition {
     params: ApiParams
     handler?: IApiHandler
 }
-
+export interface IIndicatorContext {
+    candle: CandleStickData
+    getScaler(interval: Intervals, maxCount: number): CandleStickCollectionScaler
+}
 
 export interface ApiContextData {
     memory?: { [key: string]: string; }
@@ -19,11 +23,11 @@ export interface ApiContextData {
     logs?: string[]
 }
 
-export interface IApiContext {
+export interface IApiContext extends IIndicatorContext {
     data: ApiContextData
 }
 
-export class ApiContext {
+export class ApiContext implements IApiContext {
     constructor(public data: ApiContextData) {
         data.memory = data.memory || {};
         data.logs = data.logs || [];
@@ -67,7 +71,7 @@ export class ApiServiceNode extends BackgroundService implements IApiManager {
     private match(pattern: ApiDefinition, def: ApiDefinition) {
         if (def.name == pattern.name) {
             for (const key in pattern.params) {
-                if (def.params[key] && def.params != pattern.params) {  //!baseUtils.wildCardMatch(def.parameters[key], pattern.parameters[key])) {
+                if (!def.params || def.params[key] != pattern.params[key]) {  //!baseUtils.wildCardMatch(def.parameters[key], pattern.parameters[key])) {
                     return false
                 }
             }
@@ -155,12 +159,11 @@ export class ApiServiceNode extends BackgroundService implements IApiManager {
 
         while (!token.isCancelled) {
             for (let i = 0; i < this.peers.length; i++) {
-                const x = this.peers[0];
+                const x = this.peers[i];
                 if (!this.isSelf(x)) {
                     const reply = await axios.post(x.url + '/api/stat', this.getStatus());
                     this.processStatus(reply.data);
                 }
-
             }
             await baseUtils.delay(30);
         }

@@ -1,9 +1,5 @@
-import { Intervals } from "../common";
-import { CandleStickCollectionScaler } from "../indicators";
+import { CandleStickCollectionScaler, Intervals } from "../common";
 import { IServiceProvider } from "../infrastructure/base";
-
-
-
 
 export interface IFilter {
     context: { [key: string]: unknown; };
