@@ -1,9 +1,9 @@
 import axios from "axios";
 
-import { CandleStickCollectionScaler, CandleStickData, Intervals } from "../../common";
-import { baseUtils, CancellationToken, IServiceProvider } from "../base"
-import { BaseConstants } from "../base/baseconstants";
-import { BackgroundService, IWebHost } from "../hosting"
+import { CandleStickCollectionScaler, CandleStickData, Intervals } from "../common";
+import { baseUtils, CancellationToken, IServiceProvider } from "../infrastructure/base"
+import { BaseConstants } from "../infrastructure/base/baseconstants";
+import { BackgroundService, IWebHost } from "../infrastructure/hosting"
 export interface ApiParams {
     [key: string]: any
 }
@@ -12,25 +12,27 @@ export interface ApiDefinition {
     params: ApiParams
     handler?: IApiHandler
 }
-export interface IIndicatorContext {
-    candle: CandleStickData
-    getScaler(interval: Intervals, maxCount: number): CandleStickCollectionScaler
-}
-
 export interface ApiContextData {
     memory?: { [key: string]: string; }
     params?: ApiParams,
     logs?: string[]
+    candle?: CandleStickData;
 }
 
-export interface IApiContext extends IIndicatorContext {
+export interface IApiContext {
     data: ApiContextData
+    getScaler(interval: Intervals, maxCount: number): CandleStickCollectionScaler
 }
 
 export class ApiContext implements IApiContext {
     constructor(public data: ApiContextData) {
         data.memory = data.memory || {};
         data.logs = data.logs || [];
+    }
+    getScaler(interval: Intervals, maxCount: number): CandleStickCollectionScaler {
+        (interval);
+        (maxCount)
+        throw new Error("Method not implemented.");
     }
 
 }
@@ -72,7 +74,9 @@ export class ApiServiceNode extends BackgroundService implements IApiManager {
         if (def.name == pattern.name) {
             for (const key in pattern.params) {
                 if (!def.params || def.params[key] != pattern.params[key]) {  //!baseUtils.wildCardMatch(def.parameters[key], pattern.parameters[key])) {
-                    return false
+                    if (!def.params[key] || pattern.params[key] !== '*') {
+                        return false
+                    }
                 }
             }
             return true

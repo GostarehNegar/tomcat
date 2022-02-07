@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
 import tomcat from "../src";
-import { ApiServiceNode } from "../src/infrastructure/apipipes/apipipeline"
+import { ApiServiceNode } from "../src/pipes/apipipeline"
 
 
 jest.setTimeout(50000);
