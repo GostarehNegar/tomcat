@@ -223,8 +223,8 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     this._alreadyProcessed.push(id);
     this._alreadyProcessed[id] = true;
     if (this._alreadyProcessed.length > 1000) {
-      //delete this._alreadyProcessed[this._alreadyProcessed.shift()]
-      this._alreadyProcessed.splice(0, 100)
+      delete this._alreadyProcessed[this._alreadyProcessed.shift()]
+      //this._alreadyProcessed.splice(0, 100)
     }
     if (
       context &&
