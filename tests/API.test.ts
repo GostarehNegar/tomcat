@@ -9,21 +9,6 @@ jest.setTimeout(50000);
 describe('API', () => {
     test('01 ', async () => {
 
-        const a = [];
-        for (let i = 0; i < 10; i++) {
-            let id = tomcat.utils.UUID();
-            a.push(id);
-            a[id] = true;
-        }
-        if (a.length > 5) {
-            var l = a.length - 5
-            for (let i = 0; i < l; i++) {
-                delete a[a.shift()]
-            }
-
-        }
-
-
         const port1 = 3001;// await tomcat.utils.findPort(3000, 4000);
         const port2 = 3002;// await tomcat.utils.findPort(4000, 5000);
         const port3 = 3003; // await tomcat.utils.findPort(5000, 6000);

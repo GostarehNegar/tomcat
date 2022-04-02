@@ -45,7 +45,7 @@ export class MessageBus extends BackgroundService implements IMessageBus {
   private _transports: IMessageTransport[] = [];
   private _config = config.messaging;
   private _logger: ILogger;
-  private _alreadyProcessed = [];
+  private _seen = [];
   constructor(
     public serviceProvider: IServiceProvider,
     cf?: (c: typeof config.messaging) => void,
@@ -87,6 +87,8 @@ export class MessageBus extends BackgroundService implements IMessageBus {
       payload: any;
     };
     if (_msg && _msg.method === SystemTopics.Internal.ping) {
+      /// if it's a 'ping' message answer it 
+      /// with pong immediately.
       transport.pong(this.getInfo());
     } else {
 
@@ -217,14 +219,14 @@ export class MessageBus extends BackgroundService implements IMessageBus {
     }
     /// Check if we have already seen
     // this message;
-    if (this._alreadyProcessed[id]) {
+    if (this._seen[id]) {
       return Promise.resolve();
     }
-    this._alreadyProcessed.push(id);
-    this._alreadyProcessed[id] = true;
-    if (this._alreadyProcessed.length > 1000) {
+    this._seen.push(id);
+    this._seen[id] = true;
+    if (this._seen.length > 1000) {
       for (let j = 0; j < 1; j++) {
-        delete this._alreadyProcessed[this._alreadyProcessed.shift()]
+        delete this._seen[this._seen.shift()]
       }
     }
     if (
